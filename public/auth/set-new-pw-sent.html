@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Email Sent - Cooperative Society</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="apple-touch-icon" href="/assets/icon-192.png">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script type="module" src="../js/systemmaintenance.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#e11919",
+              "background-light": "#f8f6f6",
+              "background-dark": "#211111",
+              "text-light": "#0f172a",
+              "text-dark": "#f8f9fa",
+              "text-subtle-light": "#6b7280",
+              "text-subtle-dark": "#9ca3af",
+            },
+            fontFamily: { "display": ["Manrope", "sans-serif"] },
+          },
+        },
+      }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 48; }
+    </style>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark h-screen w-screen overflow-hidden flex flex-col">
+
+    <header class="w-full flex justify-center py-4 shrink-0">
+        <img alt="Mountain Moving Ministry Intl. Logo" class="h-10 sm:h-12 w-auto" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg"/>
+    </header>
+
+    <main class="flex-1 flex items-center justify-center px-4 w-full">
+        <div class="w-full max-w-md rounded-xl bg-white dark:bg-[#2a1a1a] p-8 shadow-lg border border-black/5 dark:border-white/5">
+            <div class="flex flex-col items-center text-center">
+                <div class="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+                    <span class="material-symbols-outlined text-3xl text-primary">mark_email_read</span>
+                </div>
+                <h1 class="text-2xl font-bold leading-tight text-text-light dark:text-text-dark">Check Your Email</h1>
+                <p class="mt-3 text-sm sm:text-base font-normal leading-relaxed text-text-subtle-light dark:text-text-subtle-dark">
+                    We've sent a password reset link to your registered email address. Please check your inbox and spam folder.
+                </p>
+                <button id="resend-link" class="mt-6 text-sm font-medium text-primary underline transition-opacity hover:opacity-80 cursor-pointer bg-transparent border-none">
+                    Didn't get the email? Resend
+                </button>
+                <p id="resend-msg" class="text-xs text-green-500 mt-2 hidden font-medium">Email resent successfully!</p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="w-full py-4 text-center text-text-subtle-light dark:text-text-subtle-dark shrink-0">
+        <div class="flex flex-col items-center justify-center gap-1 text-xs sm:text-sm">
+            <p>© 2026 <a class="hover:text-primary hover:underline" href="https://mountainmovingministryintl.org/" target="_blank">Mountain Moving Ministry Intl.</a></p>
+            <a class="underline transition-colors hover:text-primary" href="https://ethan01.com" target="_blank">Contact Developer</a>
+        </div>
+    </footer>
+
+<script type="module" src="password-reset.js"></script>
+</body>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(() => console.log('Service Worker Registered'))
+        .catch(err => console.error('Service Worker Failed:', err));
+    });
+  }
+</script>
+</html>

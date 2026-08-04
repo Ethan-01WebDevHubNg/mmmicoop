@@ -1,0 +1,355 @@
+/**
+ * Interest Engine & Plan Manager (Firestore Driven)
+ * * Updates:
+ * 1. Fetches Plans from 'savings_plans' collection.
+ * 2. Implements 90-Day Cycle Locking.
+ * 3. Credits interest daily to Wallet Balance.
+ * 4. Checks for Upgrade Availability (Filters out Deactivated Plans).
+ * 5. HEALING LOGIC: Fixes missed first-day payouts for legacy users.
+ * 6. UI FIX: Queues notification to display AFTER preloader.
+ * 7. SECURITY FIX: Uses serverTimestamp() for lastInterestApplied to enable Rules enforcement.
+ * 8. STABILITY FIX: Prevents "Healing" write from conflicting with "Interest" write in the same cycle.
+ * 9. CACHE FIX: Forces server fetch to prevent "double payment" errors on stale data.
+ * 10. ERROR HANDLING FIX: Silently swallows rules-based 'permission-denied' blocks to keep console clean.
+ */
+
+const InterestEngine = (function() {
+    
+    // --- Configuration ---
+    let _plans = []; 
+    let _db, _userId, _fs, _applyInterestFn;
+    let _pendingMessage = null; // Store toast here until preloader is done
+    
+    const MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24;
+    const CYCLE_DURATION_DAYS = 90; 
+
+    // --- Helpers: Professional Standalone Toast (Matches NotificationService) ---
+    const Toast = {
+        show: (message, type = 'success') => {
+            const existing = document.getElementById('interest-toast');
+            if (existing) existing.remove();
+
+            const colors = {
+                success: 'bg-green-600',
+                error: 'bg-red-600',
+                info: 'bg-slate-800'
+            };
+            const icons = {
+                success: 'check_circle',
+                error: 'error',
+                info: 'info'
+            };
+
+            const div = document.createElement('div');
+            div.id = 'interest-toast';
+            div.className = `fixed top-5 right-5 z-[100000] flex items-center gap-3 px-6 py-4 rounded-xl shadow-2xl text-white transform transition-all duration-300 translate-y-[-20px] opacity-0 ${colors[type] || colors.info}`;
+            div.style.fontFamily = "'Manrope', sans-serif";
+            
+            div.innerHTML = `
+                <span class="material-symbols-outlined text-xl" style="font-size:20px;">${icons[type] || 'info'}</span>
+                <span class="font-bold text-sm tracking-wide">${message}</span>
+            `;
+
+            document.body.appendChild(div);
+
+            requestAnimationFrame(() => {
+                div.classList.remove('translate-y-[-20px]', 'opacity-0');
+            });
+
+            setTimeout(() => {
+                div.classList.add('opacity-0', 'translate-y-[-20px]');
+                setTimeout(() => div.remove(), 300);
+            }, 4000); 
+        }
+    };
+
+    // --- CRITICAL FIX: BYPASS CACHE ---
+    async function getUserData() {
+        if (!_db || !_userId || !_fs) return null;
+        const docRef = _fs.doc(_db, "users", _userId);
+
+        try {
+            // Attempt to force a server fetch if the SDK function is available
+            // This prevents the "Stale Data" bug where the app tries to pay interest twice.
+            if (_fs.getDocFromServer) {
+                const snap = await _fs.getDocFromServer(docRef);
+                return snap.exists() ? { ref: snap.ref, data: snap.data() } : null;
+            } else {
+                // Fallback for older SDKs or standard calls
+                const snap = await _fs.getDoc(docRef);
+                return snap.exists() ? { ref: snap.ref, data: snap.data() } : null;
+            }
+        } catch (e) {
+            console.warn("Server fetch failed (offline?), falling back to cache:", e);
+            try {
+                const snap = await _fs.getDoc(docRef);
+                return snap.exists() ? { ref: snap.ref, data: snap.data() } : null;
+            } catch (err2) { return null; }
+        }
+    }
+
+    // --- 1. INITIALIZATION ---
+    async function init(firestoreDb, userId, firebaseFunctions, applyInterestFn) {
+        _db = firestoreDb;
+        _userId = userId;
+        _fs = firebaseFunctions; 
+        _applyInterestFn = applyInterestFn;
+        _pendingMessage = null; // Reset on init
+
+        await fetchPlans();
+        await checkAndApplyInterest(); 
+    }
+
+    // --- NEW: Trigger Function called by Dashboard ---
+    function showNotification() {
+        if (_pendingMessage) {
+            setTimeout(() => {
+                Toast.show(_pendingMessage.msg, _pendingMessage.type);
+                _pendingMessage = null;
+            }, 800); 
+        }
+    }
+
+    async function fetchPlans() {
+        try {
+            const q = _fs.query(_fs.collection(_db, "savings_plans"), _fs.orderBy("minAmount", "asc"));
+            const querySnapshot = await _fs.getDocs(q);
+            _plans = [];
+            querySnapshot.forEach((doc) => {
+                _plans.push({ id: doc.id, ...doc.data() });
+            });
+        } catch (e) {
+            console.error("Error fetching plans:", e);
+            try {
+                const qFallback = _fs.collection(_db, "savings_plans");
+                const snap = await _fs.getDocs(qFallback);
+                _plans = [];
+                snap.forEach((doc) => _plans.push({ id: doc.id, ...doc.data() }));
+                _plans.sort((a,b) => a.minAmount - b.minAmount);
+            } catch (err2) { _plans = []; }
+        }
+    }
+
+    function getPlans() { 
+        return _plans; 
+    }
+
+    // --- 2. PLAN MANAGER LOGIC ---
+    
+    async function checkUpgradeAvailability() {
+        if (!_plans || _plans.length === 0) return null;
+        
+        const record = await getUserData();
+        if (!record) return null;
+        
+        const balance = parseFloat(record.data["Wallet balance"] || 0);
+        const currentPlanName = record.data["User_Plan"] || 'Bronze';
+        
+        const currentPlanObj = _plans.find(p => p.name.toLowerCase() === currentPlanName.toLowerCase());
+        const currentRank = currentPlanObj ? currentPlanObj.rank : 0;
+
+        const eligiblePlans = _plans.filter(p => {
+            const isBalanceEligible = balance >= p.minAmount && (p.maxAmount === null || balance <= p.maxAmount);
+            const isActive = p.isActive !== false; 
+            return isBalanceEligible && isActive;
+        });
+
+        eligiblePlans.sort((a,b) => b.rank - a.rank);
+        
+        const bestEligible = eligiblePlans[0];
+        
+        if (bestEligible && bestEligible.rank > currentRank) {
+            return {
+                available: true,
+                currentPlan: currentPlanName,
+                eligiblePlan: bestEligible.name,
+                message: `Your balance qualifies you for the ${bestEligible.name} Plan (${bestEligible.rate}% rate). Upgrade to start a new cycle.`
+            };
+        }
+        return null;
+    }
+
+    async function attemptChange(newPlanName) {
+        const record = await getUserData();
+        if (!record) return false;
+        const data = record.data;
+        const balance = parseFloat(data["Wallet balance"] || 0);
+
+        const targetPlan = _plans.find(p => p.name === newPlanName);
+        if (!targetPlan) {
+            Toast.show("Invalid Plan Selected", 'error');
+            return false;
+        }
+
+        if (targetPlan.isActive === false) {
+            Toast.show("This plan is no longer active.", 'error');
+            return false;
+        }
+
+        if (balance < targetPlan.minAmount || (targetPlan.maxAmount !== null && balance > targetPlan.maxAmount)) {
+             Toast.show(`Balance must be between ₦${targetPlan.minAmount.toLocaleString()} and ₦${(targetPlan.maxAmount || '∞').toLocaleString()} for ${newPlanName}.`, 'error');
+             return false;
+        }
+
+        try {
+            const now = _fs.serverTimestamp ? _fs.serverTimestamp() : new Date(); 
+            
+            const updatePayload = {
+                "User_Plan": newPlanName,
+                planStartDate: now,
+                lastInterestApplied: now,
+                firstCycleProcessed: false,
+                cycleAccumulatedInterest: 0
+            };
+
+            if (_fs.updateDoc) {
+                await _fs.updateDoc(record.ref, updatePayload);
+            } else {
+                await _fs.setDoc(record.ref, updatePayload, { merge: true });
+            }
+            Toast.show(`Plan upgraded to ${newPlanName}! New 90-day cycle started.`);
+            return true;
+        } catch (e) {
+            console.error("Plan Change Error:", e);
+            Toast.show("Plan update failed. Please check your connection.", 'error');
+            return false;
+        }
+    }
+
+    // --- 3. INTEREST LOGIC (HEALING + 24H + MIDNIGHT) ---
+    async function checkAndApplyInterest() {
+        const record = await getUserData();
+        if (!record) return;
+
+        const data = record.data;
+        const currentBalance = parseFloat(data["Wallet balance"] || 0);
+        const currentPlanName = data["User_Plan"] || 'Bronze';
+        
+        if (currentBalance <= 0) return;
+
+        const plan = _plans.find(p => p.name.toLowerCase() === currentPlanName.toLowerCase());
+        if (!plan) return; 
+
+        // 1. Establish Dates
+        let planStartDate;
+        if (data.planStartDate && typeof data.planStartDate.toDate === 'function') {
+            planStartDate = data.planStartDate.toDate();
+        } else {
+            planStartDate = new Date(data.planStartDate || Date.now());
+        }
+
+        let lastRunDate;
+        if (data.lastInterestApplied && typeof data.lastInterestApplied.toDate === 'function') {
+            lastRunDate = data.lastInterestApplied.toDate();
+        } else {
+            lastRunDate = new Date(data.lastInterestApplied || planStartDate);
+        }
+
+        if (isNaN(lastRunDate.getTime())) {
+            const nowTS = _fs.serverTimestamp ? _fs.serverTimestamp() : new Date();
+            await _fs.setDoc(record.ref, { 
+                planStartDate: nowTS, 
+                lastInterestApplied: nowTS, 
+                cycleAccumulatedInterest: 0,
+                firstCycleProcessed: false
+            }, { merge: true });
+            return;
+        }
+
+        let anchor = new Date(lastRunDate);
+        const now = new Date();
+        let daysToCredit = 0;
+        let requiresFlagUpdate = false;
+
+        // --- PHASE 1: FIRST 24-HOUR & HEALING CHECK ---
+        const firstCycleTarget = new Date(planStartDate.getTime() + MILLISECONDS_PER_DAY);
+        const hasPassedFirst24h = now.getTime() >= firstCycleTarget.getTime();
+        const isFlaggedAsPaid = data.firstCycleProcessed === true;
+
+        if (hasPassedFirst24h && !isFlaggedAsPaid) {
+            if (anchor.getTime() < firstCycleTarget.getTime()) {
+                console.log("Phase 1: Paying First 24h cycle.");
+                daysToCredit++;
+                anchor = new Date(firstCycleTarget);
+            } else {
+                console.log("Phase 1: Healing missing flag (Already paid).");
+            }
+            requiresFlagUpdate = true;
+        }
+
+        // --- PHASE 2: MIDNIGHT ALIGNMENT ---
+        let safetyCounter = 0;
+
+        while (safetyCounter < 365) {
+            let nextMidnight = new Date(anchor);
+            nextMidnight.setDate(nextMidnight.getDate() + 1);
+            nextMidnight.setHours(0, 0, 0, 0); 
+
+            if (nextMidnight.getTime() <= anchor.getTime()) {
+                nextMidnight.setDate(nextMidnight.getDate() + 1);
+            }
+            
+            if (now.getTime() >= nextMidnight.getTime()) {
+                daysToCredit++;
+                anchor = new Date(nextMidnight);
+                safetyCounter++;
+            } else {
+                break;
+            }
+        }
+
+        // --- EXECUTE UPDATES (ATOMIC SAFEGUARD) ---
+        
+        if (requiresFlagUpdate && daysToCredit === 0) {
+            try {
+                if (_fs.updateDoc) {
+                    await _fs.updateDoc(record.ref, { firstCycleProcessed: true });
+                } else {
+                    await _fs.setDoc(record.ref, { firstCycleProcessed: true }, { merge: true });
+                }
+                console.log("Healing: firstCycleProcessed flag updated.");
+            } catch(e) { console.error("Flag Update Failed:", e); }
+        }
+
+        // 2. Pay Interest (Timezone Safe Check)
+        const previousTimestamp = lastRunDate.getTime();
+        const newTimestamp = anchor.getTime();
+
+        if (daysToCredit > 0 && newTimestamp > previousTimestamp) {
+            const dailyRate = (plan.rate / 100) / CYCLE_DURATION_DAYS;
+            const interestToCredit = (currentBalance * dailyRate) * daysToCredit;
+
+            if (_applyInterestFn) {
+                try {
+                    const secureTimestamp = _fs.serverTimestamp ? _fs.serverTimestamp() : new Date();
+
+                    await _applyInterestFn(_userId, interestToCredit, secureTimestamp, true);
+                    
+                    const formattedInterest = new Intl.NumberFormat('en-NG', {style:'currency', currency:'NGN'}).format(interestToCredit);
+                    
+                    _pendingMessage = { 
+                        msg: `Daily Interest: ${formattedInterest} credited for ${daysToCredit} day(s).`,
+                        type: 'success'
+                    };
+                    
+                    console.log(`Credited ₦${interestToCredit.toFixed(2)} interest for ${daysToCredit} days.`);
+                } catch (e) { 
+                    const isPermissionDenied = e.message && e.message.includes("permission-denied");
+                    
+                    if (isPermissionDenied) {
+                        // GRACEFUL HANDLING: Silently absorb the permission error to prevent console spam.
+                        // This usually means the Firestore rules safely blocked a redundant interest call (Idempotency).
+                        console.debug("Interest Engine: Cycle securely skipped or deferred by Rules.");
+                    } else {
+                        console.error("Interest Error:", e);
+                        _pendingMessage = { msg: "Unable to process daily interest.", type: 'error' };
+                    }
+                }
+            }
+        }
+    }
+
+    return { init, attemptChange, getPlans, checkUpgradeAvailability, showNotification };
+})();
+
+window.InterestEngine = InterestEngine;

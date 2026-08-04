@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html class="dark overflow-y-scroll" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Reports - MMMI Admin</title>
+    
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="apple-touch-icon" href="/assets/icon-192.png">    
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#e31919",
+                        "background-light": "#f8fafc",
+                        "background-dark": "#0f172a",
+                        "card-light": "#ffffff",
+                        "card-dark": "#1e293b",
+                        "text-light": "#0f172a",
+                        "text-dark": "#e2e8f0",
+                        "subtext-light": "#64748b",
+                        "subtext-dark": "#94a3b8"
+                    },
+                    fontFamily: { "display": ["Manrope", "sans-serif"] },
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .isometric-sidebar { background-color: #ffffff; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg id='hexagons' fill='%23f8fafc' fill-opacity='1' fill-rule='nonzero'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); }
+        .dark .isometric-sidebar { background-color: #1e293b; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg id='hexagons' fill='%230f172a' fill-opacity='0.25' fill-rule='nonzero'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); }
+        @keyframes fadeInSlideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in-slide-up { animation: fadeInSlideUp 0.5s ease-out forwards; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .chart-tooltip {
+            position: absolute;
+            background: rgba(15, 23, 42, 0.95);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.1s;
+            z-index: 50;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 2px;
+            min-width: 80px;
+        }
+    </style>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark transition-colors duration-300 flex flex-col min-h-screen">
+
+    <div class="flex flex-1">
+        <aside class="hidden lg:flex w-64 flex-col border-r border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 bg-white dark:bg-card-dark isometric-sidebar fixed h-full z-20">
+            <div class="flex h-16 items-center gap-3 px-6 border-b border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 bg-white/90 dark:bg-card-dark/90 backdrop-blur">
+                 <img class="size-8 dark:hidden" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20Logo%20-%20light%20mode.svg" alt="Logo">
+                 <img class="size-8 hidden dark:block" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg" alt="Logo">
+                 <h1 class="text-lg font-bold tracking-tight">MMMI Admin</h1>
+            </div>
+            <nav class="flex-1 space-y-1 p-4 overflow-y-auto">
+                <a href="/admin/index" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10 transition-colors"><span class="material-symbols-outlined">dashboard</span><span>Dashboard</span></a>
+                <a href="/admin/Memberlists" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10 transition-colors"><span class="material-symbols-outlined">groups</span><span>Members</span></a>
+                <a href="/admin/withdrwalRequests" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10 transition-colors"><span class="material-symbols-outlined">payments</span><span>Withdrawals</span></a>
+                <a href="/admin/ManagePlans" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10 transition-colors"><span class="material-symbols-outlined">savings</span><span>Savings Plans</span></a>
+                <a href="/admin/reports" class="flex items-center gap-3 rounded-lg bg-primary text-white px-4 py-3 text-sm font-bold shadow-md shadow-primary/20 transition-colors"><span class="material-symbols-outlined text-white">bar_chart</span><span>Reports</span></a>
+            </nav>
+            <div class="p-4 border-t border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 bg-white/50 dark:bg-card-dark/50 mt-auto">
+                 <a class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10 mb-2" href="/admin/userManagement"><span class="material-symbols-outlined">manage_accounts</span><span>Admin Users</span></a>
+                <button class="logout-trigger w-full flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors mt-2 text-left"><span class="material-symbols-outlined">logout</span><span>Logout</span></button>
+            </div>
+        </aside>
+
+        <div class="flex flex-1 flex-col lg:ml-64 transition-all duration-300 min-w-0">
+            <header class="sticky top-0 z-30 w-full border-b border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 bg-white/80 dark:bg-card-dark/80 backdrop-blur-md">
+                <div class="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-3">
+                    <div class="flex items-center gap-4">
+                        <button id="menu-btn" class="lg:hidden p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 text-text-light dark:text-text-dark"><span class="material-symbols-outlined">menu</span></button>
+                        <h1 class="text-xl font-bold hidden sm:block">Reports & Analytics</h1>
+                        <h1 class="text-lg font-bold sm:hidden">Reports</h1>
+                    </div>
+                    <div class="flex items-center gap-2 sm:gap-4">
+                        <button id="theme-toggle" class="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 text-text-light dark:text-text-dark"><span class="material-symbols-outlined dark:hidden">dark_mode</span><span class="material-symbols-outlined hidden dark:inline">light_mode</span></button>
+                        
+                        <div class="relative ml-2">
+                            <button type="button" id="top-profile-trigger" class="flex items-center gap-3 pl-4 border-l border-gray-200 dark:border-l-0 dark:ring-l dark:ring-gray-700 hover:opacity-80 focus:outline-none">
+                                <img id="admin-avatar" src="https://ui-avatars.com/api/?name=Admin&background=random" class="size-8 sm:size-9 rounded-full ring-2 ring-white dark:ring-gray-700">
+                            </button>
+
+                            <div id="top-profile-dropdown" class="absolute right-0 z-50 mt-2 w-72 origin-top-right rounded-xl bg-white dark:bg-card-dark shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none hidden transform transition-all duration-200 opacity-0 scale-95 origin-top-right">
+                                <div class="px-5 py-5 border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-slate-800/50 rounded-t-xl">
+                                    <div class="flex items-center gap-3">
+                                        <img id="dd-avatar" class="size-10 rounded-full ring-2 ring-white dark:ring-gray-600 object-cover" src="https://ui-avatars.com/api/?name=Admin&background=random" alt="">
+                                        <div class="overflow-hidden">
+                                            <p id="dd-name" class="truncate text-sm font-bold text-gray-900 dark:text-white">Loading...</p>
+                                            <p id="dd-email" class="truncate text-xs text-gray-500 dark:text-gray-400">...</p>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                         <span id="dd-role" class="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-bold text-blue-700 ring-1 ring-inset ring-blue-700/10 dark:bg-blue-400/10 dark:text-blue-400 dark:ring-blue-400/30 uppercase tracking-wider">Admin</span>
+                                    </div>
+                                </div>
+                                <div class="p-2 space-y-1">
+                                    <a href="/admin/AdminProfile" class="flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors" role="menuitem">
+                                        <span class="material-symbols-outlined text-[20px] text-gray-400 dark:text-gray-500">person</span>
+                                        Admin Profile
+                                    </a>
+                                    <button class="logout-trigger w-full text-left flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors" role="menuitem">
+                                        <span class="material-symbols-outlined text-[20px]">logout</span>
+                                        Log Out
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div id="mobile-menu-overlay" class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden backdrop-blur-sm"></div>
+            <aside id="mobile-menu" class="fixed top-0 left-0 h-full w-64 bg-white dark:bg-card-dark isometric-sidebar flex flex-col border-r border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 shadow-2xl z-50 transform -translate-x-full transition-transform duration-300 lg:hidden">
+                <div class="flex items-center justify-between mb-8 px-6 pt-6">
+                    <div class="flex items-center gap-2">
+                         <img class="size-8 dark:hidden" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20Logo%20-%20light%20mode.svg" alt="Logo">
+                         <img class="size-8 hidden dark:block" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg" alt="Logo">
+                         <span class="font-bold text-lg">Menu</span>
+                    </div>
+                    <button id="close-menu-btn" class="p-1 rounded hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">close</span></button>
+                </div>
+                
+                <nav class="flex-1 space-y-2 overflow-y-auto px-4">
+                    <a href="/admin/index" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10"><span class="material-symbols-outlined">dashboard</span><span>Dashboard</span></a>
+                    <a href="/admin/Memberlists" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10"><span class="material-symbols-outlined">groups</span><span>Members</span></a>
+                    <a href="/admin/withdrwalRequests" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10"><span class="material-symbols-outlined">payments</span><span>Withdrawals</span></a>
+                    <a href="/admin/ManagePlans" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10"><span class="material-symbols-outlined">savings</span><span>Savings Plans</span></a>
+                    <a href="/admin/reports" class="flex items-center gap-3 rounded-lg bg-primary text-white px-4 py-3 text-sm font-bold shadow-md shadow-primary/20"><span class="material-symbols-outlined text-white">bar_chart</span><span>Reports</span></a>
+                </nav>
+
+                <div class="p-4 border-t border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 mt-auto bg-gray-50/50 dark:bg-slate-800/30">
+                    <a href="/admin/userManagement" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10 mb-2">
+                        <span class="material-symbols-outlined">manage_accounts</span><span>Admin Users</span>
+                    </a>
+                    <button class="logout-trigger w-full flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors text-left">
+                        <span class="material-symbols-outlined">logout</span><span>Logout</span>
+                    </button>
+                </div>
+            </aside>
+
+            <main class="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in-slide-up">
+                
+                <div class="mb-8 flex justify-center gap-4 border-b border-gray-200 dark:border-none dark:ring-b dark:ring-gray-700 overflow-x-auto hide-scrollbar">
+                    <button onclick="switchTab('financial')" id="tab-financial" class="px-6 py-2 text-sm font-bold border-b-2 border-primary text-primary hover:text-text-light dark:hover:text-text-dark transition-colors whitespace-nowrap">Financial Reports</button>
+                    <button onclick="switchTab('member')" id="tab-member" class="px-6 py-2 text-sm font-bold border-b-2 border-transparent text-subtext-light hover:text-text-light dark:hover:text-text-dark transition-colors whitespace-nowrap">Member Reports</button>
+                </div>
+
+                <div id="content-financial" class="block space-y-8">
+                    <div class="bg-card-light dark:bg-card-dark rounded-2xl border-none ring-1 ring-gray-200 dark:ring-gray-700 shadow-sm overflow-hidden">
+                        <div class="px-6 py-4 bg-gray-100 dark:bg-slate-900 border-b border-gray-200 dark:border-gray-700">
+                             <h3 class="text-lg font-bold text-text-light dark:text-text-dark">Report Configuration</h3>
+                        </div>
+                        <div class="p-6 flex flex-col md:flex-row gap-4 items-end">
+                            <div class="w-full md:w-auto flex-1">
+                                <label class="text-xs font-bold text-subtext-light uppercase mb-1 block">Start Date</label>
+                                <input id="f-start" type="date" class="w-full rounded-lg bg-gray-50 dark:bg-gray-800 border-none ring-1 ring-gray-200 dark:ring-gray-700 text-sm p-2.5 dark:text-gray-200">
+                            </div>
+                            <div class="w-full md:w-auto flex-1">
+                                <label class="text-xs font-bold text-subtext-light uppercase mb-1 block">End Date</label>
+                                <input id="f-end" type="date" class="w-full rounded-lg bg-gray-50 dark:bg-gray-800 border-none ring-1 ring-gray-200 dark:ring-gray-700 text-sm p-2.5 dark:text-gray-200">
+                            </div>
+                            <div class="w-full md:w-48">
+                                <label class="text-xs font-bold text-subtext-light uppercase mb-1 block">Type</label>
+                                <select id="f-type" class="w-full rounded-lg bg-gray-50 dark:bg-gray-800 border-none ring-1 ring-gray-200 dark:ring-gray-700 text-sm p-2.5 dark:text-gray-200">
+                                    <option value="all">All Transactions</option>
+                                    <option value="Credit">Credits (Inflow)</option>
+                                    <option value="Debit">Debits (Outflow)</option>
+                                </select>
+                            </div>
+                            <button onclick="runReport()" class="w-full md:w-auto px-6 py-2.5 bg-primary text-white rounded-lg font-bold hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">Run Report</button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-green-50 dark:bg-green-900/10 ring-1 ring-green-200 dark:ring-green-800 rounded-2xl p-6">
+                            <p class="text-green-700 dark:text-green-400 text-sm font-bold uppercase tracking-wide">Total Inflow</p>
+                            <h3 id="r-inflow" class="text-2xl font-black text-green-800 dark:text-green-300 mt-1">₦0.00</h3>
+                        </div>
+                        <div class="bg-red-50 dark:bg-red-900/10 ring-1 ring-red-200 dark:ring-red-800 rounded-2xl p-6">
+                            <p class="text-red-700 dark:text-red-400 text-sm font-bold uppercase tracking-wide">Total Outflow</p>
+                            <h3 id="r-outflow" class="text-2xl font-black text-red-800 dark:text-red-300 mt-1">₦0.00</h3>
+                        </div>
+                        <div class="bg-card-light dark:bg-card-dark ring-1 ring-gray-200 dark:ring-gray-700 rounded-2xl p-6">
+                            <p class="text-subtext-light text-sm font-bold uppercase tracking-wide">Net Volume</p>
+                            <h3 id="r-count" class="text-2xl font-black text-text-light dark:text-text-dark mt-1">0</h3>
+                        </div>
+                    </div>
+
+                    <div class="bg-card-light dark:bg-card-dark rounded-2xl border-none ring-1 ring-gray-200 dark:ring-gray-700 shadow-sm overflow-hidden">
+                        <div class="px-6 py-4 bg-gray-100 dark:bg-slate-900 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                            <h2 class="text-lg font-bold text-text-light dark:text-text-dark">Detailed Transaction Logs</h2>
+                            <button onclick="exportXLSX()" class="text-xs font-bold text-primary hover:underline flex items-center gap-1"><span class="material-symbols-outlined text-sm">download</span> Export Excel</button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm whitespace-nowrap">
+                                <thead class="bg-gray-50 dark:bg-slate-800/50 text-subtext-light dark:text-subtext-dark">
+                                    <tr>
+                                        <th class="px-6 py-4 font-semibold">Transaction ID</th>
+                                        <th class="px-6 py-4 font-semibold">Member ID</th>
+                                        <th class="px-6 py-4 font-semibold">Date</th>
+                                        <th class="px-6 py-4 font-semibold">Category</th>
+                                        <th class="px-6 py-4 font-semibold">Description</th>
+                                        <th class="px-6 py-4 font-semibold text-right">Amount (Org View)</th>
+                                        <th class="px-6 py-4 font-semibold text-center">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="report-body" class="divide-y divide-gray-200 dark:divide-gray-800"><tr><td colspan="7" class="px-6 py-12 text-center text-subtext-light">Select filters and click "Run Report"</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="content-member" class="hidden space-y-8">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="member-metrics">
+                        </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div class="bg-card-light dark:bg-card-dark rounded-2xl ring-1 ring-gray-200 dark:ring-gray-700 overflow-hidden flex flex-col h-96">
+                            <div class="px-6 py-4 bg-gray-100 dark:bg-slate-900 border-b border-gray-200 dark:border-gray-700">
+                                <h3 class="font-bold text-text-light dark:text-text-dark">Account Creations (Last 30 Days)</h3>
+                            </div>
+                            <div class="p-6 flex-1 w-full h-full relative" id="graph-creations"></div>
+                        </div>
+                        <div class="bg-card-light dark:bg-card-dark rounded-2xl ring-1 ring-gray-200 dark:ring-gray-700 overflow-hidden flex flex-col h-96">
+                            <div class="px-6 py-4 bg-gray-100 dark:bg-slate-900 border-b border-gray-200 dark:border-gray-700">
+                                <h3 class="font-bold text-text-light dark:text-text-dark">Top-Up Volume (Last 30 Days)</h3>
+                            </div>
+                            <div class="p-6 flex-1 w-full h-full relative" id="graph-topups"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-card-light dark:bg-card-dark rounded-2xl ring-1 ring-gray-200 dark:ring-gray-700 shadow-sm overflow-hidden">
+                        <div class="px-6 py-4 bg-gray-100 dark:bg-slate-900 border-b border-gray-200 dark:border-gray-700">
+                            <h3 class="font-bold text-text-light dark:text-text-dark">Member Activity Logs</h3>
+                        </div>
+                        <div class="overflow-x-auto">
+                             <table class="w-full text-left text-sm whitespace-nowrap">
+                                <thead class="bg-gray-50 dark:bg-slate-800/50 text-subtext-light dark:text-subtext-dark">
+                                    <tr>
+                                        <th class="px-6 py-4 font-semibold">Timestamp</th>
+                                        <th class="px-6 py-4 font-semibold">User</th>
+                                        <th class="px-6 py-4 font-semibold">Action</th>
+                                        <th class="px-6 py-4 font-semibold">Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="member-logs-body" class="divide-y divide-gray-200 dark:divide-gray-800">
+                                    <tr><td colspan="4" class="px-6 py-8 text-center text-subtext-light">Loading logs...</td></tr>
+                                </tbody>
+                             </table>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+
+            <footer class="flex-shrink-0 text-center p-4 text-sm text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 mt-auto">
+              <div class="flex flex-col sm:flex-row justify-center items-center gap-2 sm:gap-6">
+                <p>&copy; 2026 <a class="hover:text-primary hover:underline" href="https://mountainmovingministryintl.org/" rel="noopener noreferrer" target="_blank">Mountain Moving Ministry Intl.</a> All rights reserved.</p>
+                <div class="flex gap-4 sm:gap-6">
+                  <a class="hover:text-primary" href="https://ethan01.com" rel="noopener noreferrer" target="_blank">Contact Developer</a>
+                </div>
+              </div>
+            </footer>
+        </div>
+    </div>
+    
+    <div id="graph-tooltip" class="chart-tooltip"></div>
+
+    <script type="module" src="../js/admin-core.js"></script>
+    <script type="module" src="../js/role-check.js"></script>
+    <script type="module">
+        import { db, collection, collectionGroup, getDocs, query, orderBy, limit, where } from '../js/firebase-init.js';
+        import { formatCurrency, formatDate } from '../js/admin-firebase.js';
+        import { NotificationService } from '../js/admin-core.js';
+
+        let currentData = [];
+
+        window.addEventListener('admin-ready', (e) => {
+             const { adminData } = e.detail;
+             setupProfileDropdown(adminData);
+             const date = new Date();
+             document.getElementById('f-start').valueAsDate = new Date(date.getFullYear(), date.getMonth(), 1);
+             document.getElementById('f-end').valueAsDate = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+             runReport();
+        });
+
+        function setupProfileDropdown(data) {
+            const trigger = document.getElementById('top-profile-trigger');
+            const dropdown = document.getElementById('top-profile-dropdown');
+            const avatar = document.getElementById('admin-avatar');
+            document.getElementById('dd-name').textContent = data.name || 'Admin';
+            document.getElementById('dd-email').textContent = data.email || '';
+            document.getElementById('dd-role').textContent = data.role === 'super_admin' ? 'Super Admin' : 'Admin';
+            if(data.photoURL) {
+                document.getElementById('dd-avatar').src = data.photoURL;
+                avatar.src = data.photoURL;
+            }
+            trigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                dropdown.classList.toggle('hidden');
+                dropdown.classList.toggle('opacity-0');
+                dropdown.classList.toggle('scale-95');
+            });
+            document.addEventListener('click', (e) => {
+                if(!dropdown.contains(e.target) && !trigger.contains(e.target)) {
+                    dropdown.classList.add('hidden', 'opacity-0', 'scale-95');
+                }
+            });
+        }
+
+        window.switchTab = (tab) => {
+            const tabs = ['financial', 'member'];
+            tabs.forEach(t => {
+                const content = document.getElementById(`content-${t}`);
+                const btn = document.getElementById(`tab-${t}`);
+                if (t === tab) {
+                    content.classList.remove('hidden');
+                    btn.classList.add('border-primary', 'text-primary');
+                    btn.classList.remove('border-transparent', 'text-subtext-light');
+                    if (t === 'member') loadMemberReports();
+                } else {
+                    content.classList.add('hidden');
+                    btn.classList.remove('border-primary', 'text-primary');
+                    btn.classList.add('border-transparent', 'text-subtext-light');
+                }
+            });
+        };
+
+        const formatShortDate = (timestamp) => {
+            if (!timestamp) return 'N/A';
+            const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+            const d = String(date.getDate()).padStart(2, '0');
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const y = String(date.getFullYear()).slice(-2);
+            return `${d}/${m}/${y}`;
+        };
+
+        const getOrgPerspective = (txn) => {
+            const subType = txn.sub_type || "";
+            const desc = (txn.description || "").toLowerCase();
+            const userType = txn.type; 
+
+            if (subType === 'REFUND_REVERSAL') return { isOrgIncome: false };
+            if (subType.includes('FEE') || subType === 'INTEREST_REVOCATION' || 
+               ((desc.includes('fee') || desc.includes('penalty')) && !desc.includes('refund') && !desc.includes('reversal'))) {
+                return { isOrgIncome: true };
+            }
+            if (subType === 'INTEREST_ACCRUAL' || desc.includes('interest')) return { isOrgIncome: false };
+            if (userType === 'Credit') return { isOrgIncome: true };
+            return { isOrgIncome: false };
+        };
+
+        window.runReport = async () => {
+            const startStr = document.getElementById('f-start').value;
+            const endStr = document.getElementById('f-end').value;
+            const typeFilter = document.getElementById('f-type').value;
+
+            const tbody = document.getElementById('report-body');
+            tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-12 text-center text-subtext-light animate-pulse">Aggregating global data...</td></tr>`;
+
+            try {
+                let q = query(collectionGroup(db, 'transactions'), orderBy('date', 'desc'), limit(500)); 
+                const snapshot = await getDocs(q);
+                
+                const transactions = snapshot.docs.map(d => ({
+                    ...d.data(), 
+                    id: d.id,
+                    userId: d.ref.parent.parent.id
+                }));
+
+                const startDate = startStr ? new Date(startStr) : null;
+                const endDate = endStr ? new Date(endStr) : null;
+                if(endDate) endDate.setHours(23,59,59,999);
+
+                let filtered = transactions.filter(t => {
+                    const tDate = t.date ? (t.date.toDate ? t.date.toDate() : new Date(t.date)) : new Date();
+                    if (startDate && tDate < startDate) return false;
+                    if (endDate && tDate > endDate) return false;
+                    if (typeFilter !== 'all' && t.type !== typeFilter) return false;
+                    return true;
+                });
+
+                if (filtered.length > 0) {
+                    const userMap = {};
+                    // NEW: Updated mapping to include 'isDeleted' status
+                    const usersSnap = await getDocs(query(collection(db, "users")));
+                    usersSnap.docs.forEach(u => {
+                        const d = u.data();
+                        userMap[u.id] = { id: d.memberId || 'N/A', isDeleted: d.isDeleted };
+                    });
+
+                    filtered = filtered.map(t => {
+                        const userData = userMap[t.userId];
+                        let memberLabel = userData ? userData.id : (t.memberId || 'N/A');
+                        
+                        // NEW: Visual tag for Archived Users
+                        if (userData && userData.isDeleted) {
+                            memberLabel += ' (Archived)';
+                        }
+
+                        return {
+                            ...t,
+                            realMemberId: memberLabel
+                        };
+                    });
+                }
+
+                currentData = filtered;
+                renderResults(filtered);
+                calculateTotals(filtered);
+
+            } catch(e) {
+                console.error(e);
+                tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-8 text-center text-red-500">Error: ${e.message}</td></tr>`;
+            }
+        };
+
+        function renderResults(data) {
+            const tbody = document.getElementById('report-body');
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-12 text-center text-subtext-light">No records match your criteria.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = data.map(t => {
+                let statusBadge = '';
+                switch(t.status) {
+                    case 'Success': statusBadge = '<span class="px-2 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300">Success</span>'; break;
+                    case 'Pending': statusBadge = '<span class="px-2 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300">Pending</span>'; break;
+                    case 'Rejected': statusBadge = '<span class="px-2 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300">Rejected</span>'; break;
+                    default: statusBadge = `<span class="px-2 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300">${t.status}</span>`;
+                }
+
+                const { isOrgIncome } = getOrgPerspective(t);
+                const amountClass = isOrgIncome ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
+                const sign = isOrgIncome ? '+' : '-';
+
+                return `
+                <tr class="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors">
+                    <td class="px-6 py-4 text-xs font-mono text-subtext-light">${t.transactionId || t.id}</td>
+                    <td class="px-6 py-4 text-xs font-mono font-bold text-text-light dark:text-text-dark">${t.realMemberId || t.memberId || '-'}</td>
+                    <td class="px-6 py-4 text-sm font-medium text-text-light dark:text-text-dark">${formatShortDate(t.date)}</td>
+                    <td class="px-6 py-4 text-text-light dark:text-text-dark capitalize">${t.category || 'General'}</td>
+                    <td class="px-6 py-4 text-subtext-light text-xs truncate max-w-[200px]" title="${t.description || ''}">${t.description || '-'}</td>
+                    <td class="px-6 py-4 font-bold text-right ${amountClass}">${sign}${formatCurrency(t.amount)}</td>
+                    <td class="px-6 py-4 text-center">${statusBadge}</td>
+                </tr>
+            `}).join('');
+        }
+
+        function calculateTotals(data) {
+            let inflow = 0, outflow = 0;
+            data.forEach(t => {
+                const amt = parseFloat(t.amount) || 0;
+                if (t.status === 'Success') {
+                    const { isOrgIncome } = getOrgPerspective(t);
+                    if (isOrgIncome) inflow += amt;
+                    else outflow += amt;
+                }
+            });
+            document.getElementById('r-inflow').textContent = formatCurrency(inflow);
+            document.getElementById('r-outflow').textContent = formatCurrency(outflow);
+            document.getElementById('r-count').textContent = data.length;
+        }
+
+        window.exportXLSX = () => {
+            if(currentData.length === 0) {
+                NotificationService.toast("No data to export", 'error');
+                return;
+            }
+            const dateStr = new Date().toISOString().split('T')[0];
+            const ws = XLSX.utils.json_to_sheet(currentData.map(t => {
+                const { isOrgIncome } = getOrgPerspective(t);
+                const signedAmount = isOrgIncome ? Number(t.amount) : -Number(t.amount);
+
+                return {
+                    "Transaction ID": t.transactionId || t.id,
+                    "Member ID": t.realMemberId || t.memberId || 'N/A',
+                    "Date": formatShortDate(t.date),
+                    "Category": t.category || 'General',
+                    "Sub-Type": t.sub_type || 'N/A',
+                    "Description": t.description,
+                    "Amount (Org View)": signedAmount,
+                    "Status": t.status
+                };
+            }));
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Financial Report");
+            XLSX.writeFile(wb, `MMMi Report: ${dateStr}.xlsx`);
+        };
+
+        async function loadMemberReports() {
+            const metrics = [
+                { title: 'Account Creations', val: 'Loading...', sub: 'All Time' },
+                { title: 'Recent Logins', val: '0', sub: 'Last 24h' },
+                { title: 'Plan Changes', val: '0', sub: 'Last 7 Days' },
+                { title: 'Top-Ups', val: 'Loading...', sub: 'Last 30 Days' },
+                { title: 'Withdrawals', val: 'Loading...', sub: 'Pending' }
+            ];
+            renderCards(metrics);
+
+            try {
+                const usersSnap = await getDocs(query(collection(db, "users"), orderBy('createdAt', 'desc'), limit(500)));
+                const users = usersSnap.docs.map(d => d.data());
+                metrics[0].val = users.length + (users.length === 500 ? '+' : '');
+
+                const date30DaysAgo = new Date();
+                date30DaysAgo.setDate(date30DaysAgo.getDate() - 30);
+                const txnsSnap = await getDocs(query(collectionGroup(db, 'transactions'), where('type', '==', 'Credit'), where('date', '>=', date30DaysAgo), orderBy('date', 'asc')));
+                const topUps = txnsSnap.docs.map(d => d.data());
+                metrics[3].val = topUps.length;
+
+                const pendingSnap = await getDocs(query(collectionGroup(db, 'transactions'), where('status', '==', 'Pending')));
+                metrics[4].val = pendingSnap.size;
+
+                renderCards(metrics);
+                
+                drawBarChart('graph-creations', users.map(u => ({ date: u.createdAt })), 'Account Creations');
+                drawLineChart('graph-topups', topUps, 'Top-Up Volume');
+
+                const recentSnap = await getDocs(query(collectionGroup(db, 'transactions'), orderBy('date', 'desc'), limit(20)));
+                const logs = recentSnap.docs.map(d => {
+                    const data = d.data();
+                    return {
+                        timestamp: data.date,
+                        user: 'Member', 
+                        action: `${data.type} Transaction`,
+                        details: `${data.category} - ${formatCurrency(data.amount)}`
+                    };
+                });
+                renderLogs(logs);
+
+            } catch(e) {
+                console.error("Member Reports Error:", e);
+                NotificationService.toast("Error loading member data", 'error');
+            }
+        }
+
+        function renderCards(metrics) {
+            const container = document.getElementById('member-metrics');
+            container.innerHTML = metrics.map(m => `
+                <div class="bg-card-light dark:bg-card-dark p-6 rounded-2xl ring-1 ring-gray-200 dark:ring-gray-700 shadow-sm">
+                    <p class="text-xs font-bold text-subtext-light uppercase tracking-wide">${m.title}</p>
+                    <h3 class="text-3xl font-black text-text-light dark:text-text-dark mt-2">${m.val}</h3>
+                    <div class="flex items-center gap-1 mt-2 text-xs font-bold text-green-600 dark:text-green-400">
+                        <span class="material-symbols-outlined text-sm">trending_up</span> ${m.sub}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderLogs(logs) {
+            const tbody = document.getElementById('member-logs-body');
+            if(logs.length === 0) {
+                 tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-8 text-center text-subtext-light">No recent activity.</td></tr>`;
+                 return;
+            }
+            tbody.innerHTML = logs.map(l => `
+                <tr class="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors">
+                    <td class="px-6 py-4 text-xs font-mono text-subtext-light">${formatDate(l.timestamp)}</td>
+                    <td class="px-6 py-4 font-bold text-text-light dark:text-text-dark">${l.user}</td>
+                    <td class="px-6 py-4"><span class="px-2 py-1 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 rounded text-xs font-bold">${l.action}</span></td>
+                    <td class="px-6 py-4 text-xs text-subtext-light">${l.details}</td>
+                </tr>
+            `).join('');
+        }
+
+        function drawBarChart(containerId, data, label) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            
+            const counts = {};
+            data.forEach(d => {
+                let dateObj = d.date ? (d.date.toDate ? d.date.toDate() : new Date(d.date)) : new Date();
+                const key = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                const sortKey = dateObj.setHours(0,0,0,0);
+                if(!counts[sortKey]) counts[sortKey] = { label: key, val: 0 };
+                counts[sortKey].val++;
+            });
+
+            const sortedKeys = Object.keys(counts).sort((a,b) => a - b).slice(-14); 
+            const maxVal = Math.max(...sortedKeys.map(k => counts[k].val), 10);
+            
+            const h = container.clientHeight;
+            const w = container.clientWidth;
+            const padding = 30;
+            const barW = Math.max(10, (w - padding * 2) / sortedKeys.length * 0.5);
+            const gap = (w - padding * 2) / sortedKeys.length;
+
+            let svgHTML = `<svg width="100%" height="100%" viewBox="0 0 ${w} ${h}" class="overflow-visible">`;
+            const steps = Math.ceil(maxVal / 10);
+            for(let i=0; i<=steps; i++) {
+                const y = h - padding - (i * 10 / maxVal) * (h - 2*padding);
+                if (y < padding) continue;
+                svgHTML += `
+                    <line x1="${padding}" y1="${y}" x2="${w-padding}" y2="${y}" stroke="#e2e8f0" stroke-width="1" class="dark:stroke-gray-700" stroke-dasharray="4"/>
+                    <text x="${padding - 5}" y="${y + 3}" font-size="10" fill="#94a3b8" text-anchor="end">${i * 10}</text>
+                `;
+            }
+
+            sortedKeys.forEach((k, i) => {
+                const item = counts[k];
+                const barH = (item.val / maxVal) * (h - 2*padding);
+                const x = padding + (i * gap) + (gap - barW)/2;
+                const y = h - padding - barH;
+                svgHTML += `
+                    <rect x="${x}" y="${y}" width="${barW}" height="${barH}" fill="#3b82f6" rx="2" 
+                          class="hover:fill-blue-600 transition-all cursor-crosshair bar-rect"
+                          data-val="${item.val}" data-label="${item.label}" data-x="${x}" data-y="${y}"/>
+                `;
+            });
+            svgHTML += `</svg>`;
+            container.innerHTML = svgHTML;
+            setTimeout(() => setupTooltips(container, "Members registered: "), 0);
+        }
+
+        function drawLineChart(containerId, data, label) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+
+            const dailyTotals = {};
+            const today = new Date();
+            for (let i = 29; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(today.getDate() - i);
+                const key = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                dailyTotals[key] = 0;
+            }
+
+            data.forEach(d => {
+                let dateObj = d.date ? (d.date.toDate ? d.date.toDate() : new Date(d.date)) : new Date();
+                const key = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                if (dailyTotals[key] !== undefined) {
+                    dailyTotals[key] += parseFloat(d.amount);
+                }
+            });
+
+            const keys = Object.keys(dailyTotals);
+            const values = Object.values(dailyTotals);
+            const maxVal = Math.max(...values, 10000); 
+
+            const h = container.clientHeight;
+            const w = container.clientWidth;
+            const padding = 40; 
+
+            let svgHTML = `<svg width="100%" height="100%" viewBox="0 0 ${w} ${h}" class="overflow-visible">`;
+            
+            for(let i=0; i<=4; i++) {
+                const val = (maxVal / 4) * i;
+                const y = h - padding - (i/4) * (h - 2*padding);
+                const label = new Intl.NumberFormat('en-US', { notation: "compact" }).format(val);
+                svgHTML += `
+                    <line x1="${padding}" y1="${y}" x2="${w-padding}" y2="${y}" stroke="#e2e8f0" stroke-width="1" class="dark:stroke-gray-700" stroke-dasharray="4"/>
+                    <text x="${padding - 5}" y="${y + 3}" font-size="10" fill="#94a3b8" text-anchor="end">₦${label}</text>
+                `;
+            }
+
+            if(values.length > 1) {
+                const step = (w - 2*padding) / (values.length - 1);
+                let pathD = `M ${padding} ${h - padding - (values[0]/maxVal)*(h-2*padding)}`;
+                let pointsHTML = '';
+                values.forEach((v, i) => {
+                    const x = padding + (i * step);
+                    const y = h - padding - (v/maxVal)*(h-2*padding);
+                    if (i > 0) pathD += ` L ${x} ${y}`;
+                    pointsHTML += `<circle cx="${x}" cy="${y}" r="4" fill="transparent" 
+                                    class="hover:fill-primary cursor-pointer point-circle" 
+                                    data-val="${v}" data-label="${keys[i]}" data-x="${x}" data-y="${y}"/>`;
+                });
+                svgHTML += `<path d="${pathD}" fill="none" stroke="#10b981" stroke-width="2" />`;
+                svgHTML += pointsHTML;
+            }
+            svgHTML += `</svg>`;
+            container.innerHTML = svgHTML;
+            setTimeout(() => setupTooltips(container, "Volume: ₦"), 0);
+        }
+
+        function setupTooltips(container, prefix) {
+            const tooltip = document.getElementById('graph-tooltip');
+            const triggers = container.querySelectorAll('.bar-rect, .point-circle');
+
+            triggers.forEach(el => {
+                el.addEventListener('mouseenter', () => {
+                    const val = parseFloat(el.dataset.val);
+                    const formattedVal = val.toLocaleString('en-US', { 
+                        minimumFractionDigits: 2, 
+                        maximumFractionDigits: 2 
+                    });
+                    const displayVal = prefix.includes('₦') ? `${prefix}${formattedVal}` : `${prefix}${val}`;
+                    
+                    tooltip.innerHTML = `
+                        <span class="text-[10px] font-medium opacity-80 uppercase tracking-wider border-b border-white/10 pb-1 mb-1 w-full">${el.dataset.label}</span>
+                        <span class="text-sm font-bold">${displayVal}</span>
+                    `;
+                    tooltip.style.opacity = '1';
+                });
+
+                el.addEventListener('mousemove', (e) => {
+                    const tooltipWidth = tooltip.offsetWidth;
+                    const screenWidth = window.innerWidth;
+                    const offset = 15;
+                    if (e.pageX + tooltipWidth + offset > screenWidth) {
+                        tooltip.style.left = `${e.pageX - tooltipWidth - offset}px`;
+                    } else {
+                        tooltip.style.left = `${e.pageX + offset}px`;
+                    }
+                    tooltip.style.top = `${e.pageY - 35}px`;
+                });
+
+                el.addEventListener('mouseleave', () => {
+                    tooltip.style.opacity = '0';
+                });
+            });
+        }
+        
+        // --- Added: Swipe Gesture Support for Main Content ---
+        const mainContent = document.querySelector('main');
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        mainContent.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, {passive: true});
+
+        mainContent.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, {passive: true});
+
+        function handleSwipe() {
+            // Swipe Left (Show Member Reports - Right Tab)
+            if (touchEndX < touchStartX - 50) {
+                switchTab('member');
+            }
+            // Swipe Right (Show Financial Reports - Left Tab)
+            if (touchEndX > touchStartX + 50) {
+                switchTab('financial');
+            }
+        }
+    </script>
+    <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(() => console.log('Service Worker Registered'))
+        .catch(err => console.error('Service Worker Failed:', err));
+    });
+  }
+</script>
+</body>
+</html>

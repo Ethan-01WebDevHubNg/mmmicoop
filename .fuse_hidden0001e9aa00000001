@@ -1,0 +1,36 @@
+KDBA ONLINE
+
+Two Branches:
+
+* Portfolio website (Tells about the school, you will advise about the key sections and overall structure (in detail) the website should carry)
+
+* Portal: For handling educational activities/student management.
+- Has three sections:
+    i. Student - Parents view 
+    ii. Class/Form teacher view
+    iii. Central Admin
+
+    i. Student/parents view:
+        > First page is the parents view that links/directs them to each of thier child(ren)/ward(s) dashboard.
+            - They get to see the list of all their children here.
+            - The summary total of the fees they have to pay for all childre.
+            - A progressbar beneath each child to indicate the progress of that child.
+        After clicking a view report/progress button on the child they wish to view, it directs them to the students view. On this view, they can:
+        > As a student summary dashboard, they can
+            - view list of subjects for the term,
+            - view events for the term. (class events (like tests, exams and extra curricular activities) and general events)
+            - View summary of fees to be paid for the term.
+            - Pay fees from this page.
+            - Track payments to be made for the term and link 1st test to 50% of school fess being paid, 2nd Test to 75% of school fees being paid for the term, exams to 100% of school fees being paid.
+            - Per % progress bar, view progress per subject.
+            - view collection of assignments available
+  
+        > On clicking subjects:
+            - view syllabus of subject.
+            - Take tests (if made available/accessible by teacher).
+            - Take exams
+            - view scores of 1st test, 2nd test and exams as they are attempted.
+            - Pass these scores to the <<class form teacher dashboard>> automatically.
+            - visual time countdown to the test/events.
+            - paid tokenized access to termly result summary from the 1st, 2nd test and exams. view and download (template for this will be provided to guide on how to replicate the PDF Generation)
+            

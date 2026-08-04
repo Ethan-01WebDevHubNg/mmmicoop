@@ -1,0 +1,101 @@
+{
+  "hosting": {
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "redirects": [
+      {
+        "source": "/",
+        "destination": "/auth/login",
+        "type": 301
+      },
+      {
+        "source": "/member/changePassword",
+        "destination": "/changePassword",
+        "type": 301
+      },
+      {
+        "source": "/member/errorstate",
+        "destination": "/errorstate",
+        "type": 301
+      },
+      {
+        "source": "/member/memberDashboard",
+        "destination": "/memberDashboard",
+        "type": 301
+      },
+      {
+        "source": "/member/updatePaymentDetails",
+        "destination": "/updatePaymentDetails",
+        "type": 301
+      },
+      {
+        "source": "/member/userProfile",
+        "destination": "/userProfile",
+        "type": 301
+      },
+      {
+        "source": "/member/withdrawalapplication",
+        "destination": "/withdrawalapplication",
+        "type": 301
+      }
+    ],
+    "rewrites": [
+      {
+        "source": "/auth/login",
+        "destination": "/auth/index.html"
+      },
+      {
+        "source": "/auth/register",
+        "destination": "/auth/register.html"
+      },
+      {
+        "source": "/changePassword",
+        "destination": "/member/changePassword.html"
+      },
+      {
+        "source": "/errorstate",
+        "destination": "/member/errorstate.html"
+      },
+      {
+        "source": "/memberDashboard",
+        "destination": "/member/memberDashboard.html"
+      },
+      {
+        "source": "/updatePaymentDetails",
+        "destination": "/member/updatePaymentDetails.html"
+      },
+      {
+        "source": "/userProfile",
+        "destination": "/member/userProfile.html"
+      },
+      {
+        "source": "/withdrawalapplication",
+        "destination": "/member/withdrawalapplication.html"
+      },
+      {
+        "source": "/auth/login",
+        "destination": "/login.html"
+      }
+    ],
+    "cleanUrls": true,
+    "trailingSlash": false
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "disallowLegacyRuntimeConfig": true,
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ]
+    }
+  ]
+}

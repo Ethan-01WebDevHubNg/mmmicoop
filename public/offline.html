@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Offline</title>
+<style>
+body {
+    background-color: rgb(15, 23, 42);
+    color: rgb(255, 255, 255);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+.container {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.logo {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 32px;
+}
+.status-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+.cloud-icon {
+    width: 20px;
+    height: 20px;
+    opacity: 0.8;
+    filter: invert(70%) sepia(10%) saturate(500%) hue-rotate(180deg);
+}
+.offline-text {
+    font-size: 1.25rem;
+    font-weight: 400;
+    color: rgb(227, 227, 227);
+}
+.retry-container {
+    font-size: 0.950rem;
+    color: rgb(150, 150, 150);
+}
+.retry-text {
+    text-decoration: underline;
+    cursor: pointer;
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <img src="/assets/MMMi.svg" alt="" class="logo">
+    <div class="status-row">
+        <img src="/assets/cloud-offline.svg" alt="" class="cloud-icon">
+        <span class="offline-text">You're offline</span>
+    </div>
+    <div class="retry-container">
+        Check your network connection and <span class="retry-text" onclick="window.location.reload()">Retry</span>
+    </div>
+</div>
+</body>
+</html>

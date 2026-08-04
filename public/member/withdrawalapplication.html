@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Request a Withdrawal - Cooperative Society</title>
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0f172a">
+<link rel="apple-touch-icon" href="/assets/icon-192.png">
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+<script type="module" src="../js/systemmaintenance.js"></script>
+<script src="https://checkout.squadco.com/widget/squad.min.js"></script>
+<script src="https://www.google.com/recaptcha/enterprise.js?render=6Lc_9DIsAAAAAK5CvT8tlPhK-vWeVp25Xcb7nWi3"></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<style>
+/* --- PRELOADER ANIMATIONS --- */
+:root { --brand-red: #e31919; }
+@keyframes gravity-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+.gravity-container { position: relative; width: 80px; height: 80px; display: flex; justify-content: center; align-items: center; }
+.gravity-dot { position: absolute; top: 0; left: 50%; width: 10px; height: 10px; background: #e31919; border-radius: 50%; transform-origin: 0 40px; animation: gravity-spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite; }
+.gravity-dot:nth-child(1) { animation-delay: 0s; } .gravity-dot:nth-child(2) { animation-delay: -0.1s; opacity: 0.8; }
+.gravity-dot:nth-child(3) { animation-delay: -0.2s; opacity: 0.6; } .gravity-dot:nth-child(4) { animation-delay: -0.3s; opacity: 0.4; }
+.tv-off-active { animation: tv-collapse 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards; transform-origin: center; pointer-events: none; }
+@keyframes tv-collapse { 0% { transform: scale(1, 1); opacity: 1; filter: brightness(1); } 50% { transform: scale(1, 0.005); opacity: 1; filter: brightness(3); } 100% { transform: scale(0, 0.005); opacity: 0; filter: brightness(0); } }
+.hidden-force { display: none !important; }
+.animate-fade-in-slide { animation: fadeInSlide 0.5s ease-out forwards; opacity: 0; transform: translateY(20px); }
+@keyframes fadeInSlide { to { opacity: 1; transform: translateY(0); } }
+.disabled-overlay { position: absolute; inset: 0; z-index: 10; cursor: not-allowed; background: transparent; }
+.isometric-sidebar { background-color: #ffffff; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg id='hexagons' fill='%23f8fafc' fill-opacity='1' fill-rule='nonzero'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); }
+.dark .isometric-sidebar { background-color: #1e293b; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg id='hexagons' fill='%230f172a' fill-opacity='0.25' fill-rule='nonzero'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); }
+.grecaptcha-badge { visibility: hidden; }
+input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.content-area-transition { transition: filter 0.3s ease-in-out; }
+.content-blurred { filter: blur(10px); pointer-events: none; }
+</style>
+<script>
+    tailwind.config = { darkMode: "class", theme: { extend: { colors: { primary: "#e31919", "background-light": "#f1f5f9", "background-dark": "#0f172a", "slate-blue": "#0f172a", "white-off": "#F8FAFC", "pure-white": "#FFFFFF", "muted-gray": "#64748B", "dark-gray-blue": "#1E293B", "light-gray": "#94A3B8" }, fontFamily: { display: ["Poppins", "sans-serif"], manrope: ["Manrope", "sans-serif"] } } } };
+</script>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-gray-700 dark:text-gray-300">
+
+    <div id="preloader" class="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-50/80 dark:bg-gray-900/90 backdrop-blur-[5px]">
+        <div id="preloader-card" class="bg-white dark:bg-gray-800 p-12 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 flex flex-col items-center">
+            <div class="gravity-container"><div class="gravity-dot"></div><div class="gravity-dot"></div><div class="gravity-dot"></div><div class="gravity-dot"></div><div class="gravity-center"></div></div>
+            <span class="mt-8 text-sm text-gray-400 dark:text-gray-500 tracking-[0.2em] font-medium animate-pulse">Loading Data</span>
+        </div>
+    </div>
+
+    <div class="flex h-screen">
+        <aside class="w-64 flex-shrink-0 bg-white isometric-sidebar p-6 flex-col justify-between hidden lg:flex">
+            <div>
+                <div class="flex items-center gap-3 mb-10">
+                    <img id="sidebar-logo" alt="Logo" class="h-10 w-10 app-logo" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg"/>
+                    <span class="text-xl font-semibold text-gray-800 dark:text-white">Cooperative</span>
+                </div>
+                <nav class="flex flex-col gap-2">
+                    <a class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" href="./memberDashboard"><span class="material-symbols-outlined">dashboard</span><span class="font-medium">Dashboard</span></a>
+                    <a class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" href="./userProfile"><span class="material-symbols-outlined">person</span><span class="font-medium">User Profile</span></a>
+                    <a class="flex items-center gap-3 px-4 py-3 bg-primary text-white rounded-lg" href="#"><span class="material-symbols-outlined">account_balance_wallet</span><span class="font-medium">Withdraw Savings</span></a>
+                    <a onclick="window.location.href='./memberDashboard?tab=topup'" class="cursor-pointer flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><span class="material-symbols-outlined">upgrade</span><span class="font-medium">Top-up/Upgrade</span></a>
+                    <a class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" href="./updatePaymentDetails"><span class="material-symbols-outlined">payment</span><span class="font-medium">Payment Details</span></a>
+                    <a class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" href="./changePassword"><span class="material-symbols-outlined">lock_reset</span><span class="font-medium">Forgot/Change Password</span></a>
+                </nav>
+            </div>
+            <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+                <button id="logout-btn-desktop" class="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-left"><span class="material-symbols-outlined">logout</span><span class="font-medium">Log Out</span></button>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col overflow-y-auto content-area-transition" id="main-content">
+            <header class="flex-shrink-0 bg-white/80 dark:bg-background-dark/80 backdrop-blur-sm sticky top-0 z-20 flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
+                <div class="flex items-center gap-4">
+                    <button class="lg:hidden p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700" id="menu-btn"><span class="material-symbols-outlined text-gray-600 dark:text-gray-300">menu</span></button>
+                    <div class="lg:hidden flex items-center gap-2"><img id="header-logo" alt="Logo" class="h-10 w-10 app-logo" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg"/></div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700" id="theme-toggle">
+                        <span class="material-symbols-outlined text-gray-600 dark:text-gray-300 dark:hidden">dark_mode</span>
+                        <span class="material-symbols-outlined text-gray-600 dark:text-gray-300 hidden dark:inline">light_mode</span>
+                    </button>
+                    <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden border border-gray-300 dark:border-gray-600">
+                        <img id="header-profile-img" alt="Profile" class="w-full h-full object-cover" src="https://ui-avatars.com/api/?name=Member&background=random"/>
+                    </div>
+                </div>
+            </header>
+
+            <div id="toast-message" class="fixed top-0 left-1/2 transform -translate-x-1/2 -translate-y-full z-50 bg-red-100 dark:bg-red-900 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200 px-6 py-4 rounded-lg shadow-xl flex items-center gap-3 transition-transform duration-300 pointer-events-none">
+                <span class="material-symbols-outlined">error</span>
+                <span class="font-medium text-sm">Update Bank Payout Details to submit a withdrawal request form.</span>
+            </div>
+
+            <div class="p-4 sm:p-6 lg:p-8 flex-1">
+                <div class="max-w-2xl mx-auto animate-fade-in-slide">
+                    <div class="text-center mb-8">
+                        <h1 class="text-3xl md:text-4xl font-black tracking-tight text-gray-900 dark:text-white">Request a Withdrawal</h1>
+                        <p class="mt-3 text-base text-gray-500 dark:text-gray-400">Complete the form below to withdraw funds from your account.</p>
+                    </div>
+
+                    <div class="bg-white dark:bg-gray-900/40 rounded-xl shadow-lg border border-gray-100 dark:border-gray-800 p-6 sm:p-8 relative">
+                        
+                        <div id="form-disabled-overlay" class="disabled-overlay hidden" title="Update Bank Payout Details to enable this form"></div>
+
+                        <div id="cycle-status-banner" class="hidden mb-6 p-4 rounded-lg border-l-4 transition-all">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <span id="cycle-icon" class="material-symbols-outlined">info</span>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 id="cycle-title" class="text-sm font-bold uppercase">Cycle Status</h3>
+                                    <p id="cycle-desc" class="text-sm mt-1"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <form class="space-y-6" id="withdrawal-form">
+                            <div>
+                                <h3 class="text-lg font-semibold border-b border-gray-200 dark:border-gray-700 pb-3 mb-4 text-gray-900 dark:text-white">Withdrawal Details</h3>
+                                <div class="flex flex-col gap-4">
+                                    <label class="flex flex-col">
+                                        <div class="flex justify-between">
+                                            <p class="text-sm font-medium pb-2 text-gray-700 dark:text-gray-300">Amount to Withdraw</p>
+                                            <p class="text-xs text-gray-500">Balance: <span id="balance-hint" class="font-bold">Loading...</span></p>
+                                        </div>
+                                        <div class="relative">
+                                            <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-500 dark:text-gray-400">&#8358;</span>
+                                            <input id="amount-input" class="w-full rounded-lg bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 pl-8 p-3 focus:ring-primary focus:border-primary disabled:opacity-60 disabled:cursor-not-allowed" placeholder="0.00" type="number" min="1000" disabled />
+                                        </div>
+                                    </label>
+
+                                    <div id="payout-calc-box" class="hidden bg-gray-50 dark:bg-gray-800 p-3 rounded-lg border border-dashed border-gray-300 dark:border-gray-600">
+                                        <div class="flex justify-between text-sm mb-1 text-gray-500 dark:text-gray-400">
+                                            <span>Requested:</span>
+                                            <span id="calc-req">--</span>
+                                        </div>
+                                        <div class="flex justify-between text-sm mb-1 text-red-500">
+                                            <span>Penalty (1%):</span>
+                                            <span id="calc-fee">--</span>
+                                        </div>
+                                        <div class="flex justify-between text-sm mb-1 text-orange-500">
+                                            <span>Interest Forfeited:</span>
+                                            <span id="calc-forfeit">--</span>
+                                        </div>
+                                        <div class="border-t border-gray-200 dark:border-gray-700 my-2"></div>
+                                        <div class="flex justify-between font-bold text-gray-900 dark:text-white">
+                                            <span>Net Payout:</span>
+                                            <span id="calc-net">--</span>
+                                        </div>
+                                        <p id="calc-note" class="text-[10px] text-gray-400 mt-2 text-center italic">*Accrued interest is forfeited on early withdrawal.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h3 class="text-lg font-semibold border-b border-gray-200 dark:border-gray-700 pb-3 mb-4 text-gray-900 dark:text-white">Bank Account Information</h3>
+                                <div class="space-y-4">
+                                    <label class="flex flex-col">
+                                        <p class="text-sm font-medium pb-2 text-gray-700 dark:text-gray-300">Bank Name</p>
+                                        <input id="bank-name-input" class="w-full rounded-lg bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 p-3 text-gray-500 cursor-not-allowed" disabled value="Loading..." type="text"/>
+                                    </label>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <label class="flex flex-col">
+                                            <p class="text-sm font-medium pb-2 text-gray-700 dark:text-gray-300">Account Number</p>
+                                            <input id="account-number-input" class="w-full rounded-lg bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 p-3 text-gray-500 cursor-not-allowed" disabled value="..." type="text"/>
+                                        </label>
+                                        <label class="flex flex-col">
+                                            <p class="text-sm font-medium pb-2 text-gray-700 dark:text-gray-300">Account Holder</p>
+                                            <input id="account-name-input" class="w-full rounded-lg bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 p-3 text-gray-500 cursor-not-allowed" disabled value="..." type="text"/>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h3 class="text-lg font-semibold border-b border-gray-200 dark:border-gray-700 pb-3 mb-4 text-gray-900 dark:text-white">Security Verification</h3>
+                                <label class="flex flex-col">
+                                    <div class="flex justify-between items-center pb-2">
+                                        <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Confirm Password</p>
+                                        <span id="password-status" class="text-xs font-medium hidden"></span>
+                                    </div>
+                                    <div class="relative">
+                                        <input id="password-input" class="w-full rounded-lg bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 pl-4 pr-28 p-3 focus:ring-primary focus:border-primary disabled:opacity-60 disabled:cursor-not-allowed" placeholder="Enter password" type="password" disabled/>
+                                        <button type="button" id="toggle-password-btn" class="absolute right-20 top-1/2 -translate-y-1/2 text-gray-500 p-1"><span class="material-symbols-outlined text-xl">visibility</span></button>
+                                        <button type="button" id="verify-password-btn" class="absolute right-2 top-1/2 -translate-y-1/2 bg-primary hover:bg-red-700 text-white text-xs font-bold px-3 py-1.5 rounded disabled:opacity-50" disabled>Verify</button>
+                                        <div id="password-loader" class="absolute right-4 top-1/2 -translate-y-1/2 hidden"><svg class="animate-spin h-5 w-5 text-primary" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></div>
+                                        <span id="password-success-icon" class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-green-500 hidden">check_circle</span>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <div class="pt-4">
+                                <button id="submit-btn" type="submit" class="w-full rounded-lg h-14 bg-gray-400 text-white font-bold transition-all focus:ring-2 focus:ring-primary disabled:opacity-70 disabled:cursor-not-allowed" disabled>Submit Withdrawal Request</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="flex-shrink-0 text-center p-4 text-sm text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-800 mt-auto">
+                <p>&copy; 2026 <a class="hover:text-primary hover:underline" href="https://mountainmovingministryintl.org/" target="_blank">Mountain Moving Ministry Intl.</a></p>
+            </footer>
+        </main>
+        
+        <div class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden" id="mobile-menu-overlay"></div>
+        <aside class="fixed top-0 left-0 h-full w-64 bg-white isometric-sidebar p-6 flex flex-col justify-between z-40 transform -translate-x-full transition-transform duration-300 ease-in-out lg:hidden" id="mobile-menu">
+            <div>
+                <div class="flex items-center justify-between mb-10">
+                    <div class="flex items-center gap-3"><img id="mobile-logo" alt="Logo" class="h-10 w-10 app-logo" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg"/><span class="text-xl font-semibold text-gray-800 dark:text-white">Cooperative</span></div>
+                    <button class="p-1" id="close-menu-btn"><span class="material-symbols-outlined">close</span></button>
+                </div>
+                <nav class="flex flex-col gap-2">
+                    <a class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" href="./memberDashboard"><span class="material-symbols-outlined">dashboard</span><span class="font-medium">Dashboard</span></a>
+                    <a class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" href="./userProfile"><span class="material-symbols-outlined">person</span><span class="font-medium">User Profile</span></a>
+                    <a class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" href="./withdrawalapplication"><span class="material-symbols-outlined">account_balance_wallet</span><span class="font-medium">Withdraw Savings</span></a>
+                    <a onclick="window.location.href='./memberDashboard?tab=topup'" class="cursor-pointer flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><span class="material-symbols-outlined">upgrade</span><span class="font-medium">Top-up/Upgrade</span></a>
+                    <a class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" href="./updatePaymentDetails"><span class="material-symbols-outlined">payment</span><span class="font-medium">Payment Details</span></a>
+                    <a class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" href="./changePassword"><span class="material-symbols-outlined">lock_reset</span><span class="font-medium">Forgot/Change Password</span></a>
+                </nav>
+            </div>
+            <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+                <button id="logout-btn-mobile" class="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-left"><span class="material-symbols-outlined">logout</span><span class="font-medium">Log Out</span></button>
+            </div>
+        </aside>
+    </div>
+
+    <div id="concurrency-modal" class="fixed inset-0 z-[200] flex items-center justify-center hidden">
+    </div>
+
+    <script>
+        function hidePreloader() {
+            const p = document.getElementById('preloader');
+            const c = document.getElementById('preloader-card');
+            if(c) c.classList.add('tv-off-active');
+            setTimeout(() => { if(p) p.style.opacity='0'; p.style.transition='opacity 0.3s ease'; }, 400);
+            setTimeout(() => { if(p) p.classList.add('hidden-force'); }, 800);
+        }
+    </script>
+
+    <script type="module">
+        import '../js/auth.js';
+        import { auth, db, onAuthStateChanged, signOut, doc, getDoc, EmailAuthProvider, reauthenticateWithCredential, onSnapshot } from '../js/firebase-init.js';
+        import { recordWithdrawal } from '../js/txnCreation.js'; 
+        import { initCalculationLogic, updateCycleState } from '../js/withdrawal-calc-box.js';
+
+        const form = document.getElementById('withdrawal-form');
+        const amountInput = document.getElementById('amount-input');
+        const submitBtn = document.getElementById('submit-btn');
+        const overlay = document.getElementById('form-disabled-overlay');
+        
+        let currentUser = null;
+        let bankDetailsExist = false;
+        let userWalletBalance = 0; 
+        let userMemberId = "MEM000"; 
+        let isMatureCycle = false;
+        let cycleInterestPaid = 0; 
+
+        // --- INJECTED TOAST UTILITY ---
+        const Toast = {
+            show(message, type = 'success') {
+                const existing = document.getElementById('withdrawal-toast');
+                if (existing) existing.remove();
+
+                const colors = {
+                    success: 'bg-green-600 border-green-500',
+                    error: 'bg-red-600 border-red-500',
+                    info: 'bg-slate-800 border-slate-600'
+                };
+                const icons = {
+                    success: 'check_circle',
+                    error: 'error',
+                    info: 'info'
+                };
+
+                const div = document.createElement('div');
+                div.id = 'withdrawal-toast';
+                div.className = `fixed top-5 left-1/2 transform -translate-x-1/2 z-[100] flex items-center gap-3 px-6 py-4 rounded-xl shadow-2xl text-white border ${colors[type] || colors.info} transition-all duration-300 opacity-0 -translate-y-full`;
+                div.innerHTML = `
+                    <span class="material-symbols-outlined text-xl">${icons[type] || 'info'}</span>
+                    <span class="font-bold text-sm tracking-wide">${message}</span>
+                `;
+
+                document.body.appendChild(div);
+
+                // Animate In
+                requestAnimationFrame(() => {
+                    div.classList.remove('opacity-0', '-translate-y-full');
+                });
+
+                // Animate Out
+                setTimeout(() => {
+                    div.classList.add('opacity-0', '-translate-y-full');
+                    setTimeout(() => div.remove(), 300);
+                }, 4000); 
+            }
+        };
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                try { 
+                    await checkUserData(user.uid); 
+                } catch(e) { 
+                    console.error("Init Error", e); 
+                } finally { 
+                    hidePreloader(); 
+                    initMobileMenu();
+                    initCalculationLogic(); 
+                }
+            } else { window.location.href = "/auth/index.html"; }
+        });
+
+        async function checkUserData(uid) {
+            const userDoc = await getDoc(doc(db, "users", uid));
+            if (userDoc.exists()) {
+                const data = userDoc.data();
+                
+                if(data.photoURL) document.getElementById('header-profile-img').src = data.photoURL;
+                else document.getElementById('header-profile-img').src = `https://ui-avatars.com/api/?name=${data.firstName}+${data.surname}&background=random`;
+
+                if (data.bankName && data.accountNumber) {
+                    bankDetailsExist = true;
+                    document.getElementById('bank-name-input').value = data.bankName;
+                    document.getElementById('account-number-input').value = data.accountNumber;
+                    const accName = data.bankAccountName || `${data.firstName || ''} ${data.surname || ''}`.trim() || "User";
+                    document.getElementById('account-name-input').value = accName;
+                    enableForm();
+                } else { disableForm(); }
+
+                userWalletBalance = Number(data["Wallet balance"] || 0);
+                cycleInterestPaid = Number(data.cycleAccumulatedInterest || 0); 
+                userMemberId = data.memberId;
+                document.getElementById('balance-hint').textContent = `₦${userWalletBalance.toLocaleString()}`;
+
+                const planStart = data.planStartDate ? new Date(data.planStartDate) : new Date();
+                const now = new Date();
+                const daysPassed = Math.floor((now - planStart) / (1000 * 60 * 60 * 24));
+                isMatureCycle = daysPassed >= 90;
+
+                renderCycleBanner(isMatureCycle, daysPassed);
+                
+                updateCycleState(isMatureCycle, cycleInterestPaid);
+            }
+        }
+
+        function renderCycleBanner(isMature, days) {
+            const b = document.getElementById('cycle-status-banner');
+            const t = document.getElementById('cycle-title');
+            const d = document.getElementById('cycle-desc');
+            const i = document.getElementById('cycle-icon');
+            
+            b.classList.remove('hidden', 'bg-red-50', 'border-red-500', 'text-red-700', 'bg-green-50', 'border-green-500', 'text-green-700');
+
+            if (!isMature) {
+                b.classList.add('bg-red-50', 'border-red-500', 'dark:bg-red-900/20');
+                t.className = "text-sm font-bold uppercase text-red-700 dark:text-red-400";
+                d.className = "text-sm mt-1 text-red-600 dark:text-red-300";
+                i.className = "material-symbols-outlined text-red-500";
+                
+                t.textContent = "Early Withdrawal Penalty";
+                d.innerHTML = `Cycle day <b>${days}/90</b>. Withdrawals before 3 months incur a <b>1% penalty</b> on principal and <b>forfeiture of ALL accrued interest</b>.`;
+            } else {
+                b.classList.add('bg-green-50', 'border-green-500', 'dark:bg-green-900/20');
+                t.className = "text-sm font-bold uppercase text-green-700 dark:text-green-400";
+                d.className = "text-sm mt-1 text-green-600 dark:text-green-300";
+                i.className = "material-symbols-outlined text-green-500";
+                
+                t.textContent = "Cycle Matured";
+                d.textContent = "You have completed the 3-month cycle. Full withdrawal available with no penalty.";
+            }
+        }
+
+        function disableForm() {
+            overlay.classList.remove('hidden'); 
+            amountInput.disabled = true;
+            document.getElementById('password-input').disabled = true;
+            document.getElementById('verify-password-btn').disabled = true;
+            submitBtn.disabled = true;
+        }
+
+        function enableForm() {
+            overlay.classList.add('hidden');
+            amountInput.disabled = false;
+            document.getElementById('password-input').disabled = false;
+            document.getElementById('verify-password-btn').disabled = false;
+        }
+
+        const pwdInput = document.getElementById('password-input');
+        const verifyBtn = document.getElementById('verify-password-btn');
+        const pwdLoader = document.getElementById('password-loader');
+        const pwdStatus = document.getElementById('password-status');
+
+        verifyBtn.addEventListener('click', async () => {
+            const password = pwdInput.value;
+            if(!password) {
+                Toast.show("Please enter your password", "error");
+                return;
+            }
+            
+            verifyBtn.classList.add('hidden');
+            pwdLoader.classList.remove('hidden');
+            
+            try {
+                const cred = EmailAuthProvider.credential(currentUser.email, password);
+                await reauthenticateWithCredential(currentUser, cred);
+                
+                pwdLoader.classList.add('hidden');
+                document.getElementById('password-success-icon').classList.remove('hidden');
+                pwdInput.classList.add('border-green-500');
+                
+                submitBtn.removeAttribute('disabled');
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('bg-gray-400');
+                submitBtn.classList.add('bg-primary', 'hover:bg-red-700'); 
+                
+                Toast.show("Identity Verified", "success");
+
+            } catch(e) {
+                pwdLoader.classList.add('hidden');
+                verifyBtn.classList.remove('hidden');
+                pwdStatus.classList.remove('hidden');
+                pwdStatus.textContent = "Incorrect Password";
+                pwdStatus.className = "text-xs font-medium text-red-500";
+                
+                Toast.show("Incorrect Password", "error");
+            }
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const amount = parseFloat(amountInput.value);
+            
+            // REPLACED: alert("Insufficient balance")
+            if(amount > userWalletBalance) {
+                Toast.show("Insufficient wallet balance.", "error");
+                return;
+            }
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Processing...";
+            
+            try {
+                const bank = {
+                    bankName: document.getElementById('bank-name-input').value,
+                    accountNumber: document.getElementById('account-number-input').value,
+                    accountName: document.getElementById('account-name-input').value
+                };
+                
+                await recordWithdrawal(currentUser.uid, userMemberId, amount, bank);
+                
+                // REPLACED: alert("Withdrawal Request Submitted!")
+                Toast.show("Withdrawal request submitted successfully!", "success");
+                
+                setTimeout(() => {
+                    window.location.href = "./memberDashboard";
+                }, 2000);
+
+            } catch(e) {
+                console.error(e);
+                // REPLACED: alert("Error: " + e.message)
+                Toast.show(e.message || "Withdrawal failed. Please try again.", "error");
+                
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Submit Withdrawal Request";
+            }
+        });
+        
+        function initMobileMenu() {
+            const menuBtn = document.getElementById('menu-btn');
+            const mm = document.getElementById('mobile-menu');
+            const mo = document.getElementById('mobile-menu-overlay');
+            const closeBtn = document.getElementById('close-menu-btn');
+            const mainContent = document.getElementById('main-content');
+
+            const openMenu = () => { 
+                mm.classList.remove('-translate-x-full'); 
+                mo.classList.remove('hidden'); 
+                if(mainContent) mainContent.classList.add('content-blurred'); 
+            };
+            const closeMenu = () => { 
+                mm.classList.add('-translate-x-full'); 
+                mo.classList.add('hidden'); 
+                if(mainContent) mainContent.classList.remove('content-blurred'); 
+            };
+
+            if(menuBtn) menuBtn.onclick = openMenu;
+            if(closeBtn) closeBtn.onclick = closeMenu;
+            if(mo) mo.onclick = closeMenu;
+        }
+        
+        const toggleBtn = document.getElementById('toggle-password-btn');
+        const showPwd = (e) => { if(e.cancelable) e.preventDefault(); pwdInput.type='text'; };
+        const hidePwd = (e) => { if(e.cancelable) e.preventDefault(); pwdInput.type='password'; };
+
+        ['mousedown', 'touchstart'].forEach(evt => toggleBtn.addEventListener(evt, showPwd));
+        ['mouseup', 'mouseleave', 'touchend'].forEach(evt => toggleBtn.addEventListener(evt, hidePwd));
+
+        document.getElementById('logout-btn-desktop').onclick = () => signOut(auth);
+        document.getElementById('logout-btn-mobile').onclick = () => signOut(auth);
+    </script>
+    <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(() => console.log('Service Worker Registered'))
+        .catch(err => console.error('Service Worker Failed:', err));
+    });
+  }
+</script>
+</body>
+</html>

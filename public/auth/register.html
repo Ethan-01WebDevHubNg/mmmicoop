@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>MMMi Cooperative Member Registration</title>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#e31919">
+  <link rel="apple-touch-icon" href="/assets/icon-192.png">
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script type="module" src="../js/systemmaintenance.js"></script>
+  <script src="https://www.google.com/recaptcha/enterprise.js?render=6Lc_9DIsAAAAAK5CvT8tlPhK-vWeVp25Xcb7nWi3"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      font-size: 20px;
+    }
+    #mobile-menu {
+      transition: height 0.3s ease-in-out;
+    }
+
+    /* 3D Perspective Animation Styles */
+    .perspective-container {
+      perspective: 1500px; 
+    }
+    
+    .card-reveal {
+      transform-origin: bottom center;
+      opacity: 0;
+      transform: rotateX(30deg);
+      animation: standUp 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+      transform-style: preserve-3d; 
+    }
+
+    @keyframes standUp {
+      0% { opacity: 0; transform: rotateX(30deg); }
+      100% { opacity: 1; transform: rotateX(0deg); }
+    }
+
+    /* Isometric Background Pattern for Dark Mode */
+    .dark .isometric-card-bg {
+      background-color: #1e293b; 
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg id='hexagons' fill='%230f172a' fill-opacity='0.25' fill-rule='nonzero'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    /* Invisible reCaptcha badge */
+    .grecaptcha-badge { visibility: hidden; }
+  </style>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#e31919",
+            "background-light": "#F9FAFB",
+            "background-dark": "#0f172a",
+            "card-light": "#FFFFFF",
+            "card-dark": "#1e293b",
+            "text-light": "#111827",
+            "text-dark": "#E5E7EB",
+            "subtext-light": "#6B7280",
+            "subtext-dark": "#94a3b8",
+            "border-light": "#E5E7EB",
+            "border-dark": "#334155",
+            "input-bg-light": "#FFFFFF",
+            "input-bg-dark": "#334155",
+            "input-placeholder-light": "#9CA3AF",
+            "input-placeholder-dark": "#94a3b8"
+          },
+          fontFamily: { "display": ["Manrope", "sans-serif"] },
+          borderRadius: { "DEFAULT": "0.5rem", "lg": "0.75rem", "xl": "1rem", "2xl": "1.5rem", "3xl": "2rem", "full": "9999px" },
+          spacing: { '35': '8.75rem', }
+        },
+      },
+    }
+  </script>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark antialiased">
+  
+  <header class="fixed top-0 left-0 right-0 z-20 bg-card-light/95 dark:bg-card-dark/95 backdrop-blur-sm shadow-xl border-b border-border-light dark:border-border-dark transition-all duration-300 transform-gpu">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <div class="flex-shrink-0 flex items-center gap-2">
+          <a href="#" class="flex items-center gap-3">
+            <div class="h-12 w-[3.75rem] flex-shrink-0">
+              <img src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg" alt="Mountain Moving Ministry International" class="w-full h-full object-cover opacity-70" onerror="this.style.display='none'" preserveAspectRatio="none meet">
+            </div>
+            <span class="text-xl font-extrabold tracking-tight text-text-light dark:text-text-dark">Coop</span>
+          </a>
+        </div>
+
+        <nav class="hidden md:flex md:space-x-8">
+          <a class="text-subtext-light dark:text-subtext-dark hover:text-primary dark:hover:text-primary font-medium transition-colors" href="https://mountainmovingministryintl.org/Home/">Home</a>
+          <a class="text-subtext-light dark:text-subtext-dark hover:text-primary dark:hover:text-primary font-medium transition-colors" href="https://mountainmovingministryintl.org/Home/#About-Us">About Us</a>
+          <a class="text-subtext-light dark:text-subtext-dark hover:text-primary dark:hover:text-primary font-medium transition-colors" href="https://mountainmovingministryintl.org/Home/#Ministry">Ministry</a>
+        </nav>
+
+        <div class="flex items-center gap-4">
+          <a class="flex bg-primary text-white font-semibold py-2 px-4 rounded-full shadow-md hover:bg-primary/90 transition-colors text-sm sm:text-base" href="/auth/index.html">
+            Log In
+          </a>
+          <button id="mobile-menu-toggle" class="md:hidden p-2 rounded-lg text-subtext-light dark:text-subtext-dark hover:bg-gray-100 dark:hover:bg-card-dark transition-colors" aria-label="Toggle Menu">
+            <span class="material-symbols-outlined menu-icon">menu</span>
+            <span class="material-symbols-outlined close-icon hidden">close</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="mobile-menu" class="md:hidden h-0 overflow-hidden bg-card-light dark:bg-card-dark shadow-inner">
+      <div class="pt-2 pb-4 space-y-1 px-4">
+        <a class="block px-3 py-2 rounded-md text-base font-medium text-text-light dark:text-text-dark hover:bg-gray-100 dark:hover:bg-gray-700" href="https://mountainmovingministryintl.org/Home/">Home</a>
+        <a class="block px-3 py-2 rounded-md text-base font-medium text-text-light dark:text-text-dark hover:bg-gray-100 dark:hover:bg-gray-700" href="https://mountainmovingministryintl.org/Home/#About-Us">About Us</a>
+        <a class="block px-3 py-2 rounded-md text-base font-medium text-text-light dark:text-text-dark hover:bg-gray-100 dark:hover:bg-gray-700" href="https://mountainmovingministryintl.org/Home/#Ministry">Ministry</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="perspective-container relative flex w-full flex-col items-center justify-center p-4 sm:p-6 md:p-8">
+    <main class="card-reveal w-full max-w-6xl mx-auto mb-12 mt-[8.75rem] shadow-2xl dark:shadow-2xl dark:shadow-background-dark/20 overflow-hidden rounded-3xl lg:-translate-x-[20px]">
+      <div class="lg:grid lg:grid-cols-2 lg:gap-0">
+        <div class="hidden lg:block bg-gray-900 relative rounded-l-3xl lg:rounded-r-none overflow-hidden lg:translate-x-[20px]">
+          <img src="https://mountainmovingministryintl.org/gallery/87a718009f727037fc4f5475283e7e94.jpg" alt="Mountain Moving Ministry International" class="w-full h-full object-cover opacity-70" onerror="this.style.display='none'">
+        </div>
+
+        <div class="p-6 sm:p-8 md:p-10 bg-card-light dark:bg-card-dark isometric-card-bg rounded-3xl lg:relative lg:z-10">
+          <div class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-text-light dark:text-text-dark">New Member Registration</h1>
+            <p class="mt-2 text-base text-subtext-light dark:text-subtext-dark">Fill in your details below to create your account and start your journey with us.</p>
+          </div>
+          <form id="registration-form" class="space-y-6" novalidate>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <label class="flex flex-col">
+                <p class="text-sm font-medium pb-2">First Name</p>
+                <input id="firstName" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-light dark:text-text-dark focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-border-light dark:border-border-dark bg-input-bg-light dark:bg-input-bg-dark h-12 placeholder:text-input-placeholder-light dark:placeholder:text-input-placeholder-dark px-4 text-base font-normal transition-colors" placeholder="Enter your first name" type="text" required />
+              </label>
+              <label class="flex flex-col">
+                <p class="text-sm font-medium pb-2">Surname</p>
+                <input id="surname" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-light dark:text-text-dark focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-border-light dark:border-border-dark bg-input-bg-light dark:bg-input-bg-dark h-12 placeholder:text-input-placeholder-light dark:placeholder:text-input-placeholder-dark px-4 text-base font-normal transition-colors" placeholder="Enter your surname" type="text" required />
+              </label>
+            </div>
+            <div>
+              <label class="flex flex-col">
+                <p class="text-sm font-medium pb-2">Phone Number</p>
+                <div class="flex items-stretch">
+                  <div class="relative">
+                    <select id="phoneCode" class="form-select h-12 appearance-none rounded-l-lg border border-r-0 border-border-light dark:border-border-dark bg-input-bg-light dark:bg-input-bg-dark pr-8 pl-4 focus:outline-none focus:ring-2 focus:ring-primary/50 text-text-light dark:text-text-dark transition-colors">
+                      <option>+234</option>
+                      <option>+1</option>
+                      <option>+44</option>
+                    </select>
+                    <span class="material-symbols-outlined pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-subtext-light dark:text-subtext-dark"></span>
+                  </div>
+                  <input id="phoneNumber" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-r-lg text-text-light dark:text-text-dark focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-border-light dark:border-border-dark bg-input-bg-light dark:bg-input-bg-dark h-12 placeholder:text-input-placeholder-light dark:placeholder:text-input-placeholder-dark px-4 text-base font-normal transition-colors" placeholder="812 345 6789" type="tel" required />
+                </div>
+              </label>
+            </div>
+            <div>
+              <label class="flex flex-col">
+                <p class="text-sm font-medium pb-2">Email Address</p>
+                <input id="email" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-light dark:text-text-dark focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-border-light dark:border-border-dark bg-input-bg-light dark:bg-input-bg-dark h-12 placeholder:text-input-placeholder-light dark:placeholder:text-input-placeholder-dark px-4 text-base font-normal transition-colors" placeholder="you@example.com" type="email" required />
+              </label>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <label class="flex flex-col">
+                <p class="text-sm font-medium pb-2">NIN (Nat. Identification No.)</p>
+                <input id="nin" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-light dark:text-text-dark focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-border-light dark:border-border-dark bg-input-bg-light dark:bg-input-bg-dark h-12 placeholder:text-input-placeholder-light dark:placeholder:text-input-placeholder-dark px-4 text-base font-normal transition-colors" maxlength="11" placeholder="Enter your 11-digit NIN" type="text" required />
+              </label>
+              <label class="flex flex-col">
+                <p class="text-sm font-medium pb-2">Referral ID/Name (Optional)</p>
+                <input id="referral" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-light dark:text-text-dark focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-border-light dark:border-border-dark bg-input-bg-light dark:bg-input-bg-dark h-12 placeholder:text-input-placeholder-light dark:placeholder:text-input-placeholder-dark px-4 text-base font-normal transition-colors" placeholder="Enter referral ID or name" type="text" />
+              </label>
+            </div>
+            <div class="space-y-6 pt-2">
+              <p class="text-lg font-semibold">Residential Address</p>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <label class="flex flex-col sm:col-span-2">
+                  <p class="text-sm font-medium pb-2">Address Line 1</p>
+                  <input id="address1" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-light dark:text-text-dark focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-border-light dark:border-border-dark bg-input-bg-light dark:bg-input-bg-dark h-12 placeholder:text-input-placeholder-light dark:placeholder:text-input-placeholder-dark px-4 text-base font-normal transition-colors" placeholder="e.g., 123 Main Street" type="text" required />
+                </label>
+                <label class="flex flex-col sm:col-span-2">
+                  <p class="text-sm font-medium pb-2">Address Line 2 (Optional)</p>
+                  <input id="address2" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-light dark:text-text-dark focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-border-light dark:border-border-dark bg-input-bg-light dark:bg-input-bg-dark h-12 placeholder:text-input-placeholder-light dark:placeholder:text-input-placeholder-dark px-4 text-base font-normal transition-colors" placeholder="e.g., Apartment, suite, etc." type="text" />
+                </label>
+                
+                <label class="flex flex-col">
+                  <p class="text-sm font-medium pb-2">City</p>
+                  <input id="city" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-light dark:text-text-dark focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-border-light dark:border-border-dark bg-input-bg-light dark:bg-input-bg-dark h-12 placeholder:text-input-placeholder-light dark:placeholder:text-input-placeholder-dark px-4 text-base font-normal transition-colors" placeholder="Enter city" type="text" required />
+                </label>
+
+                <label class="flex flex-col relative">
+                  <p class="text-sm font-medium pb-2">Country</p>
+                  <select id="country-select" class="form-select w-full h-12 appearance-none rounded-lg border border-border-light dark:border-border-dark bg-input-bg-light dark:bg-input-bg-dark pr-10 pl-4 focus:outline-none focus:ring-2 focus:ring-primary/50 text-text-light dark:text-text-dark transition-colors" required>
+                    <option>Nigeria</option>
+                    <option>United States</option>
+                    <option>United Kingdom</option>
+                    <option>Ghana</option>
+                    <option>Kenya</option>
+                  </select>
+                  <span class="material-symbols-outlined pointer-events-none absolute right-3 bottom-3 text-subtext-light dark:text-subtext-dark"></span>
+                </label>
+                <label class="flex flex-col relative sm:col-span-2">
+                  <p class="text-sm font-medium pb-2">State</p>
+                  <select id="state-select" class="form-select w-full h-12 appearance-none rounded-lg border border-border-light dark:border-border-dark bg-input-bg-light dark:bg-input-bg-dark pr-10 pl-4 focus:outline-none focus:ring-2 focus:ring-primary/50 text-text-light dark:text-text-dark transition-colors" disabled="" required>
+                    <option value="">Select a country first</option>
+                  </select>
+                  <span class="material-symbols-outlined pointer-events-none absolute right-3 bottom-3 text-subtext-light dark:text-subtext-dark"></span>
+                </label>
+              </div>
+            </div>
+            <div>
+              <label class="flex flex-col">
+                <p class="text-sm font-medium pb-2">Password</p>
+                <div class="relative">
+                  <input id="password" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-light dark:text-text-dark focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-border-light dark:border-border-dark bg-input-bg-light dark:bg-input-bg-dark h-12 placeholder:text-input-placeholder-light dark:placeholder:text-input-placeholder-dark px-4 pr-10 text-base font-normal transition-colors" placeholder="Enter a secure password" type="password" required />
+                  <button id="password-toggle" class="absolute inset-y-0 right-0 flex items-center pr-3 text-subtext-light dark:text-subtext-dark" type="button">
+                    <span class="material-symbols-outlined">visibility_off</span>
+                  </button>
+                </div>
+              </label>
+              
+              <div class="grid grid-cols-2 gap-x-4 gap-y-1 pt-3 text-xs">
+                <div id="criteria-length" class="flex items-center gap-2 text-subtext-light dark:text-subtext-dark">
+                  <span class="material-symbols-outlined !text-base">cancel</span>
+                  <span>Min. 8 characters</span>
+                </div>
+                <div id="criteria-uppercase" class="flex items-center gap-2 text-subtext-light dark:text-subtext-dark">
+                  <span class="material-symbols-outlined !text-base">cancel</span>
+                  <span>One uppercase letter</span>
+                </div>
+                <div id="criteria-number" class="flex items-center gap-2 text-subtext-light dark:text-subtext-dark">
+                  <span class="material-symbols-outlined !text-base">cancel</span>
+                  <span>One number</span>
+                </div>
+                <div id="criteria-special" class="flex items-center gap-2 text-subtext-light dark:text-subtext-dark">
+                  <span class="material-symbols-outlined !text-base">cancel</span>
+                  <span>One special character</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <label class="flex flex-col">
+                <p class="text-sm font-medium pb-2">Confirm Password</p>
+                <div class="relative">
+                  <input id="confirm-password" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-light dark:text-text-dark focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-border-light dark:border-border-dark bg-input-bg-light dark:bg-input-bg-dark h-12 placeholder:text-input-placeholder-light dark:placeholder:text-input-placeholder-dark px-4 pr-10 text-base font-normal transition-colors" placeholder="Re-enter your password" type="password" required />
+                  <button id="confirm-password-toggle" class="absolute inset-y-0 right-0 flex items-center pr-3 text-subtext-light dark:text-subtext-dark" type="button">
+                    <span class="material-symbols-outlined">visibility_off</span>
+                  </button>
+                </div>
+              </label>
+              
+              <div class="pt-2 flex flex-col space-y-1">
+                <div id="match-success" class="flex items-center gap-2 text-xs text-green-500" style="display: none;">
+                  <span class="material-symbols-outlined !text-base">check_circle</span>
+                  <span>Passwords match</span>
+                </div>
+                <div id="match-error" class="flex items-center gap-2 text-xs text-primary" style="display: none;">
+                  <span class="material-symbols-outlined !text-base">cancel</span>
+                  <span>Passwords do not match</span>
+                </div>
+              </div>
+            </div>
+
+            <div id="form-error-message" class="hidden p-3 rounded-lg bg-primary/10 text-primary border border-primary font-medium text-sm transition-all duration-300 items-center justify-center text-center">
+              Please complete all highlighted fields and ensure password rules are met before submitting.
+            </div>
+
+            <button id="submit-button" class="w-full bg-primary text-white font-bold h-12 rounded-lg flex items-center justify-center transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-primary/30 opacity-50 cursor-not-allowed" type="submit">
+              Create Account
+            </button>
+          </form>
+          <p class="mt-8 text-center text-sm text-subtext-light dark:text-subtext-dark">
+            Already have an account?
+            <a class="font-semibold text-primary hover:underline" href="/auth/index.html">Sign In</a>
+          </p>
+        </div>
+      </div>
+    </main>
+    
+    <footer class="flex-shrink-0 text-center p-4 text-sm text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-800 mt-auto">
+        <p>&copy; 2026 <a class="hover:text-primary hover:underline" href="https://mountainmovingministryintl.org/" target="_blank">Mountain Moving Ministry Intl.</a> All rights reserved.</p>
+        <p class="text-sm text-text-light-secondary dark:text-text-dark-secondary">
+            Protected by reCAPTCHA and Google's
+            <a class="text-sm text-primary hover:underline inline-block" href="https://policies.google.com/privacy">Privacy Policy</a> and
+            <a class="text-sm text-primary hover:underline inline-block" href="https://policies.google.com/terms">Terms of Service</a> apply.</p>
+            <a class="hover:text-primary" href="https://ethan01.com" rel="noopener noreferrer" target="_blank">Contact Developer</a>
+    </footer>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Mobile Menu Logic
+      const toggleButton = document.getElementById('mobile-menu-toggle');
+      const mobileMenu = document.getElementById('mobile-menu');
+      const menuIcon = toggleButton ? toggleButton.querySelector('.menu-icon') : null;
+      const closeIcon = toggleButton ? toggleButton.querySelector('.close-icon') : null;
+
+      if (toggleButton && mobileMenu) {
+        toggleButton.addEventListener('click', () => {
+          const isOpen = mobileMenu.classList.toggle('is-open');
+          if (isOpen) {
+            mobileMenu.style.height = mobileMenu.scrollHeight + 'px';
+            menuIcon.classList.add('hidden');
+            closeIcon.classList.remove('hidden');
+          } else {
+            mobileMenu.style.height = '0';
+            menuIcon.classList.remove('hidden');
+            closeIcon.classList.add('hidden');
+          }
+        });
+        
+        mobileMenu.addEventListener('transitionend', () => {
+          if (!mobileMenu.classList.contains('is-open')) {
+            mobileMenu.style.height = ''; 
+          }
+        });
+      }
+
+      // 2. Password Visibility Toggle Logic
+      const toggleButtons = document.querySelectorAll('button[type="button"]');
+      toggleButtons.forEach(button => {
+        const input = button.previousElementSibling;
+        const icon = button.querySelector('span');
+        if (!input || !(input.tagName === 'INPUT') || !icon) return;
+        
+        const showPassword = () => {
+          if (input.type === 'password') {
+            input.type = 'text';
+            icon.textContent = 'visibility';
+          }
+        };
+        const hidePassword = () => {
+          if (input.type === 'text') {
+            input.type = 'password';
+            icon.textContent = 'visibility_off';
+          }
+        };
+        
+        button.addEventListener('mousedown', showPassword);
+        button.addEventListener('mouseup', hidePassword);
+        button.addEventListener('mouseleave', hidePassword); 
+        button.addEventListener('touchstart', (e) => {
+          e.preventDefault(); 
+          showPassword();
+        }, { passive: false });
+        button.addEventListener('touchend', hidePassword);
+        button.addEventListener('touchcancel', hidePassword);
+      });
+    });
+  </script>
+
+  <script type="module">
+    import { registerUser, auth } from '../js/auth.js';
+    import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const registrationForm = document.getElementById('registration-form');
+      const submitButton = document.getElementById('submit-button');
+      const formErrorMessage = document.getElementById('form-error-message');
+      const passwordInput = document.getElementById('password');
+      const confirmPasswordInput = document.getElementById('confirm-password');
+      const allFormInputs = registrationForm.querySelectorAll('input[required], select[required]');
+
+      const criteria = {
+        length: document.getElementById('criteria-length'),
+        uppercase: document.getElementById('criteria-uppercase'),
+        number: document.getElementById('criteria-number'),
+        special: document.getElementById('criteria-special'),
+      };
+
+      const matchSuccess = document.getElementById('match-success');
+      const matchError = document.getElementById('match-error');
+      const countrySelect = document.getElementById('country-select');
+      const stateSelect = document.getElementById('state-select');
+
+      const statesByCountry = {
+        "Nigeria": ["Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue", "Borno", "Cross River", "Delta", "Ebonyi", "Edo", "Ekiti", "Enugu", "FCT - Abuja", "Gombe", "Imo", "Jigawa", "Kaduna", "Kano", "Katsina", "Kebbi", "Kogi", "Kwara", "Lagos", "Nasarawa", "Niger", "Ogun", "Ondo", "Osun", "Oyo", "Plateau", "Rivers", "Sokoto", "Taraba", "Yobe", "Zamfara"],
+        "United States": ["Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"],
+        "United Kingdom": ["England", "Scotland", "Wales", "Northern Ireland"],
+        "Ghana": ["Ashanti", "Bono", "Bono East", "Ahafo", "Central", "Eastern", "Greater Accra", "Northern", "Savannah", "North East", "Oti", "Upper East", "Upper West", "Volta", "Western", "Western North"],
+        "Kenya": ["Mombasa", "Kwale", "Kilifi", "Tana River", "Lamu", "Taita-Taveta", "Garissa", "Wajir", "Mandera", "Marsabit", "Isiolo", "Meru", "Tharaka-Nithi", "Embu", "Kitui", "Machakos", "Makueni", "Nyandarua", "Nyeri", "Kirinyaga", "Murang'a", "Kiambu", "Turkana", "West Pokot", "Samburu", "Trans Nzoia", "Uasin Gishu", "Elgeyo-Marakwet", "Nandi", "Baringo", "Laikipia", "Nakuru", "Narok", "Kajiado", "Kericho", "Bomet", "Kakamega", "Vihiga", "Bungoma", "Busia", "Siaya", "Kisumu", "Homa Bay", "Migori", "Kisii", "Nyamira", "Nairobi"]
+      };
+
+      function updateStates() {
+        const selectedCountry = countrySelect.value;
+        const states = statesByCountry[selectedCountry] || [];
+        stateSelect.innerHTML = '';
+        stateSelect.add(new Option('Select your state', ''));
+
+        if (states.length > 0) {
+          stateSelect.disabled = false;
+          stateSelect.required = true;
+          states.forEach(state => {
+            stateSelect.add(new Option(state, state));
+          });
+        } else {
+          stateSelect.disabled = true;
+          stateSelect.required = false;
+          stateSelect.add(new Option(selectedCountry ? 'No states available' : 'Select a country first', ''));
+        }
+      }
+
+      countrySelect.addEventListener('change', updateStates);
+      updateStates();
+
+      function updateCriteriaCheck(element, isValid) {
+        const icon = element.querySelector('span');
+        if (isValid) {
+          element.classList.remove('text-subtext-light', 'dark:text-subtext-dark', 'text-primary');
+          element.classList.add('text-green-500');
+          icon.textContent = 'check_circle';
+        } else {
+          element.classList.add('text-subtext-light', 'dark:text-subtext-dark');
+          element.classList.remove('text-green-500');
+          icon.textContent = 'cancel';
+        }
+      }
+      
+      function checkPasswordStrength() {
+        const password = passwordInput.value;
+        let allMet = true;
+        const checks = {
+          length: password.length >= 8,
+          uppercase: /[A-Z]/.test(password),
+          number: /[0-9]/.test(password),
+          special: /[^A-Za-z0-9]/.test(password), 
+        };
+
+        for (const key in criteria) {
+          const isValid = checks[key];
+          updateCriteriaCheck(criteria[key], isValid);
+          if (!isValid) allMet = false;
+        }
+        return allMet;
+      }
+
+      function checkPasswordMatch() {
+        const password = passwordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+        const passwordsMatch = password === confirmPassword && password.length > 0;
+        if (confirmPassword.length === 0) {
+          matchSuccess.style.display = 'none';
+          matchError.style.display = 'none';
+        } else if (passwordsMatch) {
+          matchSuccess.style.display = 'flex';
+          matchError.style.display = 'none';
+        } else {
+          matchSuccess.style.display = 'none';
+          matchError.style.display = 'flex';
+        }
+        return passwordsMatch;
+      }
+      
+      function validateFormFields(showHighlights = false) {
+        let allRequiredFieldsFilled = true;
+
+        allFormInputs.forEach(input => {
+          if (input.disabled) return;
+          
+          const isInvalid = !input.value.trim() || (input.tagName === 'SELECT' && input.value === '');
+          
+          if (isInvalid) {
+            allRequiredFieldsFilled = false;
+            if (showHighlights) {
+               input.classList.add('border-primary', 'ring-2', 'ring-primary/50');
+               input.classList.remove('border-border-light', 'dark:border-border-dark');
+            }
+          } else {
+             input.classList.remove('border-primary', 'ring-2', 'ring-primary/50');
+             input.classList.add('border-border-light', 'dark:border-border-dark');
+          }
+        });
+
+        const passwordStrengthMet = checkPasswordStrength();
+        const passwordsAreMatched = checkPasswordMatch();
+        
+        if (showHighlights && (!passwordStrengthMet || !passwordsAreMatched)) {
+             passwordInput.classList.add('border-primary', 'ring-2', 'ring-primary/50');
+             confirmPasswordInput.classList.add('border-primary', 'ring-2', 'ring-primary/50');
+        }
+
+        const formIsValid = allRequiredFieldsFilled && passwordStrengthMet && passwordsAreMatched;
+
+        if (formIsValid) {
+            submitButton.classList.remove('opacity-50', 'cursor-not-allowed');
+            submitButton.classList.add('hover:scale-[1.02]');
+            formErrorMessage.classList.add('hidden'); 
+            formErrorMessage.classList.remove('flex');
+        } else {
+            submitButton.classList.add('opacity-50', 'cursor-not-allowed');
+            submitButton.classList.remove('hover:scale-[1.02]');
+        }
+
+        return formIsValid;
+      }
+
+      allFormInputs.forEach(input => {
+        input.addEventListener('input', function() {
+            this.classList.remove('border-primary', 'ring-2', 'ring-primary/50');
+            this.classList.add('border-border-light', 'dark:border-border-dark');
+            validateFormFields(false);
+        });
+        input.addEventListener('change', function() {
+            validateFormFields(false);
+        });
+      });
+
+      registrationForm.addEventListener('submit', function(e) {
+        e.preventDefault(); 
+        
+        const formIsValid = validateFormFields(true);
+
+        if (!formIsValid) {
+          formErrorMessage.classList.remove('hidden', 'bg-green-500/10', 'border-green-500', 'text-green-500');
+          formErrorMessage.classList.add('flex', 'bg-primary/10', 'border-primary', 'text-primary');
+        } else {
+          submitButton.disabled = true; 
+          submitButton.textContent = "Verifying...";
+          submitButton.classList.add('opacity-75', 'cursor-not-allowed');
+
+          const userData = {
+            firstName: document.getElementById('firstName').value.trim(),
+            surname: document.getElementById('surname').value.trim(),
+            phoneCode: document.getElementById('phoneCode').value,
+            phoneNumber: document.getElementById('phoneNumber').value.trim(),
+            email: document.getElementById('email').value.trim(),
+            nin: document.getElementById('nin').value.trim(),
+            referral: document.getElementById('referral').value.trim(),
+            address1: document.getElementById('address1').value.trim(),
+            address2: document.getElementById('address2').value.trim(),
+            city: document.getElementById('city').value.trim(), 
+            country: document.getElementById('country-select').value,
+            state: document.getElementById('state-select').value,
+            password: passwordInput.value
+          };
+          
+          const recaptchaAction = 'SIGNUP';
+
+          grecaptcha.enterprise.ready(async () => {
+            try {
+                const token = await grecaptcha.enterprise.execute('6Lc_9DIsAAAAAK5CvT8tlPhK-vWeVp25Xcb7nWi3', {action: recaptchaAction});
+                
+                const functions = getFunctions(auth.app);
+                const verifyRecaptcha = httpsCallable(functions, 'verifyRecaptcha');
+                const result = await verifyRecaptcha({ token: token, action: recaptchaAction });
+
+                if (!result.data.success) {
+                    throw new Error("Security check failed. Score: " + (result.data.score || "N/A"));
+                }
+                
+                submitButton.textContent = "Creating Account...";
+                await registerUser(userData);
+                
+                submitButton.textContent = "Success!";
+                submitButton.classList.remove('opacity-75', 'cursor-not-allowed');
+            } catch (error) {
+                console.error("Registration error:", error);
+                formErrorMessage.textContent = error.message || "An error occurred during registration.";
+                formErrorMessage.classList.remove('bg-green-500/10', 'border-green-500', 'text-green-500');
+                formErrorMessage.classList.add('flex', 'bg-primary/10', 'border-primary', 'text-primary');
+                
+                submitButton.disabled = false;
+                submitButton.textContent = "Create Account";
+                submitButton.classList.remove('opacity-75', 'cursor-not-allowed');
+                submitButton.classList.add('hover:scale-[1.02]');
+            }
+          });
+        }
+      });
+    });
+  </script>
+  <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(() => console.log('Service Worker Registered'))
+        .catch(err => console.error('Service Worker Failed:', err));
+    });
+  }
+</script>
+</body>
+</html>

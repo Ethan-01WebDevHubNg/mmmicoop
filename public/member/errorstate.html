@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Error - Cooperative Society Portal</title>
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0f172a">
+<link rel="apple-touch-icon" href="/assets/icon-192.png">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script type="module" src="../js/systemmaintenance.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#e11919",
+              "background-light": "#f8f6f6",
+              "background-dark": "#0f172a",
+            },
+            fontFamily: {
+              "display": ["Manrope", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+</head>
+<body class="font-display">
+<div class="relative flex h-auto min-h-screen w-full flex-col bg-background-light dark:bg-background-dark group/design-root overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<div class="px-4 sm:px-10 md:px-20 lg:px-40 flex flex-1 justify-center py-5">
+<div class="layout-content-container flex flex-col w-full max-w-[960px] flex-1">
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-gray-200/20 dark:border-white/10 px-4 sm:px-10 py-3">
+<div class="flex items-center gap-4 text-slate-800 dark:text-white">
+<div class="flex flex-col items-center items-center justify-start py-4">
+<img alt="Mountain Moving Ministry Intl. Logo" class="h-12 w-auto " src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg"/>
+</div>
+<h2 class="text-lg font-bold font-weight:900 leading-tight tracking-[- 0.015em]">Coop</h2>
+</div>
+</header>
+<main class="flex-grow flex items-center justify-center py-12 px-4">
+<div class="flex flex-col items-center gap-8 w-full max-w-lg bg-white dark:bg-slate-900/40 rounded-xl shadow-lg dark:shadow-black/20 p-8 sm:p-12">
+<div class="flex flex-col items-center gap-6 text-center">
+<div class="text-primary">
+<span class="material-symbols-outlined !text-7xl" data-icon="error">error</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<p class="text-slate-800 dark:text-gray-100 text-2xl font-bold leading-tight tracking-[-0.015em]">Oops! Something Went Wrong</p>
+<p class="text-slate-600 dark:text-gray-300 text-base font-normal leading-normal">We're sorry, but we encountered an unexpected problem. Please try again or return to your dashboard. Error Code: 500</p>
+</div>
+</div>
+<div class="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
+<button id="try-again-button" class="flex w-full sm:w-auto min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-6 bg-transparent text-primary dark:text-primary border-2 border-primary hover:bg-primary/10 transition-colors">
+<span class="truncate text-sm font-bold">Try Again</span>
+</button>
+<button class="flex w-full sm:w-auto min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-6 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors">
+<span class="truncate">Go to Dashboard</span>
+</button>
+
+</div>
+</div>
+</main>
+<footer class="flex flex-col gap-6 px-5 py-10 text-center">
+<!-- UNIFIED STYLE: Applied text-slate-500, dark:text-gray-400, text-base, and font-normal to unify with the developer link style. -->
+<p class="text-slate-500 dark:text-gray-400 text-base font-normal leading-normal">
+  © 2026 
+  <a class="hover:text-primary hover:underline transition-colors text-slate-500 dark:text-gray-400" href="https://mountainmovingministryintl.org/Home/">Mountain Moving Ministry Intl.</a> 
+  All rights reserved.
+</p>
+<div class="flex flex-wrap items-center justify-center gap-6">
+<a class="text-slate-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary text-base font-normal leading-normal min-w-40 transition-colors" href="https://ethan01.com" target="_blank">Contact Developer</a>
+</div>
+</footer>
+</div>
+</div>
+</div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Configure the 'Try Again' button
+    const tryAgainButton = document.getElementById('try-again-button');
+
+    if (tryAgainButton) {
+        // Use history.back() to navigate to the previous page in the session history,
+        // which effectively "reloads" the page the user was trying to access.
+        tryAgainButton.addEventListener('click', () => {
+            window.history.back();
+        });
+    }
+});
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(() => console.log('Service Worker Registered'))
+        .catch(err => console.error('Service Worker Failed:', err));
+    });
+  }
+</script>
+</body></html>

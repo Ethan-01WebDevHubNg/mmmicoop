@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Member Login - Cooperative Society Financial Management Portal</title>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="apple-touch-icon" href="/assets/icon-192.png">
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script type="module" src="../js/systemmaintenance.js"></script>
+  <script src="https://www.google.com/recaptcha/enterprise.js?render=6Lc_9DIsAAAAAK5CvT8tlPhK-vWeVp25Xcb7nWi3"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+
+    /* Animation Styles */
+    .perspective-container {
+      perspective: 1000px;
+    }
+    
+    .card-reveal {
+      transform-origin: bottom center;
+      opacity: 0;
+      transform: rotateX(45deg);
+      animation: standUp 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    @keyframes standUp {
+      0% {
+        opacity: 0;
+        transform: rotateX(45deg);
+      }
+      100% {
+        opacity: 1;
+        transform: rotateX(0deg);
+      }
+    }
+
+    /* Isometric Background Pattern for Dark Mode */
+    .dark .isometric-card-bg {
+      background-color: #1e293b;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg id='hexagons' fill='%230f172a' fill-opacity='0.25' fill-rule='nonzero'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    .grecaptcha-badge {
+    visibility: hidden;
+}
+  </style>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#e61919",
+            "background-light": "#f8f6f6",
+            "background-dark": "#0f172a",
+            "card-light": "#ffffff",
+            "card-dark": "#1e293b",
+            "text-light-primary": "#0f172a",
+            "text-dark-primary": "#e2e8f0",
+            "text-light-secondary": "#64748b",
+            "text-dark-secondary": "#94a3b8",
+            "border-light": "#e2e8f0",
+            "border-dark": "#334155",
+          },
+          fontFamily: {
+            "display": ["Manrope", "sans-serif"]
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+        },
+      },
+    }
+  </script>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary h-screen w-screen overflow-hidden overflow-y-auto m-0 p-0">
+  <div class="relative flex h-full w-full flex-col items-center justify-center p-4 group/design-root overflow-hidden overflow-y-auto">
+    <div class="layout-container flex h-full w-full max-w-md flex-col justify-center items-center">
+      
+      <div class="mb-6 w-full flex flex-col items-center shrink-0">
+        <img alt="Mountain Moving Ministry International Logo" class="h-14 w-auto" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg" />
+        <div class="text-xl font-extrabold tracking-tight text-center text-text-light dark:text-text-dark mt-2">
+          COOPERATIVE SOCIETY
+        </div>
+      </div>
+
+      <div class="perspective-container w-full shrink-0">
+        <div class="card-reveal w-full bg-card-light dark:bg-card-dark isometric-card-bg rounded-xl shadow-lg p-6 md:p-8">
+          <div class="text-center">
+            <h1 class="text-text-light-primary dark:text-text-dark-primary tracking-tight text-2xl md:text-3xl font-bold">
+              Welcome Back
+            </h1>
+            <p class="text-text-light-secondary dark:text-text-dark-secondary text-sm md:text-base font-normal leading-normal mt-2">
+              Sign in to access your Cooperative Account
+            </p>
+          </div>
+
+          <form id="login-form" class="mt-6 space-y-5">
+            
+            <div id="login-error-message" class="hidden p-3 rounded-lg bg-primary/10 text-primary border border-primary text-sm font-medium text-center">
+              </div>
+
+            <div class="flex flex-col">
+              <label class="text-text-light-primary dark:text-text-dark-primary text-sm font-medium mb-1" for="email">Email Address</label>
+              <div class="relative">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-light-secondary dark:text-text-dark-secondary">person</span>
+                <input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-light-primary dark:text-text-dark-primary focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark focus:border-primary h-11 placeholder:text-text-light-secondary placeholder:dark:text-text-dark-secondary/70 pl-10 pr-4 text-base font-normal leading-normal" id="email" placeholder="Enter your email" type="email" required />
+              </div>
+            </div>
+
+            <div class="flex flex-col">
+              <label class="text-text-light-primary dark:text-text-dark-primary text-sm font-medium mb-1" for="password">Password</label>
+              <div class="relative">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-light-secondary dark:text-text-dark-secondary">lock</span>
+                <input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-light-primary dark:text-text-dark-primary focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark focus:border-primary h-11 placeholder:text-text-light-secondary placeholder:dark:text-text-dark-secondary/70 pl-10 pr-10 text-base font-normal leading-normal" id="password" placeholder="Enter your password" type="password" required />
+                <button id="togglePasswordVisibility" class="absolute right-3 top-1/2 -translate-y-1/2 text-text-light-secondary dark:text-text-dark-secondary focus:outline-none" type="button">
+                  <span class="material-symbols-outlined text-xl">visibility_off</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="text-right">
+              <a class="text-sm font-medium text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-card-light dark:focus:ring-offset-card-dark focus:ring-primary rounded-sm" href="/auth/reset-password.html">
+                Forgot Password?
+              </a>
+            </div>
+
+            <button id="login-button" class="w-full bg-primary text-white font-bold py-3 px-4 rounded-lg hover:bg-primary/45 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-card-light dark:focus:ring-offset-card-dark focus:ring-primary transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed" type="submit">
+              Login
+            </button>
+
+            <p class="mt-6 text-center text-sm text-text-light-secondary dark:text-text-dark-secondary">
+              Don't have an account?
+              <a class="font-semibold text-primary hover:underline" href="/auth/register.html">Register</a>
+            </p>
+          </form>
+        </div>
+      </div>
+    </div>
+             <footer class="flex-shrink-0 text-center p-4 text-sm text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-800 mt-auto">
+                <p>&copy; 2026 <a class="hover:text-primary hover:underline" href="https://mountainmovingministryintl.org/" target="_blank">Mountain Moving Ministry Intl.</a> All rights reserved.</p>
+                <p class="text-sm text-text-light-secondary dark:text-text-dark-secondary">
+                    Protected by reCAPTCHA and Google's
+                    <a class="text-sm text-primary hover:underline inline-block" href="https://policies.google.com/privacy">Privacy Policy</a> and
+                    <a class="text-sm text-primary hover:underline inline-block" href="https://policies.google.com/terms">Terms of Service</a> apply.</p>
+                    <a class="hover:text-primary" href="https://ethan01.com" rel="noopener noreferrer" target="_blank">Contact Developer</a>
+            </footer>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const passwordInput = document.getElementById('password');
+      const toggleButton = document.getElementById('togglePasswordVisibility');
+      const toggleIcon = toggleButton ? toggleButton.querySelector('.material-symbols-outlined') : null;
+
+      if (passwordInput && toggleButton && toggleIcon) {
+        const showPassword = () => {
+          passwordInput.type = 'text';
+          toggleIcon.textContent = 'visibility';
+        };
+
+        const hidePassword = () => {
+          passwordInput.type = 'password';
+          toggleIcon.textContent = 'visibility_off';
+        };
+
+        toggleButton.addEventListener('mousedown', showPassword);
+        toggleButton.addEventListener('mouseup', hidePassword);
+        toggleButton.addEventListener('mouseout', (e) => {
+          if (passwordInput.type === 'text') hidePassword();
+        });
+
+        toggleButton.addEventListener('touchstart', (e) => {
+          e.preventDefault(); 
+          showPassword();
+        });
+        toggleButton.addEventListener('touchend', hidePassword);
+        toggleButton.addEventListener('touchcancel', hidePassword);
+      }
+    });
+  </script>
+
+  <script type="module">
+    import { loginUser } from '../js/auth.js'; 
+    import { functions, httpsCallable } from '../js/firebase-init.js';
+
+    const loginForm = document.getElementById('login-form');
+    const loginBtn = document.getElementById('login-button');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const errorDiv = document.getElementById('login-error-message');
+
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault(); 
+      errorDiv.classList.add('hidden');
+      errorDiv.textContent = '';
+      
+      const originalBtnText = loginBtn.textContent;
+      loginBtn.disabled = true;
+      loginBtn.textContent = "Verifying...";
+
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+      const recaptchaAction = 'LOGIN';
+
+      grecaptcha.enterprise.ready(async () => {
+        try {
+          const token = await grecaptcha.enterprise.execute('6Lc_9DIsAAAAAK5CvT8tlPhK-vWeVp25Xcb7nWi3', {action: recaptchaAction});
+          
+          const verifyRecaptcha = httpsCallable(functions, 'verifyRecaptcha');
+          const result = await verifyRecaptcha({ token: token, action: recaptchaAction });
+          
+          if (!result.data.success) {
+             throw new Error("Security check failed. Score: " + (result.data.score || "N/A"));
+          }
+
+          loginBtn.textContent = "Logging in...";
+          await loginUser(email, password);
+
+        } catch (error) {
+          console.error("Login/Security failed:", error);
+          errorDiv.textContent = error.message || "An error occurred during login.";
+          errorDiv.classList.remove('hidden');
+          
+          loginBtn.disabled = false;
+          loginBtn.textContent = originalBtnText;
+        }
+      });
+    });
+  </script>
+  <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(() => console.log('Service Worker Registered'))
+        .catch(err => console.error('Service Worker Failed:', err));
+    });
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>User Profile - MMMI Portal</title>
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0f172a">
+<link rel="apple-touch-icon" href="/assets/icon-192.png">
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+<script type="module" src="../js/systemmaintenance.js"></script>
+<script src="https://checkout.squadco.com/widget/squad.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<style>
+/* --- PRELOADER ANIMATIONS --- */
+:root {
+    --brand-red: #e31919;
+}
+
+/* Gravity Well Animation */
+@keyframes gravity-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.gravity-container {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.gravity-dot {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 10px;
+    height: 10px;
+    background: #e31919;
+    border-radius: 50%;
+    transform-origin: 0 40px; 
+    animation: gravity-spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+}
+
+.gravity-dot:nth-child(1) { animation-delay: 0s; }
+.gravity-dot:nth-child(2) { animation-delay: -0.1s; transform-origin: 0 40px; opacity: 0.8; }
+.gravity-dot:nth-child(3) { animation-delay: -0.2s; transform-origin: 0 40px; opacity: 0.6; }
+.gravity-dot:nth-child(4) { animation-delay: -0.3s; transform-origin: 0 40px; opacity: 0.4; }
+
+.gravity-center {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background-color: #e31919;
+    border-radius: 50%;
+    opacity: 0.5;
+}
+
+/* TV Turn Off Animation */
+@keyframes tv-collapse {
+    0% { transform: scale(1, 1); opacity: 1; filter: brightness(1); }
+    50% { transform: scale(1, 0.005); opacity: 1; filter: brightness(3); }
+    100% { transform: scale(0, 0.005); opacity: 0; filter: brightness(0); }
+}
+
+.tv-off-active {
+    animation: tv-collapse 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+    transform-origin: center;
+    pointer-events: none;
+}
+
+/* Utility to hide completely after animation */
+.hidden-force {
+    display: none !important;
+}
+
+/* --- EXISTING STYLES --- */
+.animate-fade-in-slide {
+    animation: fadeInSlide 0.5s ease-out forwards;
+    opacity: 0;
+    transform: translateY(20px);
+}
+@keyframes fadeInSlide {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.content-area-transition {
+    transition: filter 0.3s ease-in-out;
+}
+.content-blurred {
+    filter: blur(10px);
+    pointer-events: none; 
+}
+
+@keyframes fadeInSlideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-slide-up { animation: fadeInSlideUp 0.5s ease-out forwards; }
+
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Hide number input arrows */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+    -webkit-appearance: none; 
+    margin: 0; 
+}
+
+/* Isometric Background Pattern for Sidebar */
+/* Light Mode */
+.isometric-sidebar {
+    background-color: #ffffff;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg id='hexagons' fill='%23f8fafc' fill-opacity='1' fill-rule='nonzero'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Dark Mode Override */
+.dark .isometric-sidebar {
+    background-color: #1e293b;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg id='hexagons' fill='%230f172a' fill-opacity='0.25' fill-rule='nonzero'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+</style>
+<script>
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: {
+                    primary: "#e31919",
+                    "background-light": "#f1f5f9",
+                    "background-dark": "#0f172a",
+                    "slate-blue": "#0f172a",
+                    "white-off": "#F8FAFC",
+                    "pure-white": "#FFFFFF",
+                    "muted-gray": "#64748B",
+                    "dark-gray-blue": "#1E293B",
+                    "light-gray": "#94A3B8",
+                    "off-white-dark": "#F1F5F9",
+                    "success": "#22c55e",
+                    "danger": "#ef4444",
+                    "card-light": "#ffffff",
+                    "card-dark": "#1e293b",
+                    "text-light": "#0f172a",
+                    "text-dark": "#e2e8f0",
+                    "subtext-light": "#64748b",
+                    "subtext-dark": "#94a3b8"
+                },
+                fontFamily: {
+                    display: ["Poppins", "sans-serif"],
+                    manrope: ["Manrope", "sans-serif"]
+                },
+                borderRadius: {
+                    DEFAULT: "0.5rem",
+                },
+            },
+        },
+    };
+</script>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-gray-700 dark:text-gray-300">
+
+    <div id="preloader" class="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-50/80 dark:bg-gray-900/90 backdrop-blur-[5px] transition-colors">
+        <div id="preloader-card" class="bg-white dark:bg-gray-800 p-12 rounded-2xl shadow-xl flex flex-col items-center justify-center aspect-square border border-gray-100 dark:border-gray-700">
+            <div class="gravity-container">
+                <div class="gravity-dot"></div>
+                <div class="gravity-dot"></div>
+                <div class="gravity-dot"></div>
+                <div class="gravity-dot"></div>
+                <div class="gravity-center"></div>
+            </div>
+            <span class="mt-8 text-sm text-gray-400 dark:text-gray-500 sentencecase tracking-[0.2em] font-medium animate-pulse">Loading User Data</span>
+        </div>
+    </div>
+
+<div class="flex h-screen">
+    <aside class="w-64 flex-shrink-0 bg-white isometric-sidebar p-6 flex-col justify-between hidden lg:flex">
+        <div>
+            <div class="flex items-center gap-3 mb-10">
+                <img id="sidebar-logo" alt="Cooperative Logo" class="h-10 w-10 app-logo" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg"/>
+                <span class="text-xl font-semibold text-gray-800 dark:text-white">Cooperative</span>
+            </div>
+            <nav class="flex flex-col gap-2">
+                <a class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors" href="./memberDashboard">
+                    <span class="material-symbols-outlined">dashboard</span>
+                    <span class="font-medium">Dashboard</span>
+                </a>
+                <a class="flex items-center gap-3 px-4 py-3 bg-primary text-white rounded-lg" href="#">
+                    <span class="material-symbols-outlined">person</span>
+                    <span class="font-medium">User Profile</span>
+                </a>
+                <a class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors" href="./withdrawalapplication">
+                    <span class="material-symbols-outlined">account_balance_wallet</span>
+                    <span class="font-medium">Withdraw Savings</span>
+                </a>
+                <a onclick="openMainModal('topup')" class="cursor-pointer flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                    <span class="material-symbols-outlined">upgrade</span>
+                    <span class="font-medium">Top-up/Upgrade Plan</span>
+                </a>
+                <a class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors" href="./updatePaymentDetails">
+                    <span class="material-symbols-outlined">payment</span>
+                    <span class="font-medium">Update Payment details</span>
+                </a>
+                <a class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors" href="./changePassword">
+                    <span class="material-symbols-outlined">lock_reset</span>
+                    <span class="font-medium">Forgot/change password</span>
+                </a>
+            </nav>
+        </div>
+        <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+            <button id="logout-btn-desktop" class="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors text-left">
+                <span class="material-symbols-outlined">logout</span>
+                <span class="font-medium">Log Out</span>
+            </button>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col overflow-y-auto content-area-transition" id="main-content">
+        <header class="flex-shrink-0 bg-white/80 dark:bg-background-dark/80 backdrop-blur-sm sticky top-0 z-20 flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
+            <div class="flex items-center gap-4">
+                <button class="lg:hidden p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700" id="menu-btn">
+                    <span class="material-symbols-outlined text-gray-600 dark:text-gray-300">menu</span>
+                </button>
+                <div class="lg:hidden flex items-center gap-2">
+                    <img id="header-logo" alt="Cooperative Logo" class="h-10 w-10 app-logo" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg"/>
+                    <span class="font-semibold text-gray-800 dark:text-white">Cooperative Portal</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <button class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700" id="theme-toggle">
+                    <span class="material-symbols-outlined text-gray-600 dark:text-gray-300 dark:hidden">dark_mode</span>
+                    <span class="material-symbols-outlined text-gray-600 dark:text-gray-300 hidden dark:inline">light_mode</span>
+                </button>
+                <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden">
+                    <img id="header-profile-img" alt="User profile picture" src="https://ui-avatars.com/api/?name=User&background=random"/>
+                </div>
+            </div>
+        </header>
+
+        <div class="p-4 sm:p-6 lg:p-8 flex-1">
+            <div class="max-w-4xl mx-auto animate-fade-in-slide">
+                <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+                    <h1 class="text-3xl md:text-4xl font-black leading-tight tracking-tighter text-gray-900 dark:text-white">User Profile</h1>
+                    <div class="flex items-center gap-3">
+                        <a href="./changePassword" class="flex items-center justify-center gap-2 rounded-lg h-10 px-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-primary/50 dark:hover:border-primary/50 text-gray-600 dark:text-gray-300 transition-all transform hover:scale-105">
+                            <span class="material-symbols-outlined">lock_reset</span>
+                            <span class="truncate">Change Password</span>
+                        </a>
+                    </div>
+                </header>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-1 animate-fade-in-slide-up" style="animation-delay: 0.1s;">
+                        <div class="bg-white dark:bg-gray-900/40 rounded-xl border border-gray-200 dark:border-gray-800 p-6 flex flex-col items-center text-center shadow-sm">
+                            <div class="relative mb-4">
+                                <div id="profile-picture-large" class="w-32 h-32 rounded-full bg-gray-200 dark:bg-gray-700 bg-cover bg-center" style="background-image: url('https://ui-avatars.com/api/?name=User&background=random');"></div>
+                                
+                                <button id="upload-trigger-btn" class="absolute bottom-1 right-1 flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white hover:bg-primary/90 transition-transform transform hover:scale-110 shadow-md z-10">
+                                    <span class="material-symbols-outlined text-base">photo_camera</span>
+                                </button>
+
+                                <input type="file" id="hidden-file-input" class="hidden" accept="image/png, image/jpeg, image/webp">
+                            </div>
+                            <h2 id="profile-name-card" class="text-xl font-bold text-gray-900 dark:text-white">Loading...</h2>
+                            <p id="profile-email-card" class="text-sm text-gray-500 dark:text-gray-400">...</p>
+                            <p id="profile-id-card" class="text-xs text-gray-500 dark:text-gray-400 mt-1">Member ID: ...</p>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-2 space-y-8">
+                        <div class="bg-white dark:bg-gray-900/40 rounded-xl border border-gray-200 dark:border-gray-800 p-6 md:p-8 animate-fade-in-slide-up shadow-sm" style="animation-delay: 0.2s;">
+                            <h3 class="text-lg font-bold mb-6 border-b border-gray-200 dark:border-gray-700 pb-3 text-gray-900 dark:text-white">Member Information</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5 text-sm">
+                                <div>
+                                    <p class="text-gray-500 dark:text-gray-400 mb-1">First Name</p>
+                                    <p id="detail-firstname" class="font-medium text-gray-900 dark:text-white">...</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500 dark:text-gray-400 mb-1">Surname</p>
+                                    <p id="detail-surname" class="font-medium text-gray-900 dark:text-white">...</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500 dark:text-gray-400 mb-1">Phone Number</p>
+                                    <p id="detail-phone" class="font-medium text-gray-900 dark:text-white">...</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500 dark:text-gray-400 mb-1">Email Address</p>
+                                    <p id="detail-email" class="font-medium text-gray-900 dark:text-white">...</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500 dark:text-gray-400 mb-1">NIN (National ID)</p>
+                                    <p id="detail-nin" class="font-medium text-gray-900 dark:text-white">...</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500 dark:text-gray-400 mb-1">Referral</p>
+                                    <p id="detail-referral" class="font-medium text-gray-900 dark:text-white">...</p>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <p class="text-gray-500 dark:text-gray-400 mb-1">Residential Address</p>
+                                    <p id="detail-address" class="font-medium text-gray-900 dark:text-white">...</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white dark:bg-gray-900/40 rounded-xl border border-gray-200 dark:border-gray-800 p-6 md:p-8 animate-fade-in-slide-up relative shadow-sm" style="animation-delay: 0.3s;">
+                            <div class="flex justify-between items-center mb-6 border-b border-gray-200 dark:border-gray-700 pb-3">
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">Bank Payment Details</h3>
+                                
+                                <button id="edit-bank-btn" class="text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-all duration-300">
+                                    <span class="material-symbols-outlined">edit</span>
+                                </button>
+                                
+                                <button id="save-bank-btn" class="hidden flex items-center gap-1 text-green-600 hover:text-green-700 font-semibold text-sm transition-colors">
+                                    <span class="material-symbols-outlined text-lg">check_circle</span> Save
+                                </button>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5 text-sm">
+                                <div>
+                                    <p class="text-gray-500 dark:text-gray-400 mb-1">Bank Name</p>
+                                    <input id="input-bank-name" type="text" disabled 
+                                           class="w-full bg-transparent border-none p-0 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-primary/50 disabled:cursor-text rounded transition-all" 
+                                           placeholder="Not set">
+                                </div>
+                                <div>
+                                    <p class="text-gray-500 dark:text-gray-400 mb-1">Account Number</p>
+                                    <input id="input-account-number" type="text" disabled maxlength="10"
+                                           class="w-full bg-transparent border-none p-0 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-primary/50 disabled:cursor-text rounded transition-all" 
+                                           placeholder="Not set">
+                                </div>
+                                <div class="md:col-span-2">
+                                    <p class="text-gray-500 dark:text-gray-400 mb-1">Account Name (Auto-filled)</p>
+                                    <input id="input-account-name" type="text" disabled readonly
+                                           class="w-full bg-transparent border-none p-0 text-gray-900 dark:text-white font-medium focus:ring-0 cursor-default opacity-80" 
+                                           placeholder="Loading...">
+                                </div>
+                            </div>
+                            <p id="bank-update-msg" class="text-xs mt-3 hidden"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="flex-shrink-0 text-center p-4 text-sm text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-800 mt-auto">
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-2 sm:gap-6">
+                <p>&copy; 2026 <a class="hover:text-primary hover:underline" href="https://mountainmovingministryintl.org/" rel="noopener noreferrer" target="_blank">Mountain Moving Ministry Intl.</a> All rights reserved.</p>
+                <div class="flex gap-4 sm:gap-6">
+                    <a class="hover:text-primary" href="mailto: support@mountamovingministryintl.org">Contact Us</a>
+                    <a class="hover:text-primary" href="#">FAQ</a>
+                    <a class="hover:text-primary" href="https://ethan01.com" rel="noopener noreferrer" target="_blank">Contact Developer</a>
+                </div>
+            </div>
+        </footer>
+    </main>
+
+    <div class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden" id="mobile-menu-overlay"></div>
+    <aside class="fixed top-0 left-0 h-full w-64 bg-white isometric-sidebar p-6 flex flex-col justify-between z-40 transform -translate-x-full transition-transform duration-300 ease-in-out lg:hidden" id="mobile-menu">
+        <div>
+            <div class="flex items-center justify-between mb-10">
+                <div class="flex items-center gap-3">
+                    <img id="mobile-logo" alt="Cooperative Logo" class="h-10 w-10 app-logo" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg"/>
+                    <span class="text-xl font-semibold text-gray-800 dark:text-white">Cooperative</span>
+                </div>
+                <button class="p-1" id="close-menu-btn">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <nav class="flex flex-col gap-2">
+                <a class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors" href="./memberDashboard">
+                    <span class="material-symbols-outlined">dashboard</span>
+                    <span class="font-medium">Dashboard</span>
+                </a>
+                <a class="flex items-center gap-3 px-4 py-3 bg-primary text-white rounded-lg" href="#">
+                    <span class="material-symbols-outlined">person</span>
+                    <span class="font-medium">User Profile</span>
+                </a>
+                <a class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors" href="./withdrawalapplication">
+                    <span class="material-symbols-outlined">account_balance_wallet</span>
+                    <span class="font-medium">Withdraw Savings</span>
+                </a>
+                <a onclick="openMainModal('topup')" class="cursor-pointer flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                    <span class="material-symbols-outlined">upgrade</span>
+                    <span class="font-medium">Top-up/Upgrade Plan</span>
+                </a>
+                <a class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors" href="./updatePaymentDetails">
+                    <span class="material-symbols-outlined">payment</span>
+                    <span class="font-medium">Update Payment details</span>
+                </a>
+                <a class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors" href="./changePassword">
+                    <span class="material-symbols-outlined">lock_reset</span>
+                    <span class="font-medium">Forgot/change password</span>
+                </a>
+            </nav>
+        </div>
+        <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+            <button id="logout-btn-mobile" class="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors text-left">
+                <span class="material-symbols-outlined">logout</span>
+                <span class="font-medium">Log Out</span>
+            </button>
+        </div>
+    </aside>
+
+    <div id="main-modal-overlay" class="fixed inset-0 z-50 flex items-start justify-center bg-black/40 backdrop-blur-md transition-opacity duration-300 p-4 sm:p-6 overflow-y-auto py-8 hidden" style='font-family: Manrope, "Noto Sans", sans-serif;'>
+        <div class="relative flex w-full max-w-lg flex-col overflow-hidden rounded-xl bg-pure-white shadow-2xl dark:bg-dark-gray-blue w-full max-w-lg">
+            <div class="absolute top-4 right-4 z-10">
+                <button id="close-main-modal-btn" class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-blue/10 text-slate-blue dark:bg-white/10 dark:text-off-white-dark hover:bg-slate-blue/20 dark:hover:bg-white/20 transition-colors">
+                    <span class="material-symbols-outlined text-xl">close</span>
+                </button>
+            </div>
+            <div class="flex flex-col items-center p-6 border-b border-white-off/10 dark:border-light-gray/20">
+                <div class="flex h-16 w-16 items-center justify-center rounded-full bg-slate-blue/5 dark:bg-white/5 mb-4">
+                    <div id="modal-logo-bg" class="w-10 h-10 bg-center bg-no-repeat bg-cover app-logo-bg" style='background-image: url("https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg'></div>
+                </div>
+                <h3 class="text-slate-blue dark:text-off-white-dark tracking-tight text-2xl font-bold leading-tight text-center">Fund Top-up / Upgrade</h3>
+            </div>
+            <div class="p-6">
+                <p class="text-center text-muted-gray dark:text-light-gray">This feature is available on the Dashboard.</p>
+                <div class="flex py-3 justify-center mt-4">
+                    <a href="./memberDashboard" class="flex min-w-[84px] w-full max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 flex-1 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-all duration-300">
+                        Go to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="concurrency-modal" class="fixed inset-0 z-[200] flex items-center justify-center hidden">
+    </div>
+
+    <script>
+        function hidePreloader() {
+            const preloader = document.getElementById('preloader');
+            const card = document.getElementById('preloader-card');
+            
+            if (!preloader || !card) return;
+
+            // 1. Apply TV collapse animation to the card
+            card.classList.add('tv-off-active');
+
+            // 2. Fade out the background overlay slightly later
+            setTimeout(() => {
+                preloader.style.opacity = '0';
+                preloader.style.transition = 'opacity 0.3s ease';
+            }, 400);
+
+            // 3. Remove from DOM completely after animations
+            setTimeout(() => {
+                preloader.classList.add('hidden-force');
+            }, 800);
+        }
+    </script>
+
+    <script type="module">
+        import '../js/auth.js';
+        // Added onSnapshot to imports
+        import { auth, db, onAuthStateChanged, signOut, doc, getDoc, setDoc, onSnapshot } from '../js/firebase-init.js';
+        import { initProfileUpload } from '../js/profile-upload.js'; 
+
+        let currentUser = null;
+        let userDocRef = null;
+
+        // --- INJECTED TOAST UTILITY ---
+        const Toast = {
+            show(message, type = 'success') {
+                const existing = document.getElementById('profile-toast');
+                if (existing) existing.remove();
+
+                const colors = {
+                    success: 'bg-green-600 border-green-500',
+                    error: 'bg-red-600 border-red-500',
+                    info: 'bg-slate-800 border-slate-600'
+                };
+                const icons = {
+                    success: 'check_circle',
+                    error: 'error',
+                    info: 'info'
+                };
+
+                const div = document.createElement('div');
+                div.id = 'profile-toast';
+                div.className = `fixed top-5 left-1/2 transform -translate-x-1/2 z-[100] flex items-center gap-3 px-6 py-4 rounded-xl shadow-2xl text-white border ${colors[type] || colors.info} transition-all duration-300 opacity-0 -translate-y-full`;
+                div.innerHTML = `
+                    <span class="material-symbols-outlined text-xl">${icons[type] || 'info'}</span>
+                    <span class="font-bold text-sm tracking-wide">${message}</span>
+                `;
+
+                document.body.appendChild(div);
+                requestAnimationFrame(() => { div.classList.remove('opacity-0', '-translate-y-full'); });
+                setTimeout(() => {
+                    div.classList.add('opacity-0', '-translate-y-full');
+                    setTimeout(() => div.remove(), 300);
+                }, 4000); 
+            }
+        };
+
+        // --- Auth Listener ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                userDocRef = doc(db, "users", user.uid);
+                
+                try {
+                    await loadUserProfile(user.uid);
+                    initProfileUpload();
+                } catch(e) {
+                    console.error("Init Error", e);
+                    Toast.show("Failed to load profile data.", "error");
+                } finally {
+                    hidePreloader();
+                }
+
+            } else {
+                window.location.href = "/auth/index.html";
+            }
+        });
+
+        // --- Load User Data ---
+        async function loadUserProfile(uid) {
+            try {
+                const docSnap = await getDoc(userDocRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    
+                    // 1. Profile Card
+                    document.getElementById('profile-name-card').textContent = `${data.firstName} ${data.surname}`;
+                    document.getElementById('profile-email-card').textContent = data.email;
+                    document.getElementById('profile-id-card').textContent = `Member ID: ${data.memberId || 'N/A'}`;
+                    
+                    const placeholder = `https://ui-avatars.com/api/?name=${data.firstName}+${data.surname}&background=random`;
+                    const finalPhoto = data.photoURL || placeholder;
+                    
+                    document.getElementById('header-profile-img').src = finalPhoto;
+                    document.getElementById('profile-picture-large').style.backgroundImage = `url('${finalPhoto}')`;
+
+                    // 2. Member Information
+                    document.getElementById('detail-firstname').textContent = data.firstName;
+                    document.getElementById('detail-surname').textContent = data.surname;
+                    const phone = (data.phoneCode || "") + " " + (data.phoneNumber || "");
+                    document.getElementById('detail-phone').textContent = phone.trim();
+                    document.getElementById('detail-email').textContent = data.email;
+                    document.getElementById('detail-nin').textContent = data.nin || "N/A";
+                    document.getElementById('detail-referral').textContent = data.referral || "None";
+                    
+                    const address = `${data.address1}, ${data.address2 ? data.address2 + ', ' : ''}${data.state}, ${data.country}`;
+                    document.getElementById('detail-address').textContent = address;
+
+                    // 3. Bank Details
+                    const accountName = `${data.firstName} ${data.surname}`;
+                    document.getElementById('input-account-name').value = accountName;
+                    
+                    if (data.bankName) {
+                        document.getElementById('input-bank-name').value = data.bankName;
+                    }
+                    if (data.accountNumber) {
+                        document.getElementById('input-account-number').value = data.accountNumber;
+                    }
+
+                    if (data.bankName && data.accountNumber) {
+                       const btn = document.getElementById('edit-bank-btn');
+                       if(btn) btn.remove(); 
+                    }
+
+                }
+            } catch (error) {
+                console.error("Error loading profile:", error);
+                throw error;
+            }
+        }
+
+        // --- Edit Logic ---
+        const editBtn = document.getElementById('edit-bank-btn');
+        const saveBtn = document.getElementById('save-bank-btn');
+        const bankInput = document.getElementById('input-bank-name');
+        const accountInput = document.getElementById('input-account-number');
+        const msgBox = document.getElementById('bank-update-msg');
+
+        if(editBtn) {
+            editBtn.addEventListener('click', () => {
+                bankInput.disabled = false;
+                accountInput.disabled = false;
+                
+                [bankInput, accountInput].forEach(input => {
+                    input.classList.remove('bg-transparent', 'border-none', 'p-0');
+                    input.classList.add('bg-white', 'dark:bg-slate-800', 'border', 'border-gray-300', 'dark:border-gray-600', 'p-2');
+                });
+
+                bankInput.focus();
+
+                editBtn.classList.add('hidden');
+                saveBtn.classList.remove('hidden');
+            });
+        }
+
+        // --- Save Logic ---
+        if(saveBtn) {
+            saveBtn.addEventListener('click', async () => {
+                const newBank = bankInput.value.trim();
+                const newAccount = accountInput.value.trim();
+                const accountName = document.getElementById('input-account-name').value;
+
+                if (!newBank || !newAccount) {
+                    Toast.show("Please fill in both Bank Name and Account Number.", "error");
+                    return;
+                }
+
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = "Saving...";
+
+                try {
+                    await setDoc(userDocRef, {
+                        bankName: newBank,
+                        accountNumber: newAccount,
+                        accountName: accountName 
+                    }, { merge: true });
+
+                    Toast.show("Bank details updated successfully.", "success");
+
+                    bankInput.disabled = true;
+                    accountInput.disabled = true;
+
+                    [bankInput, accountInput].forEach(input => {
+                        input.classList.add('bg-transparent', 'border-none', 'p-0');
+                        input.classList.remove('bg-white', 'dark:bg-slate-800', 'border', 'border-gray-300', 'dark:border-gray-600', 'p-2');
+                    });
+
+                    saveBtn.classList.add('hidden');
+                    
+                } catch (error) {
+                    console.error("Update failed:", error);
+                    Toast.show("Failed to update details. Please try again.", "error");
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = '<span class="material-symbols-outlined text-lg">check_circle</span> Save';
+                }
+            });
+        }
+
+        // --- Logout ---
+        const logoutDesktop = document.getElementById('logout-btn-desktop');
+        const logoutMobile = document.getElementById('logout-btn-mobile');
+        
+        async function handleLogout() {
+            try {
+                await signOut(auth);
+                window.location.href = "/auth/index.html";
+            } catch(e) { console.error(e); }
+        }
+        
+        if(logoutDesktop) logoutDesktop.addEventListener('click', handleLogout);
+        if(logoutMobile) logoutMobile.addEventListener('click', handleLogout);
+
+    </script>
+
+    <script>
+        // --- UI INTERACTION & THEME LOGIC ---
+        const menuBtn = document.getElementById('menu-btn');
+        const closeMenuBtn = document.getElementById('close-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
+        const mainContent = document.getElementById('main-content');
+
+        function openMenu() {
+            mobileMenu.classList.remove('-translate-x-full');
+            mobileMenuOverlay.classList.remove('hidden');
+            if (window.innerWidth < 1024) mainContent.classList.add('content-blurred');
+        }
+        function closeMenu() {
+            mobileMenu.classList.add('-translate-x-full');
+            mobileMenuOverlay.classList.add('hidden');
+            mainContent.classList.remove('content-blurred');
+        }
+        if(menuBtn) menuBtn.addEventListener('click', openMenu);
+        if(closeMenuBtn) closeMenuBtn.addEventListener('click', closeMenu);
+        if(mobileMenuOverlay) mobileMenuOverlay.addEventListener('click', closeMenu);
+        window.addEventListener('resize', () => { if (window.innerWidth >= 1024) closeMenu(); });
+
+        // --- THEME & LOGO SWITCHING LOGIC ---
+        const themeToggle = document.getElementById('theme-toggle');
+        const htmlEl = document.documentElement;
+
+        // Define Logos
+        const logoDark = "https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg";
+        const logoLight = "https://mountainmovingministryintl.org/gallery/MMMi%20Header%20Logo%20-%20light%20mode.svg";
+
+        function updateAppLogos(isDark) {
+            const targetSrc = isDark ? logoDark : logoLight;
+            
+            // 1. Update Standard Images
+            const logos = document.querySelectorAll('.app-logo');
+            logos.forEach(img => { img.src = targetSrc; });
+
+            // 2. Update Background Images
+            const bgLogos = document.querySelectorAll('.app-logo-bg');
+            bgLogos.forEach(div => { div.style.backgroundImage = `url("${targetSrc}")`; });
+        }
+
+        if(themeToggle) {
+            themeToggle.addEventListener('click', () => {
+                htmlEl.classList.toggle('dark');
+                const isDark = htmlEl.classList.contains('dark');
+                
+                if (isDark) localStorage.setItem('theme', 'dark');
+                else localStorage.setItem('theme', 'light');
+
+                updateAppLogos(isDark);
+            });
+        }
+
+        // Initial Check
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        if (savedTheme === 'dark' || (!('theme' in localStorage) && prefersDark)) {
+            htmlEl.classList.add('dark');
+            updateAppLogos(true);
+        } else {
+            htmlEl.classList.remove('dark');
+            updateAppLogos(false);
+        }
+
+        // --- Modal Placeholder Logic ---
+        const mainModalOverlay = document.getElementById('main-modal-overlay');
+        const closeModalBtn = document.getElementById('close-main-modal-btn');
+        function openMainModal(tab) { mainModalOverlay.classList.remove('hidden'); }
+        function hideMainModal() { mainModalOverlay.classList.add('hidden'); }
+        if(closeModalBtn) closeModalBtn.addEventListener('click', hideMainModal);
+    </script>
+    <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(() => console.log('Service Worker Registered'))
+        .catch(err => console.error('Service Worker Failed:', err));
+    });
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Set New Password</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="apple-touch-icon" href="/assets/icon-192.png">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#e61919",
+              "background-light": "#f8f6f6",
+              "background-dark": "#0f172a",
+              "card-light": "#ffffff",
+              "card-dark": "#1e293b",
+              "text-light": "#0f172a",
+              "text-dark": "#cbd5e1",
+              "subtext-light": "#64748b",
+              "subtext-dark": "#94a3b8",
+              "border-light": "#e2e8f0",
+              "border-dark": "#334155",
+              "input-bg-light": "#ffffff",
+              "input-bg-dark": "#334155",
+              "success": "#22c55e",
+              "danger": "#ef4444"
+            },
+            fontFamily: { "display": ["Manrope", "sans-serif"] },
+          },
+        },
+      }
+    </script>
+    <script type="module" src="../js/systemmaintenance.js"></script>
+    <style type="text/tailwindcss">
+      @layer components {
+        .form-input {
+          @apply block w-full rounded-lg border border-border-light bg-input-bg-light p-2.5 pr-10 text-text-light placeholder:text-subtext-light focus:border-primary focus:ring-2 focus:ring-primary dark:border-border-dark dark:bg-input-bg-dark dark:text-white dark:placeholder:text-subtext-dark dark:focus:border-primary outline-none transition-all duration-200 text-sm;
+        }
+      }
+      .material-symbols-outlined { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24 }
+      .rule-icon { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24 }
+      .rule-success { color: var(--tw-color-success); }
+      .rule-fail { color: var(--tw-color-danger); }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark h-screen w-screen overflow-hidden flex flex-col">
+    
+    <div id="notification-banner" class="fixed top-6 left-1/2 transform -translate-x-1/2 -translate-y-[150%] transition-all duration-500 ease-in-out z-50 w-auto max-w-[90vw] sm:max-w-md">
+        <div id="notification-content" class="flex items-center p-4 rounded-xl shadow-2xl backdrop-blur-md border border-white/10">
+            </div>
+    </div>
+
+    <main class="flex-1 flex flex-col items-center justify-center p-4 w-full">
+        <div class="mb-4 flex justify-center">
+            <img alt="Logo" class="h-14 w-14" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg"/>
+        </div>
+        
+        <div class="w-full max-w-md rounded-xl border border-border-light bg-card-light dark:border-border-dark dark:bg-card-dark shadow-lg flex flex-col max-h-[85vh]">
+            <div class="p-6 sm:p-8 space-y-4 overflow-y-auto custom-scrollbar">
+                <div class="space-y-1 text-center">
+                    <h1 class="text-2xl font-black text-text-light dark:text-white">Set New Password</h1>
+                    <p class="text-xs sm:text-sm text-subtext-light dark:text-subtext-dark">Create a strong, unique password.</p>
+                </div>
+                
+                <form class="space-y-4" id="new-password-form">
+                    <div class="space-y-1">
+                        <label class="block text-xs font-medium text-text-light dark:text-white" for="new-password">New Password</label>
+                        <div class="relative">
+                            <input class="form-input" id="new-password" name="new-password" placeholder="Enter new password" required type="password"/>
+                            <button class="absolute inset-y-0 right-0 flex items-center pr-3 text-subtext-light dark:text-subtext-dark toggle-password" type="button">
+                                <span class="material-symbols-outlined text-lg visibility-icon" style="font-variation-settings: 'FILL' 0">visibility_off</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="password-rules" class="grid grid-cols-2 gap-x-2 gap-y-1 text-xs">
+                        <div class="flex items-center space-x-1 text-subtext-light dark:text-subtext-dark" data-rule="length">
+                            <span class="material-symbols-outlined text-base rule-icon text-danger">cancel</span>
+                            <span>8+ characters</span>
+                        </div>
+                        <div class="flex items-center space-x-1 text-subtext-light dark:text-subtext-dark" data-rule="uppercase">
+                            <span class="material-symbols-outlined text-base rule-icon text-danger">cancel</span>
+                            <span>1 Uppercase</span>
+                        </div>
+                        <div class="flex items-center space-x-1 text-subtext-light dark:text-subtext-dark" data-rule="number">
+                            <span class="material-symbols-outlined text-base rule-icon text-danger">cancel</span>
+                            <span>1 Number</span>
+                        </div>
+                        <div class="flex items-center space-x-1 text-subtext-light dark:text-subtext-dark" data-rule="special">
+                            <span class="material-symbols-outlined text-base rule-icon text-danger">cancel</span>
+                            <span>1 Symbol</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="block text-xs font-medium text-text-light dark:text-white" for="confirm-password">Confirm Password</label>
+                        <div class="relative">
+                            <input class="form-input" id="confirm-password" name="confirm-password" placeholder="Confirm password" required type="password"/>
+                            <button class="absolute inset-y-0 right-0 flex items-center pr-3 text-subtext-light dark:text-subtext-dark toggle-password" type="button">
+                                <span class="material-symbols-outlined text-lg visibility-icon" style="font-variation-settings: 'FILL' 0">visibility_off</span>
+                            </button>
+                        </div>
+                        <p id="match-status" class="text-xs text-danger hidden">Passwords do not match</p>
+                    </div>
+                    
+                    <button id="set-password-button" class="w-full rounded-lg bg-primary py-2.5 text-sm font-bold text-white transition-transform duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed" disabled type="submit">
+                        Set New Password
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <footer class="w-full py-4 text-center text-xs text-subtext-light dark:text-subtext-dark shrink-0">
+        <p>&copy; 2026 <a class="hover:text-primary hover:underline" href="https://mountainmovingministryintl.org/" target="_blank">Mountain Moving Ministry Intl.</a></p>
+    </footer>
+
+    <script type="module">
+        import { auth } from "../js/firebase-init.js";
+        import { confirmPasswordReset, verifyPasswordResetCode } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        // UPDATED NOTIFICATION HELPER
+        function showNotification(message, type) {
+            const banner = document.getElementById('notification-banner');
+            const content = document.getElementById('notification-content');
+            if(!banner || !content) return;
+
+            let iconName, title, bgClass, textClass, iconClass;
+
+            // COLOR LOGIC: Deep Green for Success, Dark Red for Error
+            if (type === 'success') {
+                iconName = 'check_circle';
+                title = 'Success';
+                bgClass = 'bg-green-900/95';  // Deep Green Background
+                textClass = 'text-green-50';
+                iconClass = 'text-green-400';
+            } else {
+                iconName = 'error';
+                title = 'Error';
+                bgClass = 'bg-[#7f1d1d]/95'; // Dark Red Background (Tailwind red-900 approx)
+                textClass = 'text-red-50';
+                iconClass = 'text-red-400';
+            }
+
+            // Inject inner HTML 
+            content.innerHTML = `
+                <span class="material-symbols-outlined text-3xl mr-4 ${iconClass}">${iconName}</span>
+                <div class="flex-1">
+                    <h3 class="font-bold leading-tight ${textClass}">${title}</h3>
+                    <p class="text-sm leading-tight mt-1 ${textClass} opacity-90">${message}</p>
+                </div>
+            `;
+
+            // Apply classes
+            content.className = `flex items-center p-4 rounded-xl shadow-2xl backdrop-blur-md border border-white/10 ${bgClass}`;
+
+            // Show Banner
+            banner.classList.remove('-translate-y-[150%]');
+            banner.classList.add('translate-y-0');
+
+            // Hide after 5 seconds
+            setTimeout(() => {
+                banner.classList.remove('translate-y-0');
+                banner.classList.add('-translate-y-[150%]');
+            }, 5000);
+        }
+
+        // INITIALIZATION
+        const urlParams = new URLSearchParams(window.location.search);
+        const oobCode = urlParams.get('oobCode');
+
+        if (!oobCode) {
+            showNotification("Invalid or missing link. Redirecting...", "error");
+            setTimeout(() => window.location.href = '/auth/reset-password.html', 3000);
+        } else {
+            verifyPasswordResetCode(auth, oobCode).catch((error) => {
+                showNotification("This link has expired or is invalid.", "error");
+                setTimeout(() => window.location.href = '/auth/reset-password.html', 3000);
+            });
+        }
+
+        // VALIDATION & SUBMISSION LOGIC
+        const newPasswordInput = document.getElementById('new-password');
+        const confirmPasswordInput = document.getElementById('confirm-password');
+        const passwordRules = document.querySelectorAll('#password-rules > div');
+        const matchStatus = document.getElementById('match-status');
+        const setPasswordButton = document.getElementById('set-password-button');
+        const toggleButtons = document.querySelectorAll('.toggle-password');
+        const form = document.getElementById('new-password-form');
+
+        const rules = {
+            length: (pwd) => pwd.length >= 8,
+            uppercase: (pwd) => /[A-Z]/.test(pwd),
+            number: (pwd) => /[0-9]/.test(pwd),
+            special: (pwd) => /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pwd),
+        };
+
+        const validatePassword = () => {
+            const newPassword = newPasswordInput.value;
+            let allRulesMet = true;
+
+            passwordRules.forEach(ruleElement => {
+                const ruleName = ruleElement.getAttribute('data-rule');
+                const ruleMet = rules[ruleName](newPassword);
+                const icon = ruleElement.querySelector('.rule-icon');
+
+                if (ruleMet) {
+                    ruleElement.classList.add('rule-success');
+                    ruleElement.classList.remove('text-subtext-light', 'dark:text-subtext-dark', 'rule-fail');
+                    icon.textContent = 'check_circle';
+                    icon.classList.add('text-success');
+                    icon.classList.remove('text-danger');
+                } else {
+                    allRulesMet = false;
+                    ruleElement.classList.add('rule-fail', 'text-subtext-light', 'dark:text-subtext-dark');
+                    ruleElement.classList.remove('rule-success');
+                    icon.textContent = 'cancel';
+                    icon.classList.add('text-danger');
+                    icon.classList.remove('text-success');
+                }
+            });
+
+            const passwordsMatch = newPassword === confirmPasswordInput.value && newPassword.length > 0;
+
+            if (newPassword.length > 0 && confirmPasswordInput.value.length > 0) {
+                 if (!passwordsMatch) {
+                    matchStatus.textContent = 'Passwords do not match';
+                    matchStatus.classList.remove('text-success', 'hidden');
+                    matchStatus.classList.add('text-danger', 'block');
+                } else {
+                    matchStatus.textContent = 'Passwords match';
+                    matchStatus.classList.remove('text-danger', 'hidden');
+                    matchStatus.classList.add('text-success', 'block');
+                }
+            } else {
+                matchStatus.classList.add('hidden');
+            }
+
+            setPasswordButton.disabled = !(allRulesMet && passwordsMatch);
+        };
+
+        newPasswordInput.addEventListener('input', validatePassword);
+        confirmPasswordInput.addEventListener('input', validatePassword);
+
+        toggleButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const input = button.closest('.relative').querySelector('input');
+                const icon = button.querySelector('.visibility-icon');
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.textContent = 'visibility';
+                } else {
+                    input.type = 'password';
+                    icon.textContent = 'visibility_off';
+                }
+            });
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!oobCode) return;
+
+            const newPassword = newPasswordInput.value;
+            setPasswordButton.disabled = true;
+            setPasswordButton.innerHTML = `
+                <svg class="animate-spin -ml-1 mr-3 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg> Updating...`;
+
+            try {
+                await confirmPasswordReset(auth, oobCode, newPassword);
+                showNotification("Your password has been successfully reset. You will be redirected shortly.", "success");
+                localStorage.removeItem('resetEmail');
+                setTimeout(() => window.location.href = '/auth/index.html', 3000);
+            } catch (error) {
+                let errorMessage = "An unexpected error occurred. Please try again.";
+                if (error.code === 'auth/expired-action-code') {
+                    errorMessage = "The reset link has expired. Please request a new one.";
+                } else if (error.code === 'auth/invalid-action-code') {
+                    errorMessage = "The reset link is invalid. Please request a new one.";
+                } else if (error.code === 'auth/weak-password') {
+                    errorMessage = "The password is too weak. Please choose a stronger one.";
+                }
+                
+                showNotification(errorMessage, "error");
+                setPasswordButton.disabled = false;
+                setPasswordButton.textContent = "Set New Password";
+            }
+        });
+    </script>
+    <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(() => console.log('Service Worker Registered'))
+        .catch(err => console.error('Service Worker Failed:', err));
+    });
+  }
+</script>
+</body>
+</html>

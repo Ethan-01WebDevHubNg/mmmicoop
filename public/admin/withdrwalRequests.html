@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Withdrawal Requests - MMMI Admin</title>
+    
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="apple-touch-icon" href="/assets/icon-192.png">    
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#e31919",
+                        "background-light": "#f8fafc",
+                        "background-dark": "#0f172a",
+                        "card-light": "#ffffff",
+                        "card-dark": "#1e293b",
+                        "text-light": "#0f172a",
+                        "text-dark": "#e2e8f0",
+                        "subtext-light": "#64748b",
+                        "subtext-dark": "#94a3b8"
+                    },
+                    fontFamily: { "display": ["Manrope", "sans-serif"] },
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .isometric-sidebar { background-color: #ffffff; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg id='hexagons' fill='%23f8fafc' fill-opacity='1' fill-rule='nonzero'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); }
+        .dark .isometric-sidebar { background-color: #1e293b; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg id='hexagons' fill='%230f172a' fill-opacity='0.25' fill-rule='nonzero'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); }
+        @keyframes fadeInSlideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in-slide-up { animation: fadeInSlideUp 0.5s ease-out forwards; }
+    </style>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark transition-colors duration-300 flex flex-col min-h-screen">
+
+    <div class="flex flex-1">
+        <aside class="hidden lg:flex w-64 flex-col border-r border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 bg-white dark:bg-card-dark isometric-sidebar fixed h-full z-20">
+            <div class="flex h-16 items-center gap-3 px-6 border-b border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 bg-white/90 dark:bg-card-dark/90 backdrop-blur">
+                 <img class="size-8 dark:hidden" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20Logo%20-%20light%20mode.svg" alt="Logo">
+                 <img class="size-8 hidden dark:block" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg" alt="Logo">
+                 <h1 class="text-lg font-bold tracking-tight">MMMI Admin</h1>
+            </div>
+            <nav class="flex-1 space-y-1 p-4 overflow-y-auto">
+                <a href="/admin/index" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+                    <span class="material-symbols-outlined">dashboard</span><span>Dashboard</span>
+                </a>
+                <a href="/admin/Memberlists" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+                    <span class="material-symbols-outlined">groups</span><span>Members</span>
+                </a>
+                <a href="/admin/withdrwalRequests" class="flex items-center gap-3 rounded-lg bg-primary text-white px-4 py-3 text-sm font-bold shadow-md shadow-primary/20 transition-colors">
+                    <span class="material-symbols-outlined text-white">payments</span><span>Withdrawals</span>
+                </a>
+                <a href="/admin/ManagePlans" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+                    <span class="material-symbols-outlined">savings</span><span>Savings Plans</span>
+                </a>
+                <a href="/admin/reports" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+                    <span class="material-symbols-outlined">bar_chart</span><span>Reports</span>
+                </a>
+            </nav>
+            <div class="p-4 border-t border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 bg-white/50 dark:bg-card-dark/50 mt-auto">
+                 <a class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10 mb-2" href="/admin/userManagement">
+                    <span class="material-symbols-outlined">manage_accounts</span><span>Admin Users</span>
+                </a>
+                <button class="logout-trigger w-full flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors mt-2 text-left">
+                    <span class="material-symbols-outlined">logout</span><span>Logout</span>
+                </button>
+            </div>
+        </aside>
+
+        <div class="flex flex-1 flex-col lg:ml-64 transition-all duration-300 w-full">
+            <header class="sticky top-0 z-30 w-full border-b border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 bg-white/80 dark:bg-card-dark/80 backdrop-blur-md">
+                <div class="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-3">
+                    <div class="flex items-center gap-4">
+                        <button id="menu-btn" class="lg:hidden p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 text-text-light dark:text-text-dark">
+                            <span class="material-symbols-outlined">menu</span>
+                        </button>
+                        <h1 class="text-xl font-bold hidden sm:block">Withdrawals</h1>
+                        <h1 class="text-lg font-bold sm:hidden">Withdrawals</h1>
+                    </div>
+                    <div class="flex items-center gap-2 sm:gap-4">
+                        <button id="theme-toggle" class="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 text-text-light dark:text-text-dark">
+                            <span class="material-symbols-outlined dark:hidden">dark_mode</span>
+                            <span class="material-symbols-outlined hidden dark:inline">light_mode</span>
+                        </button>
+                        
+                        <div class="relative ml-2">
+                            <button type="button" id="top-profile-trigger" class="flex items-center gap-3 pl-4 border-l border-gray-200 dark:border-l-0 dark:ring-l dark:ring-gray-700 hover:opacity-80 focus:outline-none">
+                                <img id="admin-avatar" src="https://ui-avatars.com/api/?name=Admin&background=random" class="size-8 sm:size-9 rounded-full ring-2 ring-white dark:ring-gray-700">
+                            </button>
+
+                            <div id="top-profile-dropdown" class="absolute right-0 z-50 mt-2 w-72 origin-top-right rounded-xl bg-white dark:bg-card-dark shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none hidden transform transition-all duration-200 opacity-0 scale-95 origin-top-right">
+                                <div class="px-5 py-5 border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-slate-800/50 rounded-t-xl">
+                                    <div class="flex items-center gap-3">
+                                        <img id="dd-avatar" class="size-10 rounded-full ring-2 ring-white dark:ring-gray-600 object-cover" src="https://ui-avatars.com/api/?name=Admin&background=random" alt="">
+                                        <div class="overflow-hidden">
+                                            <p id="dd-name" class="truncate text-sm font-bold text-gray-900 dark:text-white">Loading...</p>
+                                            <p id="dd-email" class="truncate text-xs text-gray-500 dark:text-gray-400">...</p>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                         <span id="dd-role" class="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-bold text-blue-700 ring-1 ring-inset ring-blue-700/10 dark:bg-blue-400/10 dark:text-blue-400 dark:ring-blue-400/30 uppercase tracking-wider">Admin</span>
+                                    </div>
+                                </div>
+                                <div class="p-2 space-y-1">
+                                    <a href="/admin/AdminProfile" class="flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors" role="menuitem">
+                                        <span class="material-symbols-outlined text-[20px] text-gray-400 dark:text-gray-500">person</span>
+                                        Admin Profile
+                                    </a>
+                                    <button class="logout-trigger w-full text-left flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors" role="menuitem">
+                                        <span class="material-symbols-outlined text-[20px]">logout</span>
+                                        Log Out
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div id="mobile-menu-overlay" class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden backdrop-blur-sm"></div>
+            <aside id="mobile-menu" class="fixed top-0 left-0 h-full w-64 bg-white dark:bg-card-dark isometric-sidebar flex flex-col border-r border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 shadow-2xl z-50 transform -translate-x-full transition-transform duration-300 lg:hidden">
+                <div class="flex items-center justify-between mb-8 px-6 pt-6">
+                    <div class="flex items-center gap-2">
+                         <img class="size-8 dark:hidden" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20Logo%20-%20light%20mode.svg" alt="Logo">
+                         <img class="size-8 hidden dark:block" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg" alt="Logo">
+                         <span class="font-bold text-lg">Menu</span>
+                    </div>
+                    <button id="close-menu-btn" class="p-1 rounded hover:bg-black/5 dark:hover:bg-white/5">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+                
+                <nav class="flex-1 space-y-2 overflow-y-auto px-4">
+                    <a href="/admin/index" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10"><span class="material-symbols-outlined">dashboard</span><span>Dashboard</span></a>
+                    <a href="/admin/Memberlists" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10"><span class="material-symbols-outlined">groups</span><span>Members</span></a>
+                    <a href="/admin/withdrwalRequests" class="flex items-center gap-3 rounded-lg bg-primary text-white px-4 py-3 text-sm font-bold shadow-md shadow-primary/20"><span class="material-symbols-outlined text-white">payments</span><span>Withdrawals</span></a>
+                    <a href="/admin/ManagePlans" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10"><span class="material-symbols-outlined">savings</span><span>Savings Plans</span></a>
+                    <a href="/admin/reports" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10"><span class="material-symbols-outlined">bar_chart</span><span>Reports</span></a>
+                </nav>
+
+                <div class="p-4 border-t border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 mt-auto bg-gray-50/50 dark:bg-slate-800/30">
+                    <a href="/admin/userManagement" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10 mb-2">
+                        <span class="material-symbols-outlined">manage_accounts</span><span>Admin Users</span>
+                    </a>
+                    <button class="logout-trigger w-full flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors text-left">
+                        <span class="material-symbols-outlined">logout</span><span>Logout</span>
+                    </button>
+                </div>
+            </aside>
+
+            <main class="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in-slide-up">
+                <div class="flex flex-col gap-8">
+                    <div class="flex flex-col gap-1">
+                        <h2 class="text-3xl font-black tracking-tight text-text-light dark:text-text-dark">Pending Payouts</h2>
+                        <p class="text-subtext-light dark:text-subtext-dark text-sm sm:text-base">Review, pay, or reject member withdrawal requests.</p>
+                    </div>
+
+                    <div class="bg-card-light dark:bg-card-dark rounded-2xl border-none ring-1 ring-gray-200 dark:ring-gray-700 shadow-sm overflow-hidden">
+                        <div class="px-6 py-4 bg-gray-100 dark:bg-slate-900 border-b border-gray-200 dark:border-gray-700 flex flex-col md:flex-row justify-between items-center gap-4">
+                            <h3 class="text-lg font-bold text-text-light dark:text-text-dark">Request Queue</h3>
+                            
+                            <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                                <select id="filter-category" onchange="loadWithdrawals()" class="rounded-lg border-none ring-1 ring-gray-200 dark:ring-gray-700 bg-white dark:bg-card-dark text-sm px-4 py-2 text-text-light dark:text-text-dark focus:ring-primary shadow-sm">
+                                    <option value="all">All Types</option>
+                                    <option value="savings">Cooperative Savings</option>
+                                    <option value="daily">Daily Contributions</option>
+                                </select>
+                                <div class="relative w-full sm:w-48">
+                                    <input id="filter-search" onkeyup="filterLocal()" type="text" placeholder="Search ID..." class="w-full pl-8 pr-4 py-2 rounded-lg bg-white dark:bg-card-dark border-none ring-1 ring-gray-200 dark:ring-gray-700 text-sm focus:ring-primary shadow-sm text-text-light dark:text-text-dark">
+                                    <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm">search</span>
+                                </div>
+                                <button onclick="loadWithdrawals()" class="flex items-center justify-center gap-2 px-4 py-2 bg-white dark:bg-card-dark border-none ring-1 ring-gray-200 dark:ring-gray-700 text-text-light dark:text-text-dark rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors shadow-sm font-bold text-sm">
+                                    <span class="material-symbols-outlined text-sm">refresh</span> Refresh
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm whitespace-nowrap">
+                                <thead class="border-b border-gray-200 dark:border-none dark:ring-b dark:ring-gray-700 bg-gray-50 dark:bg-slate-800/50">
+                                    <tr>
+                                        <th class="px-6 py-4 font-semibold text-subtext-light dark:text-subtext-dark">Date</th>
+                                        <th class="px-6 py-4 font-semibold text-subtext-light dark:text-subtext-dark">Ref. Code</th>
+                                        <th class="px-6 py-4 font-semibold text-subtext-light dark:text-subtext-dark">Member Info</th>
+                                        <th class="px-6 py-4 font-semibold text-subtext-light dark:text-subtext-dark">Amount</th>
+                                        <th class="px-6 py-4 font-semibold text-subtext-light dark:text-subtext-dark">Type</th>
+                                        <th class="px-6 py-4 font-semibold text-right text-subtext-light dark:text-subtext-dark">Admin Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="withdrawal-table-body" class="divide-y divide-gray-200 dark:divide-gray-800">
+                                    <tr>
+                                        <td colspan="6" class="px-6 py-12 text-center text-subtext-light animate-pulse">Loading requests...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="p-4 border-t border-gray-200 dark:border-none dark:ring-t dark:ring-gray-700 bg-gray-50/50 dark:bg-slate-800/30 flex justify-between items-center">
+                            <button onclick="prevPage()" class="p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50"><span class="material-symbols-outlined">chevron_left</span></button>
+                            <span class="text-xs font-mono text-subtext-light">Page <span id="page-num">1</span></span>
+                            <button onclick="nextPage()" class="p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50"><span class="material-symbols-outlined">chevron_right</span></button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <footer class="flex-shrink-0 text-center p-4 text-sm text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 mt-auto">
+              <div class="flex flex-col sm:flex-row justify-center items-center gap-2 sm:gap-6">
+                <p>&copy; 2026 <a class="hover:text-primary hover:underline" href="https://mountainmovingministryintl.org/" rel="noopener noreferrer" target="_blank">Mountain Moving Ministry Intl.</a> All rights reserved.</p>
+                <div class="flex gap-4 sm:gap-6">
+                  <a class="hover:text-primary" href="https://ethan01.com" rel="noopener noreferrer" target="_blank">Contact Developer</a>
+                </div>
+              </div>
+            </footer>
+        </div>
+    </div>
+
+    <div id="view-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div class="bg-white dark:bg-card-dark rounded-2xl w-full max-w-lg ring-1 ring-gray-200 dark:ring-gray-700 p-6 transform scale-95 opacity-0 transition-all duration-200" id="view-modal-content">
+            <div class="flex justify-between items-center mb-6 border-b border-gray-200 dark:border-gray-700 pb-4">
+                <h3 class="text-xl font-bold text-text-light dark:text-text-dark">Request Details</h3>
+                <button onclick="closeViewModal()" class="text-gray-400 hover:text-gray-600"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <div id="view-details" class="space-y-4 text-sm"></div>
+        </div>
+    </div>
+
+    <script type="module" src="../js/admin-core.js"></script>
+    <script type="module" src="../js/role-check.js"></script>
+    <script type="module">
+        import { fetchPendingWithdrawals, approveWithdrawal, rejectWithdrawal, formatCurrency, formatDate, getMemberDetails } from '../js/admin-firebase.js';
+        import { NotificationService } from '../js/admin-core.js';
+
+        let isSuperAdmin = false;
+        let allRequests = [];
+        let currentPage = 1;
+        const ITEMS_PER_PAGE = 20;
+
+        window.addEventListener('admin-ready', (e) => {
+            const { adminData } = e.detail;
+            setupProfileDropdown(adminData);
+            isSuperAdmin = adminData.role === 'super_admin';
+            loadWithdrawals();
+        });
+
+        function setupProfileDropdown(data) {
+            const trigger = document.getElementById('top-profile-trigger');
+            const dropdown = document.getElementById('top-profile-dropdown');
+            const avatar = document.getElementById('admin-avatar');
+            document.getElementById('dd-name').textContent = data.name || 'Admin';
+            document.getElementById('dd-email').textContent = data.email || '';
+            document.getElementById('dd-role').textContent = data.role === 'super_admin' ? 'Super Admin' : 'Admin';
+            if(data.photoURL) {
+                document.getElementById('dd-avatar').src = data.photoURL;
+                avatar.src = data.photoURL;
+            }
+            trigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isHidden = dropdown.classList.contains('hidden');
+                if(isHidden) {
+                    dropdown.classList.remove('hidden');
+                    requestAnimationFrame(() => {
+                        dropdown.classList.remove('opacity-0', 'scale-95');
+                        dropdown.classList.add('opacity-100', 'scale-100');
+                    });
+                } else {
+                    dropdown.classList.add('hidden', 'opacity-0', 'scale-95');
+                }
+            });
+            document.addEventListener('click', (e) => {
+                if(!dropdown.contains(e.target) && !trigger.contains(e.target)) {
+                    dropdown.classList.add('hidden', 'opacity-0', 'scale-95');
+                }
+            });
+        }
+
+        window.loadWithdrawals = async function() {
+            const tbody = document.getElementById('withdrawal-table-body');
+            tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-12 text-center text-subtext-light animate-pulse">Checking for new requests...</td></tr>';
+            try {
+                const requests = await fetchPendingWithdrawals();
+                allRequests = requests;
+                renderPage(1);
+            } catch (e) {
+                console.error(e);
+                tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-red-500">Error loading data. Check console.</td></tr>`;
+            }
+        };
+
+        window.renderPage = async (page) => {
+            currentPage = page;
+            document.getElementById('page-num').innerText = page;
+            const category = document.getElementById('filter-category').value;
+            let filtered = allRequests;
+            if (category !== 'all') {
+                filtered = filtered.filter(r => r.category === category);
+            }
+            const start = (page - 1) * ITEMS_PER_PAGE;
+            const paginated = filtered.slice(start, start + ITEMS_PER_PAGE);
+            
+            const tbody = document.getElementById('withdrawal-table-body');
+            if (paginated.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-12 text-center text-subtext-light">No pending requests found.</td></tr>';
+                return;
+            }
+
+            const rows = await Promise.all(paginated.map(async (req) => {
+                let displayId = 'Loading...';
+                let isArchived = false;
+
+                try {
+                    const member = await getMemberDetails(req.userId);
+                    displayId = member ? member.memberId : 'Unknown';
+                    // Check for Archived Status (Soft Delete)
+                    if (member && member.isDeleted) {
+                        isArchived = true;
+                    }
+                    req.displayMemberId = displayId;
+                    req.isArchived = isArchived;
+                } catch(e) { displayId = 'Err'; }
+
+                const bankInfo = req.bankName ? `${req.bankName}<br><span class="font-mono text-xs opacity-75">${req.accountNumber}</span>` : '<span class="text-yellow-600 font-bold text-xs bg-yellow-100 dark:bg-yellow-900/30 px-2 py-0.5 rounded">No Bank Info</span>';
+                
+                // Add Archived Badge if applicable
+                const idHtml = isArchived 
+                    ? `<div class="font-bold text-text-light dark:text-text-dark flex items-center gap-2">${displayId} <span class="px-1.5 py-0.5 bg-red-100 text-red-600 text-[10px] uppercase rounded border border-red-200 font-black">Archived</span></div>`
+                    : `<div class="font-bold text-text-light dark:text-text-dark">${displayId}</div>`;
+
+                let actions = `
+                    <button onclick='openViewModal(${JSON.stringify(req).replace(/'/g, "&apos;")})' class="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs font-bold transition-colors">
+                        View
+                    </button>
+                `;
+
+                if (isSuperAdmin) {
+                    actions += `
+                        <button onclick="handleReject('${req.userId}', '${req.id}', ${req.amount})" class="px-3 py-1.5 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/40 text-xs font-bold transition-colors">
+                            Reject
+                        </button>
+                        <button onclick="handleApprove('${req.ref.path}', '${req.id}')" class="px-3 py-1.5 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-600 hover:bg-green-100 dark:hover:bg-green-900/40 text-xs font-bold transition-colors">
+                            Pay
+                        </button>
+                    `;
+                }
+
+                return `
+                <tr class="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors group">
+                    <td class="px-6 py-4 text-subtext-light dark:text-subtext-dark">${formatDate(req.date)}</td>
+                    <td class="px-6 py-4 font-mono text-xs text-subtext-light">${(req.reference || req.transactionId || '---').substring(0, 10)}...</td>
+                    <td class="px-6 py-4">
+                        ${idHtml}
+                        <div class="text-xs text-subtext-light dark:text-subtext-dark mt-0.5">${bankInfo}</div>
+                    </td>
+                    <td class="px-6 py-4 font-black text-lg text-text-light dark:text-text-dark">${formatCurrency(req.amount)}</td>
+                    <td class="px-6 py-4">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${req.category === 'savings' ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'}">
+                            ${req.category ? req.category.toUpperCase() : 'GENERAL'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-right flex justify-end gap-2">
+                        ${actions}
+                    </td>
+                </tr>
+                `;
+            }));
+
+            tbody.innerHTML = rows.join('');
+        };
+
+        window.nextPage = () => { renderPage(currentPage + 1); };
+        window.prevPage = () => { if(currentPage > 1) renderPage(currentPage - 1); };
+        window.filterLocal = () => {
+            const term = document.getElementById('filter-search').value.toLowerCase();
+            const rows = document.querySelectorAll('#withdrawal-table-body tr');
+            rows.forEach(row => {
+                row.style.display = row.innerText.toLowerCase().includes(term) ? '' : 'none';
+            });
+        };
+
+        window.openViewModal = (req) => {
+            const modal = document.getElementById('view-modal');
+            const content = document.getElementById('view-modal-content');
+            const details = document.getElementById('view-details');
+            
+            modal.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            });
+
+            const memId = req.displayMemberId || 'Unknown';
+            // Archived Badge Logic for Modal
+            const badge = req.isArchived ? '<span class="ml-2 px-2 py-0.5 rounded bg-red-100 text-red-600 text-xs font-black border border-red-200">ARCHIVED USER</span>' : '';
+
+            details.innerHTML = `
+                <div class="grid grid-cols-2 gap-4">
+                    <div><span class="text-xs text-subtext-light">Transaction ID</span><p class="font-mono font-bold">${req.transactionId || 'N/A'}</p></div>
+                    <div><span class="text-xs text-subtext-light">Amount</span><p class="font-black text-xl text-primary">${formatCurrency(req.amount)}</p></div>
+                    <div class="col-span-2"><span class="text-xs text-subtext-light">Member ID</span><p class="font-mono font-bold text-lg flex items-center">${memId} ${badge}</p></div>
+                    <div><span class="text-xs text-subtext-light">Bank</span><p class="font-bold">${req.bankName || 'N/A'}</p></div>
+                    <div><span class="text-xs text-subtext-light">Account</span><p class="font-mono">${req.accountNumber || 'N/A'}</p></div>
+                    <div class="col-span-2 bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                        <span class="text-xs text-subtext-light block mb-1">Admin Notes</span>
+                        <p class="italic text-gray-500">None</p>
+                    </div>
+                </div>
+            `;
+        };
+
+        window.closeViewModal = () => {
+            const modal = document.getElementById('view-modal');
+            const content = document.getElementById('view-modal-content');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 200);
+        };
+
+        window.handleApprove = async (txnPath, txnId) => {
+            const confirmed = await NotificationService.confirm("Confirm Payment", "Have you physically transferred the funds?", "Yes, Paid");
+            if (!confirmed) return;
+            try {
+                await approveWithdrawal(txnPath, txnId);
+                NotificationService.toast("Withdrawal approved", 'success');
+                loadWithdrawals();
+            } catch(e) { NotificationService.toast(e.message, 'error'); }
+        };
+
+        window.handleReject = async (uid, txnId, amount) => {
+            const confirmed = await NotificationService.confirm("Reject Withdrawal", "Funds will be returned to user wallet.", "Reject");
+            if (!confirmed) return;
+            try {
+                await rejectWithdrawal(uid, txnId, amount);
+                NotificationService.toast("Rejected & Refunded", 'success');
+                loadWithdrawals();
+            } catch(e) { NotificationService.toast(e.message, 'error'); }
+        };
+    </script>
+    <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(() => console.log('Service Worker Registered'))
+        .catch(err => console.error('Service Worker Failed:', err));
+    });
+  }
+</script>
+</body>
+</html>

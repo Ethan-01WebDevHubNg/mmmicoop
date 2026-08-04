@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Member Dashboard - Cooperative Society</title>
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0f172a">
+<link rel="apple-touch-icon" href="/assets/icon-192.png">
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+<script type="module" src="../js/systemmaintenance.js"></script>
+<script src="https://checkout.squadco.com/widget/squad.min.js"></script>
+<script src="https://www.google.com/recaptcha/enterprise.js?render=6Lc_9DIsAAAAAK5CvT8tlPhK-vWeVp25Xcb7nWi3"></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<style>
+/* --- ANIMATIONS & UTILS --- */
+:root { --brand-red: #e31919; }
+@keyframes gravity-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+@keyframes tv-collapse {
+    0% { transform: scale(1, 1); opacity: 1; filter: brightness(1); }
+    50% { transform: scale(1, 0.005); opacity: 1; filter: brightness(3); }
+    100% { transform: scale(0, 0.005); opacity: 0; filter: brightness(0); }
+}
+@keyframes fadeInSlide { to { opacity: 1; transform: translateY(0); } }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+@keyframes bounceInRight { 
+    from { opacity: 0; transform: translate3d(500px, 0, 0); } 
+    60% { opacity: 1; transform: translate3d(-25px, 0, 0); } 
+    75% { transform: translate3d(10px, 0, 0); } 
+    90% { transform: translate3d(-5px, 0, 0); } 
+    to { transform: translate3d(0, 0, 0); } 
+}
+
+.gravity-container { position: relative; width: 80px; height: 80px; display: flex; justify-content: center; align-items: center; }
+.gravity-dot { position: absolute; top: 0; left: 50%; width: 10px; height: 10px; background: #e31919; border-radius: 50%; transform-origin: 0 40px; animation: gravity-spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite; }
+.gravity-dot:nth-child(1) { animation-delay: 0s; } .gravity-dot:nth-child(2) { animation-delay: -0.1s; opacity: 0.8; }
+.gravity-dot:nth-child(3) { animation-delay: -0.2s; opacity: 0.6; } .gravity-dot:nth-child(4) { animation-delay: -0.3s; opacity: 0.4; }
+.tv-off-active { animation: tv-collapse 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards; transform-origin: center; pointer-events: none; }
+.hidden-force { display: none !important; }
+.animate-fade-in-slide { animation: fadeInSlide 0.5s ease-out forwards; opacity: 0; transform: translateY(20px); }
+.shake-active { animation: shake 0.3s ease-in-out; border-color: #ef4444 !important; }
+.bounce-in { animation: bounceInRight 0.8s cubic-bezier(0.215, 0.61, 0.355, 1) forwards; }
+
+.isometric-sidebar { background-color: #ffffff; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg id='hexagons' fill='%23f5f8Fb' fill-opacity='1' fill-rule='nonzero'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); }
+.dark .isometric-sidebar { background-color: #1e293b; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg id='hexagons' fill='%230f172a' fill-opacity='0.25' fill-rule='nonzero'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); }
+.plan-card.selected { border-color: #22c55e; background-color: rgba(34, 197, 94, 0.1); }
+.plan-card.selected h5, .plan-card.selected span { color: #22c55e; }
+/* Expand/Collapse Transition */
+.expand-wrapper { max-height: 0; overflow: hidden; transition: max-height 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+.expand-wrapper.expanded { max-height: 2000px; } /* Large enough to hold 20 items */
+
+.grecaptcha-badge { visibility: hidden; }
+input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.custom-scroll::-webkit-scrollbar { width: 4px; }
+.custom-scroll::-webkit-scrollbar-track { background: transparent; }
+.custom-scroll::-webkit-scrollbar-thumb { background-color: #e2e8f0; border-radius: 20px; }
+.dark .custom-scroll::-webkit-scrollbar-thumb { background-color: #334155; }
+
+/* Mobile Menu Blur */
+.content-area-transition { transition: filter 0.3s ease-in-out; }
+.content-blurred { filter: blur(10px); pointer-events: none; }
+</style>
+<script>
+    tailwind.config = { darkMode: "class", theme: { extend: { colors: { primary: "#e31919", "background-light": "#f1f5f9", "background-dark": "#0f172a", "slate-blue": "#0f172a", "white-off": "#F8FAFC", "pure-white": "#FFFFFF", "muted-gray": "#64748B", "dark-gray-blue": "#1E293B", "light-gray": "#94A3B8" }, fontFamily: { display: ["Poppins", "sans-serif"], manrope: ["Manrope", "sans-serif"] } } } };
+</script>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-gray-700 dark:text-gray-300">
+
+    <div id="preloader" class="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-50/80 dark:bg-gray-900/90 backdrop-blur-[5px]">
+        <div id="preloader-card" class="bg-white dark:bg-gray-800 p-12 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 flex flex-col items-center">
+            <div class="gravity-container"><div class="gravity-dot"></div><div class="gravity-dot"></div><div class="gravity-dot"></div><div class="gravity-dot"></div><div class="gravity-center"></div></div>
+            <span class="mt-8 text-sm text-gray-400 dark:text-gray-500 tracking-[0.2em] font-medium animate-pulse">Loading User Data</span>
+        </div>
+    </div>
+
+    <div id="upgrade-notification" class="hidden bg-blue-50 dark:bg-blue-900/30 border-b border-blue-200 dark:border-blue-800 p-3 relative z-10 animate-fade-in-slide">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">arrow_circle_up</span>
+                <p class="text-sm text-blue-800 dark:text-blue-200 font-medium" id="upgrade-msg">You are eligible for an upgrade!</p>
+            </div>
+            <button onclick="openMainModal('upgrade')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-full transition-colors whitespace-nowrap">
+                View Upgrade
+            </button>
+        </div>
+    </div>
+
+    <div class="flex h-screen">
+        <aside class="w-64 flex-shrink-0 bg-white isometric-sidebar p-6 flex-col justify-between hidden lg:flex">
+            <div>
+                <div class="flex items-center gap-3 mb-10">
+                    <img id="sidebar-logo" alt="Logo" class="h-10 w-10 app-logo" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg"/>
+                    <span class="text-xl font-semibold text-gray-800 dark:text-white">Cooperative</span>
+                </div>
+                <nav class="flex flex-col gap-2">
+                    <a class="flex items-center gap-3 px-4 py-3 bg-primary text-white rounded-lg" href="#"><span class="material-symbols-outlined">dashboard</span><span class="font-medium">Dashboard</span></a>
+                    <a class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" href="./userProfile"><span class="material-symbols-outlined">person</span><span class="font-medium">User Profile</span></a>
+                    <a class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" href="./withdrawalapplication"><span class="material-symbols-outlined">account_balance_wallet</span><span class="font-medium">Withdraw Savings</span></a>
+                    <a onclick="openMainModal('topup')" class="cursor-pointer flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><span class="material-symbols-outlined">upgrade</span><span class="font-medium">Top-up/Upgrade</span></a>
+                    <a class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" href="./updatePaymentDetails"><span class="material-symbols-outlined">payment</span><span class="font-medium">Payment Details</span></a>
+                    <a class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" href="./changePassword"><span class="material-symbols-outlined">lock_reset</span><span class="font-medium">Forgot/Change Password</span></a>
+                </nav>
+            </div>
+            <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+                <button id="logout-btn-desktop" class="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-left"><span class="material-symbols-outlined">logout</span><span class="font-medium">Log Out</span></button>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col overflow-y-auto content-area-transition" id="main-content">
+            <header class="flex-shrink-0 bg-white/80 dark:bg-background-dark/80 backdrop-blur-sm sticky top-0 z-20 flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
+                <div class="flex items-center gap-4">
+                    <button class="lg:hidden p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700" id="menu-btn"><span class="material-symbols-outlined text-gray-600 dark:text-gray-300">menu</span></button>
+                    <div class="lg:hidden flex items-center gap-2"><img id="header-logo" alt="Logo" class="h-10 w-10 app-logo" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg"/></div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700" id="theme-toggle">
+                        <span class="material-symbols-outlined text-gray-600 dark:text-gray-300 dark:hidden">dark_mode</span>
+                        <span class="material-symbols-outlined text-gray-600 dark:text-gray-300 hidden dark:inline">light_mode</span>
+                    </button>
+                    <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden border border-gray-300 dark:border-gray-600">
+                        <img id="header-profile-img" alt="Profile" class="w-full h-full object-cover" src="https://ui-avatars.com/api/?name=Member&background=random"/>
+                    </div>
+                </div>
+            </header>
+
+            <div class="p-4 sm:p-6 lg:p-8 flex-1">
+                <div class="max-w-7xl mx-auto">
+                    <div class="mb-4 animate-fade-in-slide">
+                        <p id="member-id-display" class="text-sm text-gray-500 dark:text-gray-400">Loading ID...</p>
+                        <h1 id="greeting-text" class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white"></h1>
+                    </div>
+
+                    <div class="flex justify-center w-full mb-8 animate-fade-in-slide" style="animation-delay: 0.05s;">
+                        <div class="flex gap-2 sm:gap-4 p-1 rounded-xl select-none">
+                            <input type="radio" name="dash_toggle" id="dash-toggle-savings" class="peer/savings hidden" onchange="switchDashboard('savings')" checked>
+                            <label for="dash-toggle-savings" class="cursor-pointer px-3 py-2 sm:px-6 sm:py-2.5 rounded-full font-bold text-xs sm:text-sm transition-all shadow-sm border border-transparent bg-gray-200 text-gray-500 hover:bg-red-300 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-red-700 peer-checked/savings:bg-primary peer-checked/savings:text-white peer-checked/savings:shadow-lg peer-checked/savings:scale-105">
+                                Cooperative Savings
+                            </label>
+
+                            <input type="radio" name="dash_toggle" id="dash-toggle-daily" class="peer/daily hidden" onchange="switchDashboard('daily')">
+                            <label for="dash-toggle-daily" class="cursor-pointer px-3 py-2 sm:px-6 sm:py-2.5 rounded-full font-bold text-xs sm:text-sm transition-all shadow-sm border border-transparent bg-gray-200 text-gray-500 hover:bg-red-300 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-red-700 peer-checked/daily:bg-primary peer-checked/daily:text-white peer-checked/daily:shadow-lg peer-checked/daily:scale-105">
+                                Daily Contribution
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="dashboard-savings" class="dashboard-view">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                            <div class="bg-white dark:bg-gray-900/40 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 animate-fade-in-slide" style="animation-delay: 0.1s;">
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Savings</p>
+                                <div class="flex items-center gap-3 my-3">
+                                    <p id="wallet-balance-display" class="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white" data-value="0">&#8358;0.00</p>
+                                    <button onclick="toggleBalanceVisibility()" class="p-2 rounded-full text-gray-400 hover:text-gray-600 focus:outline-none"><span id="visibility-icon" class="material-symbols-outlined">visibility</span></button>
+                                </div>
+                                <div class="flex flex-col gap-2 mb-6">
+                                    <div class="flex items-center gap-2 text-sm">
+                                        <span class="text-gray-500 dark:text-gray-400">Current Plan:</span>
+                                        <span id="current-plan-tag" class="px-3 py-1 rounded-full text-xs font-bold transition-colors">Loading...</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500">
+                                        <span class="material-symbols-outlined text-sm">event</span>
+                                        <span>Cycle Started: <span id="savings-start-date-display" class="font-medium text-gray-600 dark:text-gray-300">--</span></span>
+                                    </div>
+                                </div>
+                                <div class="flex flex-wrap gap-3">
+                                    <button onclick="openMainModal('topup')" class="bg-primary text-white font-semibold py-2 px-5 rounded-lg hover:bg-red-700 transition-transform hover:scale-105">Fund Top-up</button>
+                                    <a href="./withdrawalapplication" class="bg-primary text-white font-semibold py-2 px-5 rounded-lg hover:bg-red-700 transition-transform hover:scale-105 inline-block text-center">Apply for withdrawal</a>
+                                    <button onclick="openMainModal('upgrade')" class="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white font-semibold py-2 px-5 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-transform hover:scale-105">Upgrade Plan</button>
+                                </div>
+                            </div>
+
+                            <div id="plan-details-container" class="bg-gray-800 dark:bg-gray-900 p-6 rounded-lg shadow-sm border border-gray-700 dark:border-gray-800 animate-fade-in-slide" style="animation-delay: 0.2s;">
+                                <p class="text-gray-400">Loading plan details...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="dashboard-daily" class="dashboard-view hidden">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                            <div class="bg-white dark:bg-gray-900/40 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 animate-fade-in-slide" style="animation-delay: 0.1s;">
+                                <div class="flex justify-between items-start mb-2">
+                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Monthly Contribution</p>
+                                    <span id="daily-status-badge" class="px-2 py-0.5 rounded text-[10px] font-bold bg-gray-100 text-gray-500">INACTIVE</span>
+                                </div>
+                                <div class="flex items-baseline gap-2">
+                                    <p id="daily-total-display" class="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white my-3">&#8358;0.00</p>
+                                    <p id="days-owed-display" class="hidden text-sm font-bold px-2 py-1 rounded transition-colors duration-300"></p>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4 my-4">
+                                    <div class="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg"><p class="text-xs text-gray-500">Selected Daily</p><p id="daily-amount-display" class="font-bold text-gray-800 dark:text-white text-lg">--</p></div>
+                                    <div class="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg"><p class="text-xs text-gray-500">Days Passed</p><p id="daily-days-display" class="font-bold text-gray-800 dark:text-white text-lg">0 / 30</p></div>
+                                </div>
+
+                                <div class="mb-4 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                                    <span class="material-symbols-outlined text-sm">calendar_today</span>
+                                    <span>Cycle Started: <span id="daily-start-date-display" class="font-bold text-gray-700 dark:text-gray-200">--</span></span>
+                                </div>
+
+                                <div id="withdrawable-section" class="hidden mb-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                                    <p class="text-xs text-green-700 dark:text-green-300">Available to Withdraw (Fees Deducted)</p>
+                                    <p id="daily-net-display" class="font-bold text-green-800 dark:text-green-100 text-xl">&#8358;0.00</p>
+                                </div>
+                                
+                                <div class="flex flex-col gap-2 mt-4">
+                                    <div id="double-tap-warning" class="hidden text-xs text-center text-red-500 font-bold animate-pulse">Early withdrawal incurs 25% penalty. Double tap same button to continue.</div>
+                                    <div class="flex flex-wrap gap-3">
+                                        <button id="btn-daily-start" onclick="openDailyModal('start')" class="bg-primary text-white font-semibold py-2 px-5 rounded-lg hover:bg-red-700 transition-transform hover:scale-105 flex-1 sm:flex-none">Start / Pay Daily</button>
+                                        <button id="btn-daily-withdraw" onclick="handleDailyWithdrawClick()" class="bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-500 font-semibold py-2 px-5 rounded-lg transition-all flex-1 sm:flex-none cursor-not-allowed">Withdraw</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-indigo-900 dark:bg-gray-900 p-6 rounded-lg shadow-sm border border-indigo-800 dark:border-gray-800 animate-fade-in-slide flex flex-col justify-between" style="animation-delay: 0.2s;">
+                                <div>
+                                    <div class="flex items-center gap-2 mb-4"><span class="material-symbols-outlined text-yellow-400">lightbulb</span><h2 class="text-lg font-semibold text-white">Daily Wisdom</h2></div>
+                                    <p id="daily-quote" class="text-indigo-100 text-sm italic mb-6 leading-relaxed">"Loading motivation..."</p>
+                                </div>
+                                <div class="bg-black/20 rounded-lg p-4">
+                                    <h3 class="text-xs font-bold text-white uppercase tracking-wider mb-3">To Do List</h3>
+                                    <ul id="daily-todo-list" class="space-y-2 text-sm text-indigo-100">
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-gray-900/40 p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 animate-fade-in-slide" style="animation-delay: 0.3s;">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Recent Transactions</h2>
+                            <button id="view-all-tx-btn" onclick="toggleTransactions()" class="hidden text-sm font-medium text-primary hover:underline bg-transparent border-none cursor-pointer focus:outline-none">View All</button>
+                        </div>
+                        
+                        <div id="transactions-container" class="space-y-0 divide-y divide-gray-100 dark:divide-gray-800">
+                            <p class="text-sm text-gray-500 text-center py-4">Loading transactions...</p>
+                        </div>
+
+                        <div id="expanded-transactions" class="expand-wrapper space-y-0 divide-y divide-gray-100 dark:divide-gray-800 mt-0">
+                            <div id="expanded-list-content"></div>
+                            
+                            <div id="tx-pagination" class="flex justify-end items-center gap-3 p-3 border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 rounded-b-lg hidden">
+                                <span id="page-indicator" class="text-[10px] text-gray-400 font-medium">Page 1</span>
+                                <div class="flex gap-1">
+                                    <button id="btn-prev-tx" class="h-7 w-7 flex items-center justify-center rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-primary hover:text-primary disabled:opacity-30 disabled:hover:border-gray-200 disabled:cursor-not-allowed transition-all text-gray-500 dark:text-gray-400">
+                                        <span class="material-symbols-outlined text-lg">chevron_left</span>
+                                    </button>
+                                    <button id="btn-next-tx" class="h-7 w-7 flex items-center justify-center rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-primary hover:text-primary disabled:opacity-30 disabled:hover:border-gray-200 disabled:cursor-not-allowed transition-all text-gray-500 dark:text-gray-400">
+                                        <span class="material-symbols-outlined text-lg">chevron_right</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            
+            <footer class="flex-shrink-0 text-center p-4 text-sm text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-800 mt-auto">
+                <p>&copy; 2026 <a class="hover:text-primary hover:underline" href="https://mountainmovingministryintl.org/" target="_blank">Mountain Moving Ministry Intl.</a> All rights reserved.</p>
+                <p class="text-sm text-text-light-secondary dark:text-text-dark-secondary">
+                    Protected by reCAPTCHA and Google's
+                    <a class="text-sm text-primary hover:underline inline-block" href="https://policies.google.com/privacy">Privacy Policy</a> and
+                    <a class="text-sm text-primary hover:underline inline-block" href="https://policies.google.com/terms">Terms of Service</a> apply.</p>
+                    <a class="hover:text-primary" href="https://ethan01.com" rel="noopener noreferrer" target="_blank">Contact Developer</a>
+            </footer>
+        </main>
+        
+        <div class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden" id="mobile-menu-overlay"></div>
+        <aside class="fixed top-0 left-0 h-full w-64 bg-white isometric-sidebar p-6 flex flex-col justify-between z-40 transform -translate-x-full transition-transform duration-300 ease-in-out lg:hidden" id="mobile-menu">
+            <div>
+                <div class="flex items-center justify-between mb-10">
+                    <div class="flex items-center gap-3"><img id="mobile-logo" alt="Logo" class="h-10 w-10 app-logo" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg"/><span class="text-xl font-semibold text-gray-800 dark:text-white">Cooperative</span></div>
+                    <button class="p-1" id="close-menu-btn"><span class="material-symbols-outlined">close</span></button>
+                </div>
+                <nav class="flex flex-col gap-2">
+                    <a class="flex items-center gap-3 px-4 py-3 bg-primary text-white rounded-lg" href="#"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+                    <a class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" href="./userProfile"><span class="material-symbols-outlined">person</span>Profile</a>
+                    <a class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" href="./withdrawalapplication"><span class="material-symbols-outlined">account_balance_wallet</span>Withdraw</a>
+                    <a onclick="openMainModal('topup')" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><span class="material-symbols-outlined">upgrade</span>Top-up/Upgrade</a>
+                    <a class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" href="./updatePaymentDetails"><span class="material-symbols-outlined">payment</span>Payment Details</a>
+                    <a class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" href="./changePassword"><span class="material-symbols-outlined">lock_reset</span>Forgot/Change Password</a>
+                </nav>
+            </div>
+            <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+                <button id="logout-btn-mobile" class="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-left"><span class="material-symbols-outlined">logout</span>Log Out</button>
+            </div>
+        </aside>
+    </div>
+
+    <div id="main-modal-overlay" class="fixed inset-0 z-50 flex items-start justify-center bg-black/40 backdrop-blur-md transition-opacity duration-300 p-4 sm:p-6 overflow-y-auto py-8 hidden" style='font-family: Manrope, "Noto Sans", sans-serif;'>
+        <div class="relative flex w-full max-w-lg flex-col overflow-hidden rounded-xl bg-pure-white shadow-2xl dark:bg-dark-gray-blue w-full max-w-lg">
+            <div class="absolute top-4 right-4 z-10">
+                <button id="close-main-modal-btn" class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-blue/10 hover:bg-slate-blue/20 dark:bg-white/10 dark:hover:bg-white/20 text-slate-blue dark:text-white transition-colors">
+                    <span class="material-symbols-outlined text-xl">close</span>
+                </button>
+            </div>
+            <div class="flex flex-col items-center p-6 border-b border-white-off/10 dark:border-light-gray/20">
+                <h3 class="text-slate-blue dark:text-white tracking-tight text-2xl font-bold leading-tight text-center">Fund Top-up / Upgrade</h3>
+            </div>
+
+            <div class="p-6">
+                <div class="flex py-3">
+                    <div class="relative flex h-12 w-full bg-slate-200 dark:bg-slate-900 rounded-xl p-1 select-none items-center shadow-inner">
+                        <input type="radio" name="view_toggle" id="radio-topup" class="switch-input hidden" onchange="toggleView('topup')" checked>
+                        <input type="radio" name="view_toggle" id="radio-upgrade" class="switch-input hidden" onchange="toggleView('upgrade')">
+                        <label for="radio-topup" class="flex-1 flex items-center justify-center font-bold text-sm bg-white dark:bg-dark-gray-blue rounded-lg shadow-sm text-slate-900 dark:text-white transition-all cursor-pointer" id="lbl-topup">Top-Up Wallet</label>
+                        <label for="radio-upgrade" class="flex-1 flex items-center justify-center font-bold text-sm text-slate-500 dark:text-slate-400 transition-all cursor-pointer" id="lbl-upgrade">Upgrade Plan</label>
+                    </div>
+                </div>
+
+                <div id="view-topup" class="animate-fade-in-slide-up">
+                    <div class="flex flex-col items-center p-4 border rounded-xl border-primary bg-primary/5 dark:bg-primary/10 mb-4">
+                        <span class="material-symbols-outlined text-primary text-3xl mb-2">account_balance_wallet</span>
+                        <h4 class="font-bold text-slate-blue dark:text-white">Top-Up Wallet</h4>
+                        <p class="text-xs text-center text-muted-gray dark:text-light-gray">Add funds directly to your cooperative account.</p>
+                    </div>
+                    <label class="flex flex-col min-w-40 flex-1">
+                        <p class="text-slate-blue dark:text-white text-base font-medium pb-2">Amount</p>
+                        <div class="relative">
+                            <span class="absolute left-4 top-4 text-slate-blue dark:text-white">&#8358;</span>
+                            <input id="amount-input" class="w-full rounded-lg border border-gray-300 bg-white-off p-4 pl-8 dark:bg-slate-900 dark:border-gray-700 dark:text-white focus:ring-primary focus:border-primary" placeholder="Min 5,000" type="number" min="5000"/>
+                        </div>
+                    </label>
+                    <button onclick="initiatePayment()" class="w-full bg-primary text-white font-bold py-3 mt-4 rounded-lg hover:bg-red-700 transition-all">Proceed to Payment</button>
+                    <p class="text-[10px] text-gray-500 mt-2 text-center">Note: Top-ups contribute to your current plan cycle.</p>
+                </div>
+
+                <div id="view-upgrade" class="hidden animate-fade-in-slide-up">
+                    <div class="flex flex-col items-center p-4 border rounded-xl border-primary bg-primary/5 dark:bg-primary/10 mb-4">
+                        <span class="material-symbols-outlined text-primary text-3xl mb-2">star</span>
+                        <h4 class="font-bold text-slate-blue dark:text-white">Upgrade Plan</h4>
+                        <p class="text-xs text-center text-muted-gray dark:text-light-gray">Select a higher plan. <span class="text-red-500 font-bold">Resets 3-Month Cycle.</span></p>
+                    </div>
+                    
+                    <div id="upgrade-plans-list" class="grid grid-cols-1 gap-4 sm:grid-cols-2 max-h-80 overflow-y-auto custom-scroll pr-2">
+                        <p class="text-center text-sm text-gray-500 w-full col-span-2">Loading plans...</p>
+                    </div>
+
+                    <button onclick="savePlan()" class="w-full bg-primary text-white font-bold py-3 mt-4 rounded-lg hover:bg-red-700 transition-all">Switch Plan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="daily-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm hidden p-4">
+        <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-6 animate-fade-in-slide">
+            <button onclick="closeDailyModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><span class="material-symbols-outlined">close</span></button>
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Daily Contribution</h3>
+            <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Amount (Min &#8358;500)</label>
+            <div class="relative mb-2">
+                <span class="absolute left-3 top-3 text-gray-500">&#8358;</span>
+                <input id="daily-input" type="number" min="500" class="w-full pl-8 p-3 rounded-lg border border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-primary focus:border-primary" placeholder="500">
+            </div>
+            <p id="daily-lock-msg" class="hidden text-xs text-orange-500 mb-4 font-semibold"><span class="material-symbols-outlined text-xs align-bottom">lock</span> Amount is locked for the current active cycle.</p>
+            
+            <div id="pay-ahead-section" class="mb-6 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg hidden">
+                <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2">Pay Days Ahead</label>
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-gray-600 dark:text-gray-300">Pay <span id="ahead-count-text" class="font-bold">0</span> days ahead</span>
+                    <div class="flex items-center gap-3">
+                        <button onclick="updateAhead(-1)" class="w-8 h-8 rounded-full bg-white dark:bg-gray-600 shadow flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-500 text-gray-600 dark:text-white transition-colors font-bold text-lg leading-none pb-1">-</button>
+                        <span class="font-mono font-bold text-xl text-primary" id="ahead-counter-display">0</span>
+                        <button onclick="updateAhead(1)" class="w-8 h-8 rounded-full bg-white dark:bg-gray-600 shadow flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-500 text-gray-600 dark:text-white transition-colors font-bold text-lg leading-none pb-1">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg mb-6">
+                <p class="text-xs text-blue-800 dark:text-blue-200 flex items-start gap-2"><span class="material-symbols-outlined text-sm">info</span><span>Note: 1 day's contribution is held as a service fee.</span></p>
+            </div>
+            <button id="btn-pay-daily-confirm" onclick="startDailyPayment()" class="w-full bg-primary text-white font-bold py-3 rounded-lg hover:bg-red-700 transition-transform active:scale-95">Pay Today's Contribution</button>
+        </div>
+    </div>
+
+    <div id="daily-destination-modal" class="fixed inset-0 z-[55] flex items-center justify-center bg-black/60 backdrop-blur-sm hidden p-4">
+        <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-sm w-full p-6 animate-fade-in-slide">
+             <button onclick="closeDestinationModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><span class="material-symbols-outlined">close</span></button>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 text-center">Choose Destination</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6 text-center">Where would you like to move your funds?</p>
+            
+            <div class="flex flex-col gap-3">
+                <button onclick="handleDestinationSelect('savings')" class="flex items-center gap-4 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all group">
+                    <div class="h-10 w-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center group-hover:bg-green-500 group-hover:text-white transition-colors">
+                        <span class="material-symbols-outlined">savings</span>
+                    </div>
+                    <div class="text-left">
+                        <h4 class="font-bold text-gray-800 dark:text-white group-hover:text-green-700 dark:group-hover:text-green-300">Cooperative Savings</h4>
+                        <p class="text-xs text-gray-500">Add to your savings balance</p>
+                    </div>
+                </button>
+
+                <button onclick="handleDestinationSelect('bank')" class="flex items-center gap-4 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all group">
+                    <div class="h-10 w-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center group-hover:bg-blue-500 group-hover:text-white transition-colors">
+                        <span class="material-symbols-outlined">account_balance</span>
+                    </div>
+                    <div class="text-left">
+                        <h4 class="font-bold text-gray-800 dark:text-white group-hover:text-blue-700 dark:group-hover:text-blue-300">Withdraw to Bank</h4>
+                        <p class="text-xs text-gray-500">Request payout to bank account</p>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="auth-modal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm hidden p-4">
+        <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-sm w-full p-6 animate-fade-in-slide">
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Security Check</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Please enter your password to confirm withdrawal.</p>
+            
+            <form id="auth-form" onsubmit="event.preventDefault(); handleAuthSubmit();">
+                <div class="relative mb-4">
+                    <input id="auth-password-input" type="password" class="w-full p-3 pr-10 rounded-lg border border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-primary focus:border-primary" placeholder="Password" required>
+                    <button type="button" onclick="toggleAuthPassword()" class="absolute right-3 top-3 text-gray-400 hover:text-gray-600">
+                        <span id="auth-eye-icon" class="material-symbols-outlined text-xl">visibility</span>
+                    </button>
+                </div>
+                <div class="flex gap-3">
+                    <button type="button" onclick="closeAuthModal()" class="flex-1 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
+                    <button type="submit" id="auth-submit-btn" class="flex-1 py-2 rounded-lg bg-primary text-white font-bold hover:bg-red-700">Confirm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="debt-popup" class="fixed top-24 right-6 z-40 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-2xl border-l-4 border-red-500 flex items-center gap-4 hidden max-w-xs">
+        <div>
+            <p class="text-xs font-bold text-red-500 uppercase">Reminder</p>
+            <p class="text-sm text-gray-700 dark:text-gray-300 font-medium mt-1">You owe contribution for <span id="debt-days-count">0</span> days.</p>
+        </div>
+        <button onclick="handleDebtPayClick()" class="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 px-3 py-2 rounded-lg text-xs font-bold hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors whitespace-nowrap">Pay Now</button>
+        <button onclick="document.getElementById('debt-popup').classList.add('hidden')" class="absolute -top-2 -right-2 bg-gray-200 dark:bg-gray-700 rounded-full p-1 shadow-sm"><span class="material-symbols-outlined text-xs">close</span></button>
+    </div>
+
+    <div id="custom-modal" class="fixed inset-0 z-[100] flex items-center justify-center hidden">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+        <div class="relative bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-2xl max-w-sm w-full mx-4 z-10 animate-fade-in-slide">
+            <h4 id="modal-title" class="text-lg font-bold text-slate-blue dark:text-white mb-3"></h4>
+            <p id="modal-message" class="text-muted-gray dark:text-light-gray mb-6 text-sm leading-relaxed"></p>
+            <div class="flex justify-end space-x-3 mt-auto">
+                <button id="modal-close" class="px-4 py-2 text-sm font-semibold rounded-lg bg-white-off dark:bg-slate-blue text-muted-gray dark:text-light-gray">Close</button>
+                <button id="modal-confirm" class="px-4 py-2 text-sm font-semibold rounded-lg bg-primary text-white hidden shadow-lg shadow-primary/20">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="concurrency-modal" class="fixed inset-0 z-[200] flex items-center justify-center hidden">
+    </div>
+
+<script src="../js/interest-engine.js"></script>
+<script>
+    function hidePreloader() {
+        const p = document.getElementById('preloader');
+        const c = document.getElementById('preloader-card');
+        if(c) c.classList.add('tv-off-active');
+        setTimeout(() => { if(p) p.style.opacity = '0'; p.style.transition = 'opacity 0.3s ease'; }, 400);
+        setTimeout(() => { if(p) p.classList.add('hidden-force'); }, 800);
+    }
+    if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+        document.querySelectorAll('.app-logo').forEach(i => i.src = "https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg");
+    } else {
+        document.documentElement.classList.remove('dark');
+        document.querySelectorAll('.app-logo').forEach(i => i.src = "https://mountainmovingministryintl.org/gallery/MMMi%20Header%20Logo%20-%20light%20mode.svg");
+    }
+</script>
+
+<script type="module">
+    import '../js/auth.js';
+    import { auth, db, doc, getDoc, setDoc, updateDoc, signOut, onAuthStateChanged, collection, query, orderBy, limit, getDocs, where, onSnapshot } from '../js/firebase-init.js';
+    // ✅ CRITICAL FIX: Imported applyDailyInterest to wire it up!
+    import { recordTopUp, applyDailyInterest } from '../js/txnCreation.js';
+    import * as Daily from '../js/daily-logic.js';
+
+    let currentUser = null;
+    let activeDashboard = 'savings';
+    let isBalanceVisible = true;
+    
+    // Pagination & Transaction State
+    let rawTransactions = []; 
+    let currentFilteredTx = []; 
+    let currentPage = 0; 
+    const itemsPerPage = 20; 
+
+    // --- INIT ---
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            currentUser = user;
+            try {
+                if (window.InterestEngine) {
+                    // ✅ WIRED UP: Passing applyDailyInterest as the 4th argument so the engine can PAY the user!
+                    await window.InterestEngine.init(
+                        db, 
+                        user.uid, 
+                        { doc, getDoc, setDoc, updateDoc, getDocs, collection, query, orderBy, where },
+                        applyDailyInterest 
+                    );
+                    renderPlansUI(); 
+                    checkUpgrades();
+                }
+
+                Daily.initDailyLogic(user, {
+                    showModal: window.showModal,
+                    formatCurrency: window.formatCurrency,
+                    switchDashboard: window.switchDashboard
+                });
+
+                await loadData();
+                initSwipeListener(); // Initialize the Swipe Listener
+            } catch (e) {
+                console.error("Dashboard Init Error:", e);
+            } finally {
+                hidePreloader();
+                if (window.InterestEngine && window.InterestEngine.showNotification) {
+                    window.InterestEngine.showNotification();
+                }
+            }
+            
+            // --- SINGLE DEVICE ENFORCEMENT ---
+            // Local call removed to prevent conflict with auth.js
+            
+            bindMobileMenu();
+            bindPagination();
+
+        } else { window.location.href = "/auth/index.html"; }
+    });
+
+    // --- SWIPE GESTURE LISTENER ---
+    function initSwipeListener() {
+        const swipeArea = document.getElementById('main-content');
+        if (!swipeArea) return;
+
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchEndX = 0;
+        let touchEndY = 0;
+
+        swipeArea.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+            touchStartY = e.changedTouches[0].screenY;
+        }, {passive: true});
+
+        swipeArea.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            touchEndY = e.changedTouches[0].screenY;
+            handleSwipeGesture();
+        }, {passive: true});
+
+        function handleSwipeGesture() {
+            const xDiff = touchEndX - touchStartX;
+            const yDiff = touchEndY - touchStartY;
+            const threshold = 50; // Minimum distance to be considered a swipe
+
+            // Check if horizontal swipe dominates vertical scroll
+            if (Math.abs(xDiff) > Math.abs(yDiff) && Math.abs(xDiff) > threshold) {
+                if (xDiff < 0) {
+                    // Swipe Left: Go to Daily (if currently on Savings)
+                    if (activeDashboard === 'savings') {
+                        document.getElementById('dash-toggle-daily').checked = true;
+                        switchDashboard('daily');
+                    }
+                } else {
+                    // Swipe Right: Go to Savings (if currently on Daily)
+                    if (activeDashboard === 'daily') {
+                        document.getElementById('dash-toggle-savings').checked = true;
+                        switchDashboard('savings');
+                    }
+                }
+            }
+        }
+    }
+
+    // --- DATA LOADING ---
+    async function loadData() {
+        if (!currentUser) return;
+        const uid = currentUser.uid;
+        try {
+            const docSnap = await getDoc(doc(db, "users", uid));
+            if (!docSnap.exists()) return;
+            const data = docSnap.data();
+
+            document.getElementById('member-id-display').textContent = `ID: ${data.memberId || 'N/A'}`;
+            updateGreeting(data.firstName || "Member");
+            
+            if (data.photoURL) document.getElementById('header-profile-img').src = data.photoURL;
+            else document.getElementById('header-profile-img').src = `https://ui-avatars.com/api/?name=${data.firstName}+${data.surname}&background=random`;
+
+            Daily.processDailyData(data);
+
+            if (activeDashboard === 'savings') {
+                const bal = data["Wallet balance"] || 0;
+                const balEl = document.getElementById('wallet-balance-display');
+                balEl.setAttribute('data-value', bal);
+                balEl.textContent = isBalanceVisible ? formatCurrency(bal) : '\u20A6 ***';
+                renderCurrentPlanDetail(data["User_Plan"] || "Bronze", data.planStartDate);
+            }
+            
+            if(rawTransactions.length === 0) {
+                await fetchTransactions(uid);
+            } else {
+                filterAndRenderTransactions();
+            }
+
+        } catch(e) { console.error("Error loading data:", e); }
+    }
+
+    function renderCurrentPlanDetail(planName, planStartDateStr) {
+        const tag = document.getElementById('current-plan-tag');
+        tag.textContent = planName;
+        const lowerPlan = planName.toLowerCase();
+        let colorClasses = "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"; 
+        
+        if (lowerPlan.includes('bronze')) colorClasses = "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200";
+        else if (lowerPlan.includes('silver')) colorClasses = "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300";
+        else if (lowerPlan.includes('gold')) colorClasses = "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200";
+        else if (lowerPlan.includes('platinum') || lowerPlan.includes('diamond')) colorClasses = "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-200";
+        
+        tag.className = `px-3 py-1 rounded-full text-xs font-bold transition-colors ${colorClasses}`;
+
+        const dateEl = document.getElementById('savings-start-date-display');
+        if (dateEl) {
+            if (planStartDateStr) {
+                const d = new Date(planStartDateStr);
+                if (!isNaN(d.getTime())) {
+                    dateEl.textContent = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+                } else { dateEl.textContent = "N/A"; }
+            } else { dateEl.textContent = "N/A"; }
+        }
+
+        const plans = InterestEngine.getPlans();
+        if (!plans || plans.length === 0) {
+             document.getElementById('plan-details-container').innerHTML = '<p class="text-gray-400 text-sm">Plan details unavailable.</p>';
+             return;
+        }
+        const p = plans.find(x => x.name.toLowerCase() === planName.toLowerCase()) || plans[0]; 
+        const detailsDiv = document.getElementById('plan-details-container');
+        if(p) {
+            detailsDiv.innerHTML = `
+                <h2 class="text-lg font-semibold text-white mb-4">Your ${p.name} Plan Benefits</h2>
+                <ul class="space-y-4">
+                    <li class="flex items-start gap-3"><span class="material-symbols-outlined text-green-400 mt-1">check_circle</span><span class="text-gray-300">${p.rate}% Interest Rate in 90 days</span></li>
+                    <li class="flex items-start gap-3"><span class="material-symbols-outlined text-green-400 mt-1">check_circle</span><span class="text-gray-300">Balance Range: &#8358;${p.minAmount.toLocaleString()} - ${p.maxAmount ? '&#8358;'+p.maxAmount.toLocaleString() : 'âˆž'}</span></li>
+                    <li class="flex items-start gap-3"><span class="material-symbols-outlined text-green-400 mt-1">check_circle</span><span class="text-gray-300">Withdrawable after 3 months cycle.</span></li>
+                </ul>
+            `;
+        }
+    }
+
+    async function checkUpgrades() {
+        const upgrade = await InterestEngine.checkUpgradeAvailability();
+        const banner = document.getElementById('upgrade-notification');
+        if (upgrade && upgrade.available) {
+            document.getElementById('upgrade-msg').textContent = upgrade.message;
+            banner.classList.remove('hidden');
+        } else {
+            banner.classList.add('hidden');
+        }
+    }
+
+    // --- PLANS UI ---
+    function renderPlansUI() {
+        const allPlans = InterestEngine.getPlans() || [];
+        const activePlans = allPlans.filter(p => p.isActive !== false);
+        const container = document.getElementById('upgrade-plans-list');
+        
+        if (activePlans.length === 0) {
+            container.innerHTML = '<p class="text-xs text-red-500 w-full col-span-2 text-center">No active plans available for upgrade.</p>';
+            return;
+        }
+
+        container.innerHTML = activePlans.map(p => `
+            <div data-plan="${p.name}" onclick="selectPlan(this)" class="plan-card flex flex-col p-4 border rounded-xl cursor-pointer border-white-off/10 dark:border-light-gray/20 hover:border-primary/50 transition-all">
+                <div class="flex justify-between items-center mb-2">
+                    <h5 class="font-bold text-slate-blue dark:text-white">${p.name}</h5>
+                    <span class="text-xs text-primary font-semibold">${p.rate}% /90d cycle</span>
+                </div>
+                <p class="text-xs text-muted-gray dark:text-light-gray mb-2">Range: &#8358;${p.minAmount.toLocaleString()} - ${p.maxAmount ? '&#8358;'+p.maxAmount.toLocaleString() : 'Unlimited'}</p>
+                <ul class="text-xs text-muted-gray dark:text-light-gray list-disc pl-4 space-y-1">
+                    <li>Rate applies to 3-month cycle</li>
+                    <li>Withdrawable after maturity</li>
+                </ul>
+            </div>
+        `).join('');
+    }
+
+    // --- DASHBOARD UI LOGIC ---
+    window.switchDashboard = function(type) {
+        activeDashboard = type;
+        document.getElementById('dashboard-savings').classList.toggle('hidden', type !== 'savings');
+        document.getElementById('dashboard-daily').classList.toggle('hidden', type !== 'daily');
+        loadData();
+    }
+
+    function updateGreeting(name) {
+        const h = new Date().getHours();
+        document.getElementById('greeting-text').textContent = `${h<12?"Good morning":h<18?"Good afternoon":"Good evening"}, ${name}!`;
+    }
+
+    // --- MODAL & PLAN SELECTION ---
+    window.openMainModal = function(tab) {
+        document.getElementById('main-modal-overlay').classList.remove('hidden');
+        toggleView(tab);
+    }
+    window.hideMainModal = function() { document.getElementById('main-modal-overlay').classList.add('hidden'); }
+    
+    window.toggleView = function(view) {
+        document.getElementById('view-topup').classList.toggle('hidden', view !== 'topup');
+        document.getElementById('view-upgrade').classList.toggle('hidden', view !== 'upgrade');
+        
+        const topBtn = document.getElementById('lbl-topup');
+        const upBtn = document.getElementById('lbl-upgrade');
+        
+        if(view === 'topup'){
+            document.getElementById('radio-topup').checked = true;
+            topBtn.className = "flex-1 flex items-center justify-center font-bold text-sm bg-white dark:bg-dark-gray-blue rounded-lg shadow-sm text-slate-900 dark:text-white transition-all cursor-pointer py-2";
+            upBtn.className = "flex-1 flex items-center justify-center font-bold text-sm text-slate-500 dark:text-slate-400 transition-all cursor-pointer py-2";
+        } else {
+            document.getElementById('radio-upgrade').checked = true;
+            topBtn.className = "flex-1 flex items-center justify-center font-bold text-sm text-slate-500 dark:text-slate-400 transition-all cursor-pointer py-2";
+            upBtn.className = "flex-1 flex items-center justify-center font-bold text-sm bg-white dark:bg-dark-gray-blue rounded-lg shadow-sm text-slate-900 dark:text-white transition-all cursor-pointer py-2";
+        }
+    }
+
+    window.selectPlan = function(el) {
+        document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
+        el.classList.add('selected');
+        window.selectedPlanTemp = el.dataset.plan; 
+    }
+
+    window.savePlan = function() {
+        const plan = window.selectedPlanTemp || 'Bronze';
+        showModal('Confirm Plan Switch', `Switching to ${plan} will start a new 3-month cycle. Continue?`, true, async () => {
+             if (window.InterestEngine) {
+                const s = await InterestEngine.attemptChange(plan);
+                if(s) { 
+                    renderCurrentPlanDetail(plan, new Date().toISOString()); 
+                    loadData(); 
+                    hideMainModal();
+                    checkUpgrades(); 
+                }
+             }
+        });
+    }
+
+    window.initiatePayment = function() {
+        const amt = document.getElementById('amount-input').value;
+        if(amt < 5000) {
+            showModal("Invalid Amount", "Minimum amount is \u20A65,000");
+            return;
+        }
+
+        const squadInstance = new squad({
+            onSuccess: async(d) => {
+                try {
+                    if (!d || (!d.transaction_ref && !d.reference)) throw new Error("Reference missing from payment provider.");
+                    const ref = d.transaction_ref || d.reference;
+                    const cleanRef = String(ref).trim();
+
+                    await recordTopUp(currentUser.uid, parseFloat(amt), cleanRef);
+
+                    hideMainModal();
+                    showModal("Success", "Topup Successful!", true, () => loadData());
+                    loadData();
+                    checkUpgrades();
+                } catch(e) {
+                    console.error("Savings Payment Record Error:", e);
+                    hideMainModal();
+                    showModal("Payment Error", "Payment successful, but verification failed: " + (e.message || "Unknown error"));
+                }
+            },
+            key: "pk_59f298e7999d3bef0293627a86b20786947a6c15",
+            email: currentUser.email,
+            amount: amt*100,
+            currency_code: "NGN"
+        });
+        squadInstance.setup(); squadInstance.open();
+    }
+
+    // --- TRANSACTION LOGIC WITH PAGINATION ---
+    async function fetchTransactions(uid) {
+        const q = query(collection(db, "users", uid, "transactions"), orderBy("date", "desc"), limit(100));
+        const snap = await getDocs(q);
+        
+        rawTransactions = [];
+        snap.forEach(doc => rawTransactions.push({ id: doc.id, ...doc.data() }));
+        
+        filterAndRenderTransactions();
+    }
+
+    function filterAndRenderTransactions() {
+        if(activeDashboard === 'daily') {
+            currentFilteredTx = rawTransactions.filter(tx => tx.category === 'daily');
+        } else {
+            currentFilteredTx = rawTransactions.filter(tx => tx.category !== 'daily');
+        }
+        
+        renderTransactionPreview();
+        currentPage = 0;
+        renderTransactionPage(); 
+        
+        const btn = document.getElementById('view-all-tx-btn');
+        if(currentFilteredTx.length > 4) {
+            btn.classList.remove('hidden');
+            if (!document.getElementById('expanded-transactions').classList.contains('expanded')) {
+                btn.textContent = "View All";
+            }
+        } else {
+            btn.classList.add('hidden');
+        }
+    }
+
+    function renderTransactionPreview() {
+        const cont = document.getElementById('transactions-container');
+        if (currentFilteredTx.length === 0) {
+            cont.innerHTML = '<p class="text-gray-500 text-center text-sm py-4">No transactions found.</p>';
+            return;
+        }
+        cont.innerHTML = currentFilteredTx.slice(0, 4).map(tx => createTxHTML(tx)).join('');
+    }
+
+    function renderTransactionPage() {
+        const listContent = document.getElementById('expanded-list-content');
+        const pagination = document.getElementById('tx-pagination');
+        
+        const start = 4 + (currentPage * itemsPerPage);
+        const end = start + itemsPerPage;
+        
+        if (start >= currentFilteredTx.length) {
+            if (currentFilteredTx.length > 4) {
+                currentPage = Math.max(0, currentPage - 1);
+                renderTransactionPage();
+            } else {
+                listContent.innerHTML = '';
+                pagination.classList.add('hidden');
+            }
+            return;
+        }
+
+        const slice = currentFilteredTx.slice(start, end);
+        
+        if(slice.length > 0) {
+            listContent.innerHTML = slice.map(tx => createTxHTML(tx)).join('');
+        } else {
+            listContent.innerHTML = '<p class="text-xs text-gray-400 text-center py-2">End of history.</p>';
+        }
+        
+        const totalExpandedItems = currentFilteredTx.length - 4;
+        
+        if (totalExpandedItems > itemsPerPage) {
+            pagination.classList.remove('hidden');
+            const totalPages = Math.ceil(totalExpandedItems / itemsPerPage);
+            document.getElementById('page-indicator').textContent = `Page ${currentPage + 1} of ${totalPages}`;
+            
+            document.getElementById('btn-prev-tx').disabled = currentPage === 0;
+            document.getElementById('btn-next-tx').disabled = currentPage >= totalPages - 1;
+        } else {
+            pagination.classList.add('hidden');
+        }
+    }
+
+    function createTxHTML(tx) {
+        const displayId = tx.transactionId || tx.id; 
+        const isCr = tx.type && (tx.type.includes('Credit') || tx.type === 'Interest Credit');
+        const colorClass = isCr ? "text-green-600" : "text-red-600";
+        const iconBg = isCr ? "bg-green-50 dark:bg-green-900/20" : "bg-red-50 dark:bg-red-900/20";
+        const iconColor = isCr ? "text-green-600" : "text-red-600";
+        const iconName = isCr ? "arrow_downward" : "arrow_upward";
+        const dateObj = tx.date ? tx.date.toDate() : new Date();
+        const dateStr = dateObj.toLocaleDateString('en-GB'); 
+        const timeStr = dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+        let statusColor = "text-gray-400"; 
+        const s = (tx.status || '').toUpperCase();
+        if(s === 'SUCCESS' || s === 'COMPLETED') statusColor = "text-green-500 dark:text-green-400";
+        else if(s === 'PENDING' || s === 'PROCESSING') statusColor = "text-yellow-500 dark:text-yellow-400";
+        else if(s === 'REJECTED' || s === 'FAILED') statusColor = "text-red-500 dark:text-red-400";
+
+        return `
+        <div class="flex justify-between items-center p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors animate-fade-in-slide border-b border-gray-50 dark:border-gray-800 last:border-0">
+            <div class="flex items-start gap-3">
+                <div class="h-10 w-10 rounded-full ${iconBg} flex items-center justify-center flex-shrink-0 mt-1"><span class="material-symbols-outlined ${iconColor} text-xl">${iconName}</span></div>
+                <div>
+                    <h4 class="font-bold text-gray-800 dark:text-gray-200 text-sm leading-tight">${tx.description || 'Transaction'}</h4>
+                    <p class="text-xs text-gray-400 font-mono mt-0.5">Ref: ${displayId}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">${dateStr} • ${timeStr}</p>
+                </div>
+            </div>
+            <div class="text-right">
+                <p class="font-bold text-sm ${colorClass}">${isCr?'+':'-'}${formatCurrency(tx.amount)}</p>
+                <span class="text-[10px] uppercase font-bold ${statusColor} tracking-wide">${tx.status || 'SUCCESS'}</span>
+            </div>
+        </div>`;
+    }
+
+    function bindPagination() {
+        document.getElementById('btn-prev-tx').addEventListener('click', () => {
+            if(currentPage > 0) { currentPage--; renderTransactionPage(); }
+        });
+        document.getElementById('btn-next-tx').addEventListener('click', () => {
+            const totalExpandedItems = currentFilteredTx.length - 4;
+            const maxPages = Math.ceil(totalExpandedItems / itemsPerPage);
+            if(currentPage < maxPages - 1) { currentPage++; renderTransactionPage(); }
+        });
+    }
+
+    function bindMobileMenu() {
+        const mm = document.getElementById('mobile-menu'); 
+        const mo = document.getElementById('mobile-menu-overlay');
+        const mb = document.getElementById('menu-btn');
+        const cmb = document.getElementById('close-menu-btn');
+        const mainContent = document.getElementById('main-content');
+        
+        const openMenu = () => { 
+            mm.classList.remove('-translate-x-full'); 
+            mo.classList.remove('hidden'); 
+            if(mainContent) mainContent.classList.add('content-blurred');
+        };
+        const closeMenu = () => { 
+            mm.classList.add('-translate-x-full'); 
+            mo.classList.add('hidden'); 
+            if(mainContent) mainContent.classList.remove('content-blurred');
+        };
+
+        if(mb) mb.onclick = openMenu;
+        if(cmb) cmb.onclick = closeMenu; 
+        if(mo) mo.onclick = closeMenu;
+    }
+
+    // SHARED UTILS
+    window.toggleBalanceVisibility = () => { isBalanceVisible=!isBalanceVisible; loadData(); };
+    
+    window.toggleTransactions = () => {
+        const exp = document.getElementById('expanded-transactions');
+        const btn = document.getElementById('view-all-tx-btn');
+        
+        exp.classList.toggle('expanded');
+        
+        if (exp.classList.contains('expanded')) {
+            btn.textContent = 'Collapse';
+            if(!exp.innerHTML.trim() || currentPage !== 0) {
+                currentPage = 0;
+                renderTransactionPage();
+            }
+        } else {
+            btn.textContent = 'View All';
+        }
+    };
+
+    window.showModal = (t,m,c,cb) => { 
+        document.getElementById('modal-title').textContent=t; document.getElementById('modal-message').textContent=m;
+        document.getElementById('custom-modal').classList.remove('hidden');
+        const btn = document.getElementById('modal-confirm');
+        if(c){ btn.classList.remove('hidden'); btn.onclick = () => { cb(); document.getElementById('custom-modal').classList.add('hidden'); }; }
+        else { btn.classList.add('hidden'); }
+        document.getElementById('modal-close').onclick = () => document.getElementById('custom-modal').classList.add('hidden');
+    };
+    window.formatCurrency = function(v) { return new Intl.NumberFormat('en-NG', {style:'currency', currency:'NGN'}).format(v); }
+
+    document.getElementById('logout-btn-desktop').addEventListener('click', () => signOut(auth));
+    document.getElementById('logout-btn-mobile').addEventListener('click', () => signOut(auth));
+    document.getElementById('close-main-modal-btn').addEventListener('click', hideMainModal);
+    
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+        const d = document.documentElement.classList.contains('dark');
+        localStorage.setItem('theme', d?'dark':'light');
+        document.querySelectorAll('.app-logo').forEach(i => i.src = d ? "https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg" : "https://mountainmovingministryintl.org/gallery/MMMi%20Header%20Logo%20-%20light%20mode.svg");
+    });
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(() => console.log('Service Worker Registered'))
+        .catch(err => console.error('Service Worker Failed:', err));
+    });
+  }
+</script>
+<script type="module" src="../js/notifications.js"></script>
+</body>
+</html>

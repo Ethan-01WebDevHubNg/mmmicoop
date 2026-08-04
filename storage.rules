@@ -1,0 +1,18 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Match profile images path: profile_images/USER_ID/FILENAME
+    match /profile_images/{userId}/{fileName} {
+      
+      // Allow Read: Anyone logged in can see profile pics
+      allow read: if request.auth != null;
+      
+      // Allow Write: Strict Checks
+      allow write: if request.auth != null 
+                   && request.auth.uid == userId // Only owner
+                   && request.resource.size < 2 * 1024 * 1024 // Max 2MB
+                   && request.resource.contentType.matches('image/.*'); // Images only
+    }
+  }
+}

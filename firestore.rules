@@ -1,0 +1,148 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // --- 🔐 SECURITY HELPERS ---
+
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    
+    function balanceChange() {
+      return incoming()["Wallet balance"] - existing()["Wallet balance"];
+    }
+
+    function isChanging(field) {
+      return incoming().get(field, null) != existing().get(field, null);
+    }
+
+    function existingData(field) {
+      return existing().get(field, null);
+    }
+
+    // --- 📄 RULES ---
+
+    match /metadata/user_stats {
+      allow read: if true;
+      allow update: if incoming().memberCount == existing().memberCount + 1;
+    }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+
+      // ✅ CREATE
+      allow create: if isOwner(userId)
+        && incoming()["Wallet balance"] == 0
+        && incoming()["User_Plan"] == "Bronze"
+        && incoming().Credit_Transactions == 0
+        && incoming().Debit_transactions == 0
+        && incoming().email == request.auth.token.email
+        && incoming().keys().hasAll(['memberId', 'createdAt', 'planStartDate']);
+
+      // ✅ UPDATE
+      allow update: if isOwner(userId) 
+        // GLOBAL PROTECTION
+        && !isChanging("User_Plan") 
+        && !isChanging("planStartDate")
+        && !isChanging("memberId")
+
+        // BANK DETAILS "WRITE-ONCE" RULE
+        && (
+           (!isChanging("bankName") && !isChanging("accountNumber")) 
+           || 
+           (existingData("bankName") == null && existingData("accountNumber") == null)
+        )
+
+        && (
+          // -----------------------------------------------------
+          // SCENARIO A: WITHDRAWAL (Debit)
+          // -----------------------------------------------------
+          (
+            balanceChange() < 0 && 
+            incoming().Debit_transactions == existing().Debit_transactions + 1 &&
+
+            // STRICT 90-DAY LIMIT ENFORCEMENT
+            (
+               // CASE 1: Resetting the Cycle (User claims > 90 days passed)
+               (
+                 incoming().withdrawalCycleCount == 1 && // Reset to first withdrawal of new cycle
+                 // Check if 90 days actually passed
+                 request.time > timestamp(existing().withdrawalCycleStart) + duration.value(90, 'd') &&
+                 // And user set a new start date (roughly now)
+                 timestamp(incoming().withdrawalCycleStart) > request.time - duration.value(1, 'h')
+               )
+               ||
+               // CASE 2: Continuing the Cycle (Within 90 days)
+               (
+                 incoming().withdrawalCycleCount == existing().withdrawalCycleCount + 1 &&
+                 incoming().withdrawalCycleStart == existing().withdrawalCycleStart &&
+                 incoming().withdrawalCycleCount <= 2
+               )
+            )
+          ) 
+          
+          ||
+
+          // -----------------------------------------------------
+          // SCENARIO B: TOP-UP (Credit)
+          // -----------------------------------------------------
+          (
+            balanceChange() > 0 &&
+            balanceChange() >= 5000 && 
+            incoming().Credit_Transactions == existing().Credit_Transactions + 1 &&
+
+            // NEW: Allow Cycle Initialization on FIRST Credit
+            (
+               // Normal Top-Up (Cycle already exists)
+               (!isChanging("withdrawalCycleStart") && !isChanging("withdrawalCycleCount"))
+               ||
+               // First Funding (Cycle is null) -> Allow setting it
+               (
+                 existingData("withdrawalCycleStart") == null && 
+                 isChanging("withdrawalCycleStart") && 
+                 incoming().withdrawalCycleCount == 0
+               )
+            )
+          )
+
+          ||
+
+          // -----------------------------------------------------
+          // SCENARIO C: INTEREST APPLICATION
+          // -----------------------------------------------------
+          (
+            balanceChange() > 0 && 
+            isChanging("lastInterestApplied") &&
+            request.time > timestamp(existing().lastInterestApplied) + duration.value(20, 'h')
+          )
+          
+          ||
+          
+          // -----------------------------------------------------
+          // SCENARIO D: PROFILE UPDATES
+          // -----------------------------------------------------
+          (
+             balanceChange() == 0 &&
+             !isChanging("Credit_Transactions") &&
+             !isChanging("Debit_transactions") &&
+             !isChanging("withdrawalCycleCount")
+          )
+        );
+
+      match /transactions/{txnId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId)
+          && incoming().amount > 0
+          && incoming().userId == userId
+          && (
+            (incoming().type == "Credit" && incoming().status == "Success" && incoming().reference.size() > 5) ||
+            (incoming().type == "Debit" && incoming().status == "Pending") ||
+            (incoming().type == "Interest Credit")
+          );
+      }
+    }
+  }
+}
