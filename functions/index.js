@@ -1,35 +1,33 @@
-const { onCall, HttpsError } = require("firebase-functions/v2/https");
-const { onDocumentWritten } = require("firebase-functions/v2/firestore");
-// REMOVED onSchedule import to stop the crashing Cron Job
-const { defineSecret } = require('firebase-functions/params'); 
-const admin = require("firebase-admin");
-const axios = require("axios");
-const { RecaptchaEnterpriseServiceClient } = require("@google-cloud/recaptcha-enterprise");
-const { getFirestore, FieldValue } = require("firebase-admin/firestore");
-const { getMessaging } = require("firebase-admin/messaging");
+import { onCall, HttpsError } from "firebase-functions/v2/https";
+import * as functionsV1 from "firebase-functions/v1"; 
+import { defineSecret } from "firebase-functions/params";
+
+import { initializeApp, getApps } from "firebase-admin/app";
+import { getFirestore, FieldValue } from "firebase-admin/firestore";
+import { getMessaging } from "firebase-admin/messaging";
+import axios from "axios";
+import { RecaptchaEnterpriseServiceClient } from "@google-cloud/recaptcha-enterprise";
 
 // --- SECRETS CONFIGURATION ---
 const squadTestKey = defineSecret('SQUAD_TEST_KEY');
 const squadLiveKey = defineSecret('SQUAD_LIVE_KEY');
 
-// ⚡️ TOGGLE THIS TO SWITCH MODES ⚡️
 const IS_PROD = true; 
 
 // --- INITIALIZATION ---
-if (admin.apps.length === 0) {
-  admin.initializeApp();
+if (getApps().length === 0) {
+  initializeApp();
 }
 
 const db = getFirestore();
-// IMPORTANT: Prevents crashes on partial updates
 db.settings({ ignoreUndefinedProperties: true });
 
-const client = new RecaptchaEnterpriseServiceClient();
+let recaptchaClient = null;
 
 // =========================================================
-// 1. RECAPTCHA VERIFICATION
+// 1. RECAPTCHA VERIFICATION (Gen 2)
 // =========================================================
-exports.verifyRecaptcha = onCall(
+export const verifyRecaptcha = onCall(
     { region: "us-central1" }, 
     async (request) => {
         const { token, action } = request.data;
@@ -39,12 +37,16 @@ exports.verifyRecaptcha = onCall(
         if (!token) throw new HttpsError("invalid-argument", "Missing reCAPTCHA token.");
 
         try {
-            const projectPath = client.projectPath(projectID);
+            if (!recaptchaClient) {
+                recaptchaClient = new RecaptchaEnterpriseServiceClient();
+            }
+
+            const projectPath = recaptchaClient.projectPath(projectID);
             const assessmentRequest = {
                 assessment: { event: { token: token, siteKey: recaptchaKey, expectedAction: action } },
                 parent: projectPath,
             };
-            const [response] = await client.createAssessment(assessmentRequest);
+            const [response] = await recaptchaClient.createAssessment(assessmentRequest);
 
             if (!response.tokenProperties.valid) return { success: false, error: "Invalid Token" };
             if (response.tokenProperties.action !== action) return { success: false, error: "Action Mismatch" };
@@ -58,25 +60,24 @@ exports.verifyRecaptcha = onCall(
 );
 
 // =========================================================
-// 2. DASHBOARD AGGREGATION
+// 2. DASHBOARD AGGREGATION (Gen 1)
 // =========================================================
 const STATS_DOC_REF = db.collection("metadata").doc("dashboard_stats");
 
-exports.aggregateTransactions = onDocumentWritten(
-    { region: "europe-west1", document: "users/{userId}/transactions/{txnId}" },
-    async (event) => {
-        if (!event.data) return;
-        const beforeData = event.data.before.data();
-        const afterData = event.data.after.data();
+export const aggregateTransactions = functionsV1.region("europe-west1")
+    .firestore.document("users/{userId}/transactions/{txnId}")
+    .onWrite(async (change, context) => {
+        const beforeData = change.before ? change.before.data() : null;
+        const afterData = change.after ? change.after.data() : null;
 
         let inflowDelta = 0;
         let outflowDelta = 0;
 
-        const processSnapshot = (data, multiplier) => {
-            if (!data || data.status !== 'Success') return; 
-            const amount = Number(data.amount) || 0;
-            if (data.type === 'Credit') inflowDelta += (amount * multiplier);
-            else if (data.type === 'Debit') outflowDelta += (amount * multiplier);
+        const processSnapshot = (dataObj, multiplier) => {
+            if (!dataObj || dataObj.status !== 'Success') return; 
+            const amount = Number(dataObj.amount) || 0;
+            if (dataObj.type === 'Credit') inflowDelta += (amount * multiplier);
+            else if (dataObj.type === 'Debit') outflowDelta += (amount * multiplier);
         };
 
         processSnapshot(beforeData, -1);
@@ -93,16 +94,14 @@ exports.aggregateTransactions = onDocumentWritten(
         } catch (error) {
             console.error("Aggregation Failed", error);
         }
-    }
-);
+    });
 
 // =========================================================
-// 3. SECURE DEPOSIT (Unified)
+// 3. SECURE DEPOSIT (Gen 2)
 // =========================================================
-exports.verifyAndCreditTopUp = onCall(
+export const verifyAndCreditTopUp = onCall(
     { 
         region: "us-central1",
-        // SECRETS MUST BE DEFINED HERE
         secrets: [squadTestKey, squadLiveKey] 
     }, 
     async (request) => {
@@ -117,30 +116,28 @@ exports.verifyAndCreditTopUp = onCall(
         if (!reference) throw new HttpsError('invalid-argument', 'Missing Transaction Reference.');
 
         try {
-            // 1. Verify User
-            const decodedToken = await admin.auth().verifyIdToken(userToken, true);
+            const { getAuth } = await import("firebase-admin/auth");
+            
+            const decodedToken = await getAuth().verifyIdToken(userToken, true);
             if (decodedToken.uid !== userId) throw new HttpsError('permission-denied', 'User mismatch.');
 
-            // 2. Idempotency Check
             const existingTxn = await db.collection("users").doc(userId)
                 .collection("transactions").where("reference", "==", reference).get();
             if (!existingTxn.empty) return { success: true, message: "Transaction already processed." };
 
-            // 3. Squad Verification
             const squadUrl = `${BASE_URL}/transaction/verify/${reference}`;
             const response = await axios.get(squadUrl, {
                 headers: { "Authorization": `Bearer ${SQUAD_SECRET_KEY}` }
             });
 
-            const data = response.data;
-            if (!data.status || data.data.transaction_status !== "success") {
+            const resData = response.data;
+            if (!resData.status || resData.data.transaction_status !== "success") {
                 throw new HttpsError('aborted', 'Payment verification failed or pending.');
             }
 
-            const koboAmount = Number(data.data.transaction_amount);
+            const koboAmount = Number(resData.data.transaction_amount);
             const amountInNaira = koboAmount / 100;
 
-            // 4. DB Write
             await db.runTransaction(async (t) => {
                 const userRef = db.collection("users").doc(userId);
                 const userDoc = await t.get(userRef);
@@ -156,8 +153,8 @@ exports.verifyAndCreditTopUp = onCall(
                     
                     if (!daily.isActive) {
                         daily.isActive = true;
-                        daily.dailyAmount = amountInNaira;
                         daily.startDate = new Date().toISOString();
+                        daily.dailyAmount = amountInNaira;
                         daily.lastContributionDate = new Date().toISOString();
                         daily.count = 1;
                         daily.accumulated = amountInNaira;
@@ -183,7 +180,7 @@ exports.verifyAndCreditTopUp = onCall(
                         reference: reference,
                         date: serverTime,
                         description: "Daily Contribution Deposit",
-                        payment_gateway_ref: data.data.transaction_ref
+                        payment_gateway_ref: resData.data.transaction_ref
                     });
 
                 } else {
@@ -203,7 +200,7 @@ exports.verifyAndCreditTopUp = onCall(
                         reference: reference,
                         date: serverTime,
                         description: "Wallet Top-up",
-                        payment_gateway_ref: data.data.transaction_ref
+                        payment_gateway_ref: resData.data.transaction_ref
                     });
                 }
             });
@@ -222,9 +219,9 @@ exports.verifyAndCreditTopUp = onCall(
 );
 
 // =========================================================
-// 4. ADMIN USER MANAGEMENT
+// 4. ADMIN USER MANAGEMENT (Gen 2)
 // =========================================================
-exports.deleteUser = onCall(
+export const deleteUser = onCall(
     { region: "us-central1" }, 
     async (request) => {
         if (!request.auth) throw new HttpsError('unauthenticated', 'User must be logged in.');
@@ -232,9 +229,11 @@ exports.deleteUser = onCall(
         if (!targetUid) throw new HttpsError('invalid-argument', 'UID required.');
 
         try {
-            await admin.auth().updateUser(targetUid, { disabled: true });
-            await admin.auth().revokeRefreshTokens(targetUid);
-            await admin.firestore().collection("users").doc(targetUid).update({
+            const { getAuth } = await import("firebase-admin/auth");
+
+            await getAuth().updateUser(targetUid, { disabled: true });
+            await getAuth().revokeRefreshTokens(targetUid);
+            await db.collection("users").doc(targetUid).update({
                 isDeleted: true,
                 isAccountActive: false,
                 deletedAt: FieldValue.serverTimestamp(),
@@ -245,7 +244,7 @@ exports.deleteUser = onCall(
             console.error("Error archiving user:", error);
             if (error.code === 'auth/user-not-found') {
                  try {
-                    await admin.firestore().collection("users").doc(targetUid).update({
+                    await db.collection("users").doc(targetUid).update({
                         isDeleted: true,
                         deletedAt: FieldValue.serverTimestamp()
                     });
@@ -258,17 +257,9 @@ exports.deleteUser = onCall(
 );
 
 // =========================================================
-// 5. INTEREST SCHEDULER
+// 6. NOTIFICATION SYSTEM (Gen 2)
 // =========================================================
-// 🛑 REMOVED to prevent server crashes. 
-// We are now using "Plan B" (Client-Side Interest Engine) via interest-engine.js
-
-// =========================================================
-// 6. NOTIFICATION SYSTEM
-// =========================================================
-
-// A. Subscribe User to Broadcast Topic
-exports.subscribeToBroadcast = onCall(
+export const subscribeToBroadcast = onCall(
     { region: "us-central1" },
     async (request) => {
         if (!request.auth) throw new HttpsError('unauthenticated', 'User must be logged in.');
@@ -277,10 +268,8 @@ exports.subscribeToBroadcast = onCall(
         if (!fcmToken) throw new HttpsError('invalid-argument', 'Token required.');
 
         try {
-            // Subscribe this token to the global 'broadcast' topic
             await getMessaging().subscribeToTopic(fcmToken, 'broadcast');
             
-            // Optional: Save token to user profile for debugging
             await db.collection('users').doc(request.auth.uid).set({
                 fcmToken: fcmToken,
                 notificationsEnabled: true,
@@ -295,18 +284,19 @@ exports.subscribeToBroadcast = onCall(
     }
 );
 
-// B. Send Broadcast (Admin Only)
-exports.sendBroadcast = onCall(
+export const sendBroadcast = onCall(
     { region: "us-central1" },
     async (request) => {
-        // Strict Admin Check
         if (!request.auth) throw new HttpsError('unauthenticated', 'Login required.');
         
-        // Check if user is admin (You can enhance this using your existing role check logic)
         const adminDoc = await db.collection('admins').doc(request.auth.uid).get();
         if (!adminDoc.exists) throw new HttpsError('permission-denied', 'Not an admin.');
 
-        const { title, body } = request.data;
+        const { title, body, imageUrl } = request.data;
+
+        if (!title || !body) {
+            throw new HttpsError('invalid-argument', 'Broadcast title and body cannot be empty.');
+        }
 
         const message = {
             notification: {
@@ -315,10 +305,14 @@ exports.sendBroadcast = onCall(
             },
             data: {
                 url: '/member/memberDashboard.html',
-                click_action: 'FLUTTER_NOTIFICATION_CLICK' // For consistency if you ever go native
+                click_action: 'FLUTTER_NOTIFICATION_CLICK'
             },
             topic: 'broadcast'
         };
+
+        if (imageUrl) {
+            message.notification.image = imageUrl;
+        }
 
         try {
             const response = await getMessaging().send(message);

@@ -1,4 +1,4 @@
-import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
+import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
 import { app, functions, httpsCallable } from "./firebase-init.js";
 
 const messaging = getMessaging(app);
@@ -28,12 +28,22 @@ export async function initNotifications() {
                 console.log('Subscribed to broadcasts');
             }
         } else {
-            console.log('Unable to get permission to notify.');
+            console.warn('Unable to get permission to notify.');
         }
     } catch (error) {
         console.error('Notification setup failed:', error);
     }
 }
+
+// 3. HANDLE FOREGROUND MESSAGES
+// Intercepts payloads when the app is active and dispatches an event
+onMessage(messaging, (payload) => {
+    console.log('Foreground message received:', payload);
+    
+    // Dispatch a custom event so dashboards can display dynamic UI toasts natively
+    const fcmEvent = new CustomEvent('fcm-foreground', { detail: payload });
+    window.dispatchEvent(fcmEvent);
+});
 
 // Auto-init on load
 initNotifications();

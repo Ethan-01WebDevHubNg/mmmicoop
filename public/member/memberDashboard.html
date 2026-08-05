@@ -469,7 +469,6 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 <script type="module">
     import '../js/auth.js';
     import { auth, db, doc, getDoc, setDoc, updateDoc, signOut, onAuthStateChanged, collection, query, orderBy, limit, getDocs, where, onSnapshot } from '../js/firebase-init.js';
-    // ✅ CRITICAL FIX: Imported applyDailyInterest to wire it up!
     import { recordTopUp, applyDailyInterest } from '../js/txnCreation.js';
     import * as Daily from '../js/daily-logic.js';
 
@@ -489,7 +488,6 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
             currentUser = user;
             try {
                 if (window.InterestEngine) {
-                    // ✅ WIRED UP: Passing applyDailyInterest as the 4th argument so the engine can PAY the user!
                     await window.InterestEngine.init(
                         db, 
                         user.uid, 
@@ -516,9 +514,6 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
                     window.InterestEngine.showNotification();
                 }
             }
-            
-            // --- SINGLE DEVICE ENFORCEMENT ---
-            // Local call removed to prevent conflict with auth.js
             
             bindMobileMenu();
             bindPagination();
@@ -552,16 +547,13 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
             const yDiff = touchEndY - touchStartY;
             const threshold = 50; // Minimum distance to be considered a swipe
 
-            // Check if horizontal swipe dominates vertical scroll
             if (Math.abs(xDiff) > Math.abs(yDiff) && Math.abs(xDiff) > threshold) {
                 if (xDiff < 0) {
-                    // Swipe Left: Go to Daily (if currently on Savings)
                     if (activeDashboard === 'savings') {
                         document.getElementById('dash-toggle-daily').checked = true;
                         switchDashboard('daily');
                     }
                 } else {
-                    // Swipe Right: Go to Savings (if currently on Daily)
                     if (activeDashboard === 'daily') {
                         document.getElementById('dash-toggle-savings').checked = true;
                         switchDashboard('savings');
@@ -978,5 +970,43 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
   }
 </script>
 <script type="module" src="../js/notifications.js"></script>
+
+<!-- INJECT START: FCM Foreground Toast Listener -->
+<script>
+    window.addEventListener('fcm-foreground', (e) => {
+        const payload = e.detail;
+        if (payload && payload.notification) {
+            
+            // Conditionally generate the image HTML
+            const imageHtml = payload.notification.image 
+                ? `<img src="${payload.notification.image}" class="w-full h-32 object-cover rounded-lg mt-3 border border-gray-100 dark:border-gray-700">` 
+                : '';
+
+            const toast = document.createElement('div');
+            toast.className = 'fixed top-4 right-4 z-[9999] bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-primary/20 p-4 max-w-sm w-full animate-fade-in-slide flex items-start gap-3';
+            toast.innerHTML = `
+                <div class="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <span class="material-symbols-outlined text-primary">notifications_active</span>
+                </div>
+                <div class="flex-1 w-full">
+                    <h4 class="font-bold text-gray-900 dark:text-white text-sm">${payload.notification.title}</h4>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">${payload.notification.body}</p>
+                    ${imageHtml}
+                </div>
+                <button onclick="this.parentElement.remove()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors focus:outline-none">
+                    <span class="material-symbols-outlined text-sm">close</span>
+                </button>
+            `;
+            document.body.appendChild(toast);
+            
+            // Auto-dismiss after 8 seconds
+            setTimeout(() => {
+                if (toast.parentElement) toast.remove();
+            }, 8000);
+        }
+    });
+</script>
+<!-- INJECT END: FCM Foreground Toast Listener -->
+
 </body>
 </html>

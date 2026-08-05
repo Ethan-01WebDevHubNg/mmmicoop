@@ -25,6 +25,7 @@ messaging.onBackgroundMessage((payload) => {
     body: payload.notification.body,
     icon: '/assets/icon-192.png',
     badge: '/assets/icon-192.png',
+    image: payload.notification.image || null,
     data: payload.data || {},
     vibrate: [200, 100, 200]
   };

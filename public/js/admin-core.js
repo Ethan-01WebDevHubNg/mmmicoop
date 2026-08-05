@@ -464,8 +464,11 @@ class AdminSessionManager {
             const btn = this;
             const titleInput = document.getElementById('notif-title');
             const bodyInput = document.getElementById('notif-body');
+            const imageInput = document.getElementById('notif-image'); // New Image Input
+            
             const title = titleInput.value.trim();
             const body = bodyInput.value.trim();
+            const imageUrl = imageInput ? imageInput.value.trim() : null; // Capture URL
 
             if (!title || !body) {
                 NotificationService.toast('Please fill in both title and message.', 'error');
@@ -480,13 +483,15 @@ class AdminSessionManager {
             try {
                 // Call Firebase Function
                 const sendBroadcast = httpsCallable(functions, 'sendBroadcast');
-                await sendBroadcast({ title, body });
+                await sendBroadcast({ title, body, imageUrl });
 
                 NotificationService.toast('Broadcast sent successfully!', 'success');
                 
                 // Reset and Close
                 titleInput.value = '';
                 bodyInput.value = '';
+                if(imageInput) imageInput.value = ''; // Reset image input
+                
                 // Reset Char Count if exists
                 const charCount = document.getElementById('char-count');
                 if(charCount) { 
