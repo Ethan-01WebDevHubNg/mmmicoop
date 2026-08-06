@@ -2,7 +2,7 @@
   "name": "functions",
   "description": "Cloud Functions for Firebase",
   "scripts": {
-    "serve": "firebase emulators:start --only functions",
+    "serve": "firebase serve --only functions",
     "shell": "firebase functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
@@ -13,14 +13,13 @@
   },
   "main": "index.js",
   "dependencies": {
-    "@google-cloud/recaptcha-enterprise": "^6.4.2",
-    "axios": "^1.19.0",
-    "firebase-admin": "^14.2.0",
-    "firebase-functions": "^7.3.2"
+    "@google-cloud/recaptcha-enterprise": "^5.0.0",
+    "axios": "^1.6.0",
+    "firebase-admin": "^12.0.0",
+    "firebase-functions": "^4.6.0"
   },
-  "devDependencies": {
-    "firebase-functions-test": "^3.4.1"
+  "overrides": {
+    "jose": "~4.15.5"
   },
-  "private": true,
-  "type": "module"
+  "private": true
 }

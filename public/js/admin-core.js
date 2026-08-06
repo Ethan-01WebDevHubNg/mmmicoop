@@ -2,7 +2,6 @@
  * admin-core.js
  * Central Logic for Admin Side: UI, Notifications, & STRICT SESSION SECURITY
  */
-
 import { auth, db, doc, getDoc, signOut, onAuthStateChanged, onSnapshot, functions, httpsCallable } from './firebase-init.js';
 
 // ==========================================
@@ -68,7 +67,9 @@ export class NotificationService {
         `;
 
         container.appendChild(toast);
+
         requestAnimationFrame(() => toast.classList.remove('translate-x-full'));
+
         setTimeout(() => {
             toast.classList.add('opacity-0', 'translate-x-full');
             setTimeout(() => toast.remove(), 300);
@@ -89,16 +90,20 @@ export class NotificationService {
                     </div>
                 </div>
             `;
+
             document.body.appendChild(overlay);
+
             requestAnimationFrame(() => {
                 overlay.classList.remove('opacity-0');
                 overlay.querySelector('div').classList.remove('scale-95');
                 overlay.querySelector('div').classList.add('scale-100');
             });
+
             const cleanup = () => {
                 overlay.classList.add('opacity-0');
                 setTimeout(() => overlay.remove(), 200);
             };
+
             overlay.querySelector('#modal-cancel').onclick = () => { cleanup(); resolve(false); };
             overlay.querySelector('#modal-confirm').onclick = () => { cleanup(); resolve(true); };
         });
@@ -123,7 +128,7 @@ export function debounce(func, wait) {
 class AdminSessionManager {
     constructor() {
         this.TIMEOUT_MINUTES = 15; 
-        this.WARNING_MINUTES = 13; 
+        this.WARNING_MINUTES = 13;  
         
         this.TIMEOUT_MS = this.TIMEOUT_MINUTES * 60 * 1000;
         this.WARNING_MS = this.WARNING_MINUTES * 60 * 1000;
@@ -313,7 +318,6 @@ class AdminSessionManager {
     hideSessionWarning() {
         this.isWarningVisible = false;
         if (this.countdownInterval) clearInterval(this.countdownInterval);
-
         const modal = document.getElementById('admin-session-modal');
         if (modal) {
             modal.classList.add('opacity-0');
@@ -338,6 +342,7 @@ class AdminSessionManager {
             if (docSnap.exists()) {
                 const remote = docSnap.data().currentSessionToken;
                 const local = localStorage.getItem('mmmi_session_token');
+
                 if (remote && local && remote !== local) {
                     this.showConcurrencyModal();
                 }
@@ -388,7 +393,6 @@ class AdminSessionManager {
                 clearInterval(interval);
                 this.forceLogout(null, true);
             };
-
         } else {
             this.forceLogout("Logged in on another device.");
         }
@@ -427,7 +431,7 @@ class AdminSessionManager {
 
     function runUILogic() {
         initMobileMenu();
-        initBroadcastLogic(); // <-- NEW: Init Broadcast Listeners
+        initBroadcastLogic(); // <-- Init Broadcast Listeners
     }
 
     function initMobileMenu() {
@@ -454,7 +458,7 @@ class AdminSessionManager {
     }
 
     // ==========================================
-    // 6. BROADCAST LOGIC (NEW)
+    // 6. BROADCAST LOGIC
     // ==========================================
     function initBroadcastLogic() {
         const sendBtn = document.getElementById('btn-send-broadcast');
@@ -464,11 +468,13 @@ class AdminSessionManager {
             const btn = this;
             const titleInput = document.getElementById('notif-title');
             const bodyInput = document.getElementById('notif-body');
-            const imageInput = document.getElementById('notif-image'); // New Image Input
+            const imageInput = document.getElementById('notif-image'); 
+            const urlInput = document.getElementById('notif-url'); 
             
             const title = titleInput.value.trim();
             const body = bodyInput.value.trim();
-            const imageUrl = imageInput ? imageInput.value.trim() : null; // Capture URL
+            const imageUrl = imageInput ? imageInput.value.trim() : null; 
+            const clickUrl = urlInput && urlInput.value.trim() !== '' ? urlInput.value.trim() : '/member/memberDashboard.html';
 
             if (!title || !body) {
                 NotificationService.toast('Please fill in both title and message.', 'error');
@@ -483,19 +489,20 @@ class AdminSessionManager {
             try {
                 // Call Firebase Function
                 const sendBroadcast = httpsCallable(functions, 'sendBroadcast');
-                await sendBroadcast({ title, body, imageUrl });
+                await sendBroadcast({ title, body, imageUrl, clickUrl });
 
                 NotificationService.toast('Broadcast sent successfully!', 'success');
                 
                 // Reset and Close
                 titleInput.value = '';
                 bodyInput.value = '';
-                if(imageInput) imageInput.value = ''; // Reset image input
+                if(imageInput) imageInput.value = ''; 
+                if(urlInput) urlInput.value = ''; 
                 
                 // Reset Char Count if exists
                 const charCount = document.getElementById('char-count');
-                if(charCount) { 
-                    charCount.textContent = '0/120'; 
+                if(charCount) {
+                    charCount.textContent = '0/120';
                     charCount.classList.remove('text-red-500');
                 }
                 
@@ -520,4 +527,5 @@ class AdminSessionManager {
         }
       }
     });
+
 })();

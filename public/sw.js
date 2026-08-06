@@ -24,7 +24,7 @@ messaging.onBackgroundMessage((payload) => {
   const notificationOptions = {
     body: payload.notification.body,
     icon: '/assets/icon-192.png',
-    badge: '/assets/icon-192.png',
+    badge: '/assets/badge.png', // STRICT NATIVE BADGE INTEGRATION
     image: payload.notification.image || null,
     data: payload.data || {},
     vibrate: [200, 100, 200]
