@@ -323,7 +323,8 @@ const InterestEngine = (function() {
                 try {
                     const secureTimestamp = _fs.serverTimestamp ? _fs.serverTimestamp() : new Date();
 
-                    await _applyInterestFn(_userId, interestToCredit, secureTimestamp, true);
+                    // NOW PASSING 'daysToCredit' AS THE 4TH ARGUMENT FOR DYNAMIC NOTIFICATIONS
+                    await _applyInterestFn(_userId, interestToCredit, secureTimestamp, daysToCredit, true);
                     
                     const formattedInterest = new Intl.NumberFormat('en-NG', {style:'currency', currency:'NGN'}).format(interestToCredit);
                     

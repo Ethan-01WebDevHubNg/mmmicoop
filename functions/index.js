@@ -59,8 +59,8 @@ exports.aggregateTransactions = onDocumentWritten(
     { region: "europe-west1", document: "users/{userId}/transactions/{txnId}" },
     async (event) => {
         if (!event.data) return;
-        const beforeData = event.data.before.data();
-        const afterData = event.data.after.data();
+        const beforeData = event.data.before ? event.data.before.data() : null;
+        const afterData = event.data.after ? event.data.after.data() : null;
 
         let inflowDelta = 0;
         let outflowDelta = 0;
@@ -141,8 +141,8 @@ exports.verifyAndCreditTopUp = onCall(
                     
                     if (!daily.isActive) {
                         daily.isActive = true;
-                        daily.startDate = new Date().toISOString();
                         daily.dailyAmount = amountInNaira;
+                        daily.startDate = new Date().toISOString();
                         daily.lastContributionDate = new Date().toISOString();
                         daily.count = 1;
                         daily.accumulated = amountInNaira;
@@ -288,7 +288,7 @@ exports.sendBroadcast = onCall(
             webpush: {
                 notification: {
                     icon: '/assets/icon-192.png',
-                    badge: '/assets/badge.png' // INJECTS BADGE INTO SYSTEM TRAY
+                    badge: '/assets/badge.png' 
                 },
                 fcm_options: {
                     link: targetUrl
@@ -312,6 +312,106 @@ exports.sendBroadcast = onCall(
         } catch (error) {
             console.error("Broadcast Error:", error);
             throw new HttpsError('internal', 'Broadcast failed.');
+        }
+    }
+);
+
+// =========================================================
+// 7. AUTONOMOUS TRANSACTION NOTIFICATIONS (DYNAMIC ENGINE)
+// =========================================================
+exports.notifyOnTransaction = onDocumentWritten(
+    { region: "europe-west1", document: "users/{userId}/transactions/{txnId}" },
+    async (event) => {
+        if (!event.data) return;
+        const beforeData = event.data.before ? event.data.before.data() : null;
+        const afterData = event.data.after ? event.data.after.data() : null;
+
+        // CRITICAL GUARD: Only trigger if the transaction is newly successful
+        if (!afterData || afterData.status !== 'Success') return;
+        if (beforeData && beforeData.status === 'Success') return; 
+
+        const userId = event.params.userId;
+        const amount = Number(afterData.amount).toLocaleString('en-NG', { minimumFractionDigits: 2 });
+        const type = afterData.type; 
+        const category = afterData.category; 
+        const subType = afterData.sub_type; 
+        
+        // PULLS DAYS FOR INTEREST CALCULATION (DEFAULTS TO 1)
+        const interestDays = afterData.days || 1;
+
+        try {
+            const userDoc = await db.collection('users').doc(userId).get();
+            if (!userDoc.exists) return;
+            
+            const userData = userDoc.data();
+            const fcmToken = userData.fcmToken;
+
+            if (!fcmToken || userData.notificationsEnabled === false) return; 
+
+            // Extract the user's First Name safely
+            const rawName = userData.firstName || userData.fullName || userData.name || 'Member';
+            const firstName = rawName.split(' ')[0]; 
+
+            let title = '';
+            let body = '';
+
+            // THE DYNAMIC LOGIC MATRIX
+            if (category === 'daily') {
+                if (type === 'Credit') {
+                    title = 'Daily Target Hit! 🎯';
+                    body = `Great job, ${firstName}! Your daily contribution of ₦${amount} is safely locked in.`;
+                } else if (type === 'Debit') {
+                    title = 'Daily Savings Withdrawal 💸';
+                    body = `Hey ${firstName}, your withdrawal of ₦${amount} from your daily contribution is being processed and you should be credited soon.`;
+                }
+            } 
+            else if (category === 'savings') {
+                if (type === 'Credit') {
+                    title = 'Wallet Top-up Successful 💳';
+                    body = `${firstName}, your cooperative wallet was just credited with ₦${amount}.`;
+                } else if (type === 'Debit') {
+                    title = 'Wallet Debit 📉';
+                    body = `₦${amount} has been debited from your cooperative wallet, ${firstName}.`;
+                }
+            } 
+            else if (category === 'interest' || subType === 'INTEREST') {
+                title = 'Daily ! 📈';
+                const dayString = interestDays == 1 ? 'day' : 'days';
+                body = `Hooray! ${firstName}, your cooperative savings just generated ₦${amount} in interest for the last ${interestDays} ${dayString}.`;
+            } 
+            else {
+                // FALLBACK ROUTE
+                const isCredit = type === 'Credit';
+                title = isCredit ? 'Credit Alert! 💰' : 'Debit Alert! 💸';
+                body = isCredit 
+                    ? `Hi ${firstName}, your account was credited with ₦${amount}.` 
+                    : `Hi ${firstName}, ₦${amount} was debited from your account.`;
+            }
+
+            const message = {
+                notification: {
+                    title: title,
+                    body: body,
+                },
+                webpush: {
+                    notification: {
+                        icon: '/assets/icon-192.png',
+                        badge: '/assets/badge.png'
+                    },
+                    fcm_options: { link: '/member/memberDashboard.html' }
+                },
+                data: {
+                    url: '/member/memberDashboard.html',
+                    click_action: 'FLUTTER_NOTIFICATION_CLICK',
+                    forceDrawer: 'true' // FLAG TO BYPASS IN-APP TOAST
+                },
+                token: fcmToken 
+            };
+
+            await getMessaging().send(message);
+            
+        } catch (error) {
+            console.error("Autonomous Notification Failed:", error);
         }
     }
 );

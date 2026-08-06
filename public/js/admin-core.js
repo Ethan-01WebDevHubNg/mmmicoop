@@ -403,10 +403,8 @@ class AdminSessionManager {
             localStorage.removeItem('mmmi_session_token');
             await signOut(auth);
             
-            // IMPROVED: Use Toast instead of Alert, with redirect delay
             if (!silent && reason) {
                 NotificationService.toast(reason, 'info');
-                // Allow user to read the toast before redirecting
                 setTimeout(() => {
                     window.location.href = '/auth/index.html'; 
                 }, 2000);
@@ -431,7 +429,7 @@ class AdminSessionManager {
 
     function runUILogic() {
         initMobileMenu();
-        initBroadcastLogic(); // <-- Init Broadcast Listeners
+        initBroadcastLogic(); 
     }
 
     function initMobileMenu() {
@@ -471,6 +469,10 @@ class AdminSessionManager {
             const imageInput = document.getElementById('notif-image'); 
             const urlInput = document.getElementById('notif-url'); 
             
+            // --- NEW: Capture Audience Selection ---
+            const audienceInput = document.getElementById('notif-audience');
+            const audience = audienceInput ? audienceInput.value : 'users';
+            
             const title = titleInput.value.trim();
             const body = bodyInput.value.trim();
             const imageUrl = imageInput ? imageInput.value.trim() : null; 
@@ -487,9 +489,9 @@ class AdminSessionManager {
             btn.innerHTML = `<span class="material-symbols-outlined animate-spin text-xl">refresh</span> Sending...`;
 
             try {
-                // Call Firebase Function
+                // Call Firebase Function (Now passes the 'audience' variable)
                 const sendBroadcast = httpsCallable(functions, 'sendBroadcast');
-                await sendBroadcast({ title, body, imageUrl, clickUrl });
+                await sendBroadcast({ title, body, imageUrl, clickUrl, audience });
 
                 NotificationService.toast('Broadcast sent successfully!', 'success');
                 
@@ -498,6 +500,7 @@ class AdminSessionManager {
                 bodyInput.value = '';
                 if(imageInput) imageInput.value = ''; 
                 if(urlInput) urlInput.value = ''; 
+                if(audienceInput) audienceInput.value = 'users';
                 
                 // Reset Char Count if exists
                 const charCount = document.getElementById('char-count');

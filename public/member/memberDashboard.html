@@ -973,10 +973,31 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 
 <!-- INJECT START: FCM Foreground Toast Listener -->
 <script>
-    window.addEventListener('fcm-foreground', (e) => {
+    window.addEventListener('fcm-foreground', async (e) => {
         const payload = e.detail;
         if (payload && payload.notification) {
             
+            // --- NEW: INTERCEPT DYNAMIC TRANSACTION ALERTS ---
+            // Force native system push notification instead of HTML toast
+            if (payload.data && payload.data.forceDrawer === 'true') {
+                if ('serviceWorker' in navigator) {
+                    try {
+                        const registration = await navigator.serviceWorker.ready;
+                        await registration.showNotification(payload.notification.title, {
+                            body: payload.notification.body,
+                            icon: '/assets/icon-192.png',
+                            badge: '/assets/badge.png',
+                            data: payload.data,
+                            vibrate: [200, 100, 200]
+                        });
+                    } catch (err) {
+                        console.error('Failed to force native notification:', err);
+                    }
+                }
+                return; // Stop execution here so the HTML toast is not drawn
+            }
+            
+            // --- FALLBACK: Standard Broadcast HTML Toasts ---
             // Conditionally generate the image HTML
             const imageHtml = payload.notification.image 
                 ? `<img src="${payload.notification.image}" class="w-full h-32 object-cover rounded-lg mt-3 border border-gray-100 dark:border-gray-700">` 

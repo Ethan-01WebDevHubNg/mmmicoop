@@ -260,6 +260,20 @@
 
         <div class="p-6 space-y-4">
             
+            <!-- NEW TARGET AUDIENCE DROPDOWN -->
+            <div>
+                <label class="block text-xs font-bold text-subtext-light dark:text-subtext-dark uppercase mb-1">Target Audience</label>
+                <div class="relative">
+                    <select id="notif-audience" class="w-full pl-10 pr-4 py-3 rounded-xl bg-gray-50 dark:bg-slate-800 border-none ring-1 ring-gray-200 dark:ring-gray-700 focus:ring-2 focus:ring-purple-500 text-sm font-bold text-gray-900 dark:text-white transition-all appearance-none cursor-pointer">
+                        <option value="users">Clients / Users Only</option>
+                        <option value="admins">Admins Only</option>
+                        <option value="all">Everyone (Admins + Users)</option>
+                    </select>
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">group</span>
+                    <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">expand_more</span>
+                </div>
+            </div>
+
             <div>
                 <label class="block text-xs font-bold text-subtext-light dark:text-subtext-dark uppercase mb-1">Highlight / Title</label>
                 <div class="relative">
@@ -296,7 +310,7 @@
             </div>
 
             <button id="btn-send-broadcast" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-purple-600/30 transition-all flex items-center justify-center gap-2">
-                <span>Send to All Members</span>
+                <span>Send Broadcast</span>
                 <span class="material-symbols-outlined text-sm">send</span>
             </button>
         </div>

@@ -166,7 +166,7 @@ export async function recordWithdrawal(uid, memberId, amountRequest, bankDetails
     } catch (e) { throw e; }
 }
 
-export async function applyDailyInterest(uid, interestAmount, datePayload, isAccrual = false) {
+export async function applyDailyInterest(uid, interestAmount, datePayload, daysToCredit = 1, isAccrual = false) {
     if (!uid || interestAmount <= 0) return;
     
     // --- FIX: GENERATE IDs OUTSIDE ---
@@ -207,7 +207,8 @@ export async function applyDailyInterest(uid, interestAmount, datePayload, isAcc
                 description: "Daily Interest Credit", 
                 reference: refId,  
                 status: "Success", 
-                date: datePayload        
+                date: datePayload,
+                days: daysToCredit // <-- THE INJECTION POINT FOR DYNAMIC NOTIFICATIONS
             });
         });
         return { success: true };
