@@ -1,16 +1,21 @@
-const { onCall, HttpsError } = require("firebase-functions/v2/https");
+const { onCall, onRequest, HttpsError } = require("firebase-functions/v2/https");
 const { onDocumentWritten } = require("firebase-functions/v2/firestore");
+const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { defineSecret } = require('firebase-functions/params'); 
 const admin = require("firebase-admin");
 const axios = require("axios");
 const { RecaptchaEnterpriseServiceClient } = require("@google-cloud/recaptcha-enterprise");
 const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 const { getMessaging } = require("firebase-admin/messaging");
+const { getStorage } = require("firebase-admin/storage");
+const Busboy = require("busboy");
+const sharp = require("sharp");
+const crypto = require("crypto"); 
 
 const squadTestKey = defineSecret('SQUAD_TEST_KEY');
 const squadLiveKey = defineSecret('SQUAD_LIVE_KEY');
 
-const IS_PROD = true; 
+const IS_PROD = false; 
 
 if (admin.apps.length === 0) {
   admin.initializeApp();
@@ -245,16 +250,27 @@ exports.subscribeToBroadcast = onCall(
         if (!request.auth) throw new HttpsError('unauthenticated', 'User must be logged in.');
         
         const { fcmToken } = request.data;
+        const uid = request.auth.uid;
+
         if (!fcmToken) throw new HttpsError('invalid-argument', 'Token required.');
 
         try {
             await getMessaging().subscribeToTopic(fcmToken, 'broadcast');
-            
-            await db.collection('users').doc(request.auth.uid).set({
+            await db.collection('users').doc(uid).set({
                 fcmToken: fcmToken,
                 notificationsEnabled: true,
                 lastTokenUpdate: FieldValue.serverTimestamp()
             }, { merge: true });
+
+            const adminDoc = await db.collection('admins').doc(uid).get();
+            if (adminDoc.exists) {
+                await getMessaging().subscribeToTopic(fcmToken, 'broadcast_admins');
+                await db.collection('admins').doc(uid).set({
+                    fcmToken: fcmToken,
+                    notificationsEnabled: true,
+                    lastTokenUpdate: FieldValue.serverTimestamp()
+                }, { merge: true });
+            }
 
             return { success: true };
         } catch (error) {
@@ -264,61 +280,173 @@ exports.subscribeToBroadcast = onCall(
     }
 );
 
-exports.sendBroadcast = onCall(
-    { region: "us-central1" },
-    async (request) => {
-        if (!request.auth) throw new HttpsError('unauthenticated', 'Login required.');
-        
-        const adminDoc = await db.collection('admins').doc(request.auth.uid).get();
-        if (!adminDoc.exists) throw new HttpsError('permission-denied', 'Not an admin.');
-
-        const { title, body, imageUrl, clickUrl } = request.data;
-
-        if (!title || !body) {
-            throw new HttpsError('invalid-argument', 'Broadcast title and body cannot be empty.');
-        }
-
-        const targetUrl = clickUrl || '/member/memberDashboard.html';
-
-        const message = {
-            notification: {
-                title: title,
-                body: body,
-            },
-            webpush: {
-                notification: {
-                    icon: '/assets/icon-192.png',
-                    badge: '/assets/badge.png' 
-                },
-                fcm_options: {
-                    link: targetUrl
-                }
-            },
-            data: {
-                url: targetUrl,
-                click_action: 'FLUTTER_NOTIFICATION_CLICK' 
-            },
-            topic: 'broadcast'
-        };
-
-        if (imageUrl) {
-            message.notification.image = imageUrl; 
-            message.webpush.notification.image = imageUrl; 
-        }
-
+// RESTORED MULTIPART UPLOAD PIPELINE
+exports.sendBroadcast = onRequest(
+    { 
+        region: "us-central1",
+        cors: true,
+        invoker: "public" // <-- THIS IS THE MISSING PIECE THAT BYPASSES THE CLOUD RUN IAM BLOCK
+    }, 
+    async (req, res) => {
         try {
-            const response = await getMessaging().send(message);
-            return { success: true, messageId: response };
+            const authHeader = req.headers.authorization || '';
+            if (!authHeader.startsWith('Bearer ')) {
+                return res.status(401).json({ error: 'Unauthenticated.' });
+            }
+            const token = authHeader.split('Bearer ')[1];
+            const decodedToken = await admin.auth().verifyIdToken(token);
+            
+            const adminDoc = await db.collection('admins').doc(decodedToken.uid).get();
+            if (!adminDoc.exists) {
+                return res.status(403).json({ error: 'Permission denied. Not an admin.' });
+            }
+
+            await new Promise((resolve, reject) => {
+                const busboy = Busboy({ headers: req.headers });
+                const fields = {};
+                let fileBuffer = null;
+                let mimeType = '';
+
+                busboy.on('field', (name, val) => {
+                    fields[name] = val;
+                });
+
+                busboy.on('file', (name, file, info) => {
+                    if (name === 'imageFile') {
+                        mimeType = info.mimeType;
+                        const chunks = [];
+                        file.on('data', (data) => chunks.push(data));
+                        file.on('end', () => { fileBuffer = Buffer.concat(chunks); });
+                    } else {
+                        file.resume();
+                    }
+                });
+
+                busboy.on('close', async () => {
+                    try {
+                        const { title, body, clickUrl, audience = 'users' } = fields;
+
+                        if (!title || !body) {
+                            res.status(400).json({ error: 'Broadcast title and body cannot be empty.' });
+                            return resolve(); 
+                        }
+
+                        let fullGraphicUrl = '';
+                        let graphicIconUrl = '';
+                        
+                        if (fileBuffer) {
+                            if (!['image/jpeg', 'image/png', 'image/webp'].includes(mimeType)) {
+                                res.status(400).json({ error: 'Invalid format. Only JPG, PNG, WEBP allowed.' });
+                                return resolve();
+                            }
+
+                            const processedImage = await sharp(fileBuffer)
+                                .resize({ width: 1000, withoutEnlargement: true })
+                                .jpeg({ quality: 85 })
+                                .toBuffer();
+
+                            const processedIcon = await sharp(fileBuffer)
+                                .resize(192, 192, { fit: 'cover' })
+                                .jpeg({ quality: 85 })
+                                .toBuffer();
+
+                            const bucket = getStorage().bucket();
+                            const now = new Date();
+                            const yyyy = now.getFullYear();
+                            const mm = String(now.getMonth() + 1).padStart(2, '0');
+                            const uniqueId = crypto.randomUUID(); 
+                            const basePath = `notification-assets/broadcasts/${yyyy}/${mm}/${uniqueId}`;
+                            
+                            const imageRef = bucket.file(`${basePath}/image.jpg`);
+                            await imageRef.save(processedImage, { metadata: { contentType: 'image/jpeg' } });
+                            fullGraphicUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(`${basePath}/image.jpg`)}?alt=media`;
+
+                            const iconRef = bucket.file(`${basePath}/icon.jpg`);
+                            await iconRef.save(processedIcon, { metadata: { contentType: 'image/jpeg' } });
+                            graphicIconUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(`${basePath}/icon.jpg`)}?alt=media`;
+                        }
+
+                        let targetUrl = '/member/memberDashboard.html';
+                        
+                        if (clickUrl && clickUrl.trim() !== '') {
+                            const rawUrl = clickUrl.trim();
+                            const lowerUrl = rawUrl.toLowerCase();
+                            
+                            const isWhatsApp = /(whatsapp|watsapp|whatsap|watsap|whatapp|wa\.me)/i.test(lowerUrl);
+                            const isTel = /^[\d\+\-\s\(\)]+$/.test(rawUrl) || /(call|tel|phone|dial)/i.test(lowerUrl);
+                            
+                            if (isWhatsApp || isTel) {
+                                const phoneMatch = rawUrl.match(/(?:\+?\d[\d\-\s()]{7,}\d)/);
+                                let digits = phoneMatch ? phoneMatch[0].replace(/\D/g, '') : rawUrl.replace(/\D/g, '');
+                                
+                                if (digits.startsWith('0') && digits.length === 11) {
+                                    digits = '234' + digits.substring(1);
+                                } else if (digits.length === 10 && /^[789][01]/.test(digits)) {
+                                    digits = '234' + digits;
+                                }
+                                
+                                if (isWhatsApp) {
+                                    targetUrl = `https://wa.me/${digits}`;
+                                } else {
+                                    targetUrl = `/member/memberDashboard.html?intent=tel&number=%2B${digits}`;
+                                }
+                            } 
+                            else {
+                                if (!lowerUrl.startsWith('http') && !lowerUrl.startsWith('/') && !lowerUrl.startsWith('tel:') && !lowerUrl.startsWith('mailto:')) {
+                                    targetUrl = `https://${rawUrl}`;
+                                } else {
+                                    targetUrl = rawUrl;
+                                }
+                            }
+                        }
+
+                        const message = {
+                            data: {
+                                title: title,
+                                body: body,
+                                url: targetUrl,
+                                click_action: 'FLUTTER_NOTIFICATION_CLICK',
+                                attachedImage: fullGraphicUrl || '', 
+                                attachedIcon: graphicIconUrl || '',
+                                forceDrawer: 'false'
+                            },
+                            topic: audience === 'admins' ? 'broadcast_admins' : 'broadcast'
+                        };
+
+                        const responseId = await getMessaging().send(message);
+                        res.status(200).json({ success: true, messageId: responseId });
+                        resolve();
+                        
+                    } catch (err) {
+                        console.error("Broadcast Build/Send Error:", err);
+                        res.status(500).json({ error: 'Broadcast failed.' });
+                        resolve();
+                    }
+                });
+
+                busboy.on('error', (err) => {
+                    console.error("Busboy Parse Error:", err);
+                    res.status(500).json({ error: 'File stream parsing failed.' });
+                    resolve();
+                });
+
+                if (req.rawBody) {
+                    busboy.end(req.rawBody);
+                } else {
+                    req.pipe(busboy);
+                }
+            });
+            
         } catch (error) {
-            console.error("Broadcast Error:", error);
-            throw new HttpsError('internal', 'Broadcast failed.');
+            console.error("Auth/Processing Error:", error);
+            if (!res.headersSent) {
+                res.status(500).json({ error: 'Internal server error.' });
+            }
         }
     }
 );
 
-// =========================================================
-// 7. AUTONOMOUS TRANSACTION NOTIFICATIONS (DYNAMIC ENGINE)
-// =========================================================
+// RESTORED DATA-ONLY TRANSACTION PAYLOADS
 exports.notifyOnTransaction = onDocumentWritten(
     { region: "europe-west1", document: "users/{userId}/transactions/{txnId}" },
     async (event) => {
@@ -326,7 +454,6 @@ exports.notifyOnTransaction = onDocumentWritten(
         const beforeData = event.data.before ? event.data.before.data() : null;
         const afterData = event.data.after ? event.data.after.data() : null;
 
-        // CRITICAL GUARD: Only trigger if the transaction is newly successful
         if (!afterData || afterData.status !== 'Success') return;
         if (beforeData && beforeData.status === 'Success') return; 
 
@@ -336,7 +463,6 @@ exports.notifyOnTransaction = onDocumentWritten(
         const category = afterData.category; 
         const subType = afterData.sub_type; 
         
-        // PULLS DAYS FOR INTEREST CALCULATION (DEFAULTS TO 1)
         const interestDays = afterData.days || 1;
 
         try {
@@ -348,14 +474,12 @@ exports.notifyOnTransaction = onDocumentWritten(
 
             if (!fcmToken || userData.notificationsEnabled === false) return; 
 
-            // Extract the user's First Name safely
             const rawName = userData.firstName || userData.fullName || userData.name || 'Member';
             const firstName = rawName.split(' ')[0]; 
 
             let title = '';
             let body = '';
 
-            // THE DYNAMIC LOGIC MATRIX
             if (category === 'daily') {
                 if (type === 'Credit') {
                     title = 'Daily Target Hit! 🎯';
@@ -375,12 +499,11 @@ exports.notifyOnTransaction = onDocumentWritten(
                 }
             } 
             else if (category === 'interest' || subType === 'INTEREST') {
-                title = 'Daily ! 📈';
+                title = 'Daily Interest! 📈';
                 const dayString = interestDays == 1 ? 'day' : 'days';
                 body = `Hooray! ${firstName}, your cooperative savings just generated ₦${amount} in interest for the last ${interestDays} ${dayString}.`;
             } 
             else {
-                // FALLBACK ROUTE
                 const isCredit = type === 'Credit';
                 title = isCredit ? 'Credit Alert! 💰' : 'Debit Alert! 💸';
                 body = isCredit 
@@ -389,21 +512,14 @@ exports.notifyOnTransaction = onDocumentWritten(
             }
 
             const message = {
-                notification: {
+                data: {
                     title: title,
                     body: body,
-                },
-                webpush: {
-                    notification: {
-                        icon: '/assets/icon-192.png',
-                        badge: '/assets/badge.png'
-                    },
-                    fcm_options: { link: '/member/memberDashboard.html' }
-                },
-                data: {
                     url: '/member/memberDashboard.html',
                     click_action: 'FLUTTER_NOTIFICATION_CLICK',
-                    forceDrawer: 'true' // FLAG TO BYPASS IN-APP TOAST
+                    attachedImage: '',
+                    attachedIcon: '',
+                    forceDrawer: 'true' 
                 },
                 token: fcmToken 
             };
@@ -415,3 +531,29 @@ exports.notifyOnTransaction = onDocumentWritten(
         }
     }
 );
+
+// --- SCHEDULED MAINTENANCE: NOTIFICATION ASSET CLEANUP ---
+exports.cleanupNotificationAssets = onSchedule("0 2 * * *", async (event) => {
+    try {
+        const bucket = getStorage().bucket();
+        const [files] = await bucket.getFiles({ prefix: 'notification-assets/broadcasts/' });
+        
+        const now = Date.now();
+        const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+        let deletedCount = 0;
+
+        for (const file of files) {
+            const [metadata] = await file.getMetadata();
+            const timeCreated = new Date(metadata.timeCreated).getTime();
+            
+            if (now - timeCreated > THIRTY_DAYS_MS) {
+                await file.delete();
+                deletedCount++;
+            }
+        }
+        
+        console.log(`Maintenance Complete: Deleted ${deletedCount} expired broadcast images.`);
+    } catch (error) {
+        console.error("Asset Cleanup Routine Error:", error);
+    }
+});

@@ -344,12 +344,47 @@
         </div>
     </div>
 
-<script>
-    function insertEmoji(emoji) {
+<!-- PWA INSTALL PROMPT -->
+<div id="pwa-install-prompt" class="fixed bottom-0 left-0 right-0 z-[100] transform translate-y-full transition-transform duration-500 ease-out hidden sm:hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-t-2xl shadow-[0_-4px_20px_rgba(0,0,0,0.15)] border-t border-gray-100 dark:border-gray-700 p-5 pb-8">
+        <div class="flex items-start gap-4 mb-4">
+            <img src="/assets/icon-192.png" alt="App Icon" class="w-12 h-12 rounded-xl shadow-sm">
+            <div class="flex-1">
+                <h3 class="text-base font-bold text-gray-900 dark:text-white">Install MMMi Admin</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">Add MMMi to your Home Screen for the best app experience and to enable cooperative push notifications.</p>
+            </div>
+            <button id="pwa-close-btn" class="text-gray-400 hover:text-gray-600 dark:hover:text-white bg-gray-50 dark:bg-gray-700 rounded-full p-1.5 focus:outline-none transition-colors">
+                <span class="material-symbols-outlined text-sm">close</span>
+            </button>
+        </div>
+        
+        <!-- Android / Native Actions -->
+        <div id="pwa-native-actions" class="hidden flex gap-3">
+            <button id="pwa-install-btn" class="flex-1 bg-primary text-white font-bold py-2.5 rounded-xl text-sm shadow-md shadow-primary/20 hover:bg-red-700 transition-colors">Install Now</button>
+        </div>
+
+        <!-- iOS Instructions -->
+        <div id="pwa-ios-instructions" class="hidden bg-blue-50 dark:bg-blue-900/20 rounded-xl p-3 border border-blue-100 dark:border-blue-800">
+            <p class="text-xs text-blue-800 dark:text-blue-200 font-medium flex items-center gap-2 mb-2">
+                <span class="material-symbols-outlined text-base">ios_share</span> 1. Tap the Share button below
+            </p>
+            <p class="text-xs text-blue-800 dark:text-blue-200 font-medium flex items-center gap-2">
+                <span class="material-symbols-outlined text-base">add_box</span> 2. Select "Add to Home Screen"
+            </p>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    // Import your custom NotificationService
+    import { NotificationService } from '../js/admin-core.js';
+
+    // Expose the emoji injector to the global window so your HTML onclicks can find it
+    window.insertEmoji = function(emoji) {
         const body = document.getElementById('notif-body');
         body.value += emoji;
         updateCount();
-    }
+    };
     
     const bodyInput = document.getElementById('notif-body');
     const countDisplay = document.getElementById('char-count');
@@ -362,6 +397,172 @@
     }
     
     bodyInput.addEventListener('input', updateCount);
+
+    // ==========================================
+    // IMAGE UPLOAD & PREVIEW LOGIC
+    // ==========================================
+    const imageInput = document.getElementById('notif-image-file');
+    const imagePreview = document.getElementById('notif-image-preview');
+    const previewContainer = document.getElementById('notif-image-preview-container');
+    const dropzoneLabel = document.getElementById('notif-image-label');
+    const removeBtn = document.getElementById('notif-image-remove');
+    let selectedImageFile = null;
+
+    imageInput.addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+            selectedImageFile = this.files[0];
+            imagePreview.src = URL.createObjectURL(selectedImageFile);
+            previewContainer.classList.remove('hidden');
+            dropzoneLabel.parentElement.classList.add('hidden');
+        }
+    });
+
+    removeBtn.addEventListener('click', function() {
+        selectedImageFile = null;
+        imageInput.value = '';
+        previewContainer.classList.add('hidden');
+        dropzoneLabel.parentElement.classList.remove('hidden');
+    });
+
+    // ==========================================
+    // BROADCAST FORM SUBMISSION
+    // ==========================================
+    document.getElementById('btn-send-broadcast').addEventListener('click', async () => {
+        const btn = document.getElementById('btn-send-broadcast');
+        const originalText = btn.innerHTML;
+        
+        const title = document.getElementById('notif-title').value.trim();
+        const body = document.getElementById('notif-body').value.trim();
+        const clickUrl = document.getElementById('notif-url').value.trim();
+        const audience = document.getElementById('notif-audience').value;
+
+        if (!title || !body) {
+            NotificationService.toast("Title and body are required to send a broadcast.", "error");
+            return;
+        }
+
+        btn.innerHTML = 'Sending... <span class="material-symbols-outlined animate-spin">sync</span>';
+        btn.disabled = true;
+
+        try {
+            // Check auth globally attached via admin-core.js
+            const token = await window.auth.currentUser.getIdToken();
+            
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('body', body);
+            formData.append('clickUrl', clickUrl);
+            formData.append('audience', audience);
+            
+            if (selectedImageFile) {
+                formData.append('imageFile', selectedImageFile);
+            }
+
+            // Calls the onRequest Firebase endpoint
+            const response = await fetch('https://us-central1-mmmi-cooperative-portal.cloudfunctions.net/sendBroadcast', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` },
+                body: formData
+            });
+
+            const result = await response.json();
+            if (result.error) throw new Error(result.error);
+
+            NotificationService.toast("Broadcast sent successfully!", "success");
+            document.getElementById('broadcast-modal').classList.add('hidden');
+            
+            // Reset form
+            document.getElementById('notif-title').value = '';
+            document.getElementById('notif-body').value = '';
+            document.getElementById('notif-url').value = '';
+            removeBtn.click();
+            
+        } catch (error) {
+            NotificationService.toast("Error sending broadcast: " + error.message, "error");
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const promptEl = document.getElementById('pwa-install-prompt');
+        const closeBtn = document.getElementById('pwa-close-btn');
+        const installBtn = document.getElementById('pwa-install-btn');
+        const nativeActions = document.getElementById('pwa-native-actions');
+        const iosInstructions = document.getElementById('pwa-ios-instructions');
+        
+        let deferredPrompt = null;
+        const COOLDOWN_DAYS = 7;
+        const DISMISSAL_KEY = 'pwa_prompt_dismissed';
+
+        const isInstalled = navigator.standalone || window.matchMedia('(display-mode: standalone)').matches || window.matchMedia('(display-mode: window-controls-overlay)').matches;
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        const isMobile = window.innerWidth <= 768 || /Mobi|Android/i.test(navigator.userAgent);
+        
+        function hasCooldown() {
+            const dismissed = localStorage.getItem(DISMISSAL_KEY);
+            if (!dismissed) return false;
+            const daysPassed = (Date.now() - parseInt(dismissed, 10)) / (1000 * 60 * 60 * 24);
+            return daysPassed < COOLDOWN_DAYS;
+        }
+
+        function setCooldown() {
+            localStorage.setItem(DISMISSAL_KEY, Date.now().toString());
+        }
+
+        function showPrompt() {
+            promptEl.classList.remove('hidden');
+            setTimeout(() => promptEl.classList.remove('translate-y-full'), 50);
+        }
+
+        function hidePrompt() {
+            promptEl.classList.add('translate-y-full');
+            setTimeout(() => promptEl.classList.add('hidden'), 500);
+        }
+
+        closeBtn.addEventListener('click', () => {
+            setCooldown();
+            hidePrompt();
+        });
+
+        if (isInstalled || !isMobile || hasCooldown()) return;
+
+        if (isIOS) {
+            iosInstructions.classList.remove('hidden');
+            setTimeout(showPrompt, 2500);
+        } 
+        else {
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                nativeActions.classList.remove('hidden');
+                setTimeout(showPrompt, 2500);
+            });
+
+            installBtn.addEventListener('click', async () => {
+                hidePrompt();
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    if (outcome === 'accepted') {
+                        console.log('User accepted the install prompt');
+                    } else {
+                        setCooldown();
+                    }
+                    deferredPrompt = null;
+                }
+            });
+
+            window.addEventListener('appinstalled', () => {
+                hidePrompt();
+                deferredPrompt = null;
+                console.log('PWA was installed natively');
+            });
+        }
+    });
 </script>
 
     <script type="module" src="../js/admin-core.js"></script>
@@ -369,6 +570,10 @@
     <script type="module">
         import { db, collection, collectionGroup, getDocs, query, orderBy, limit, where } from '../js/firebase-init.js';
         import { formatCurrency, formatDate } from '../js/admin-firebase.js';
+
+        // Keep existing auth logic accessible for the form fetch
+        import { auth } from '../js/firebase-init.js';
+        window.auth = auth; 
 
         let allTransactions = [];
 
@@ -520,119 +725,5 @@
     });
   }
 </script>
-
-<!-- PWA INSTALL PROMPT -->
-<div id="pwa-install-prompt" class="fixed bottom-0 left-0 right-0 z-[100] transform translate-y-full transition-transform duration-500 ease-out hidden sm:hidden">
-    <div class="bg-white dark:bg-gray-800 rounded-t-2xl shadow-[0_-4px_20px_rgba(0,0,0,0.15)] border-t border-gray-100 dark:border-gray-700 p-5 pb-8">
-        <div class="flex items-start gap-4 mb-4">
-            <img src="/assets/icon-192.png" alt="App Icon" class="w-12 h-12 rounded-xl shadow-sm">
-            <div class="flex-1">
-                <h3 class="text-base font-bold text-gray-900 dark:text-white">Install MMMi Admin</h3>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">Add MMMi to your Home Screen for the best app experience and to enable cooperative push notifications.</p>
-            </div>
-            <button id="pwa-close-btn" class="text-gray-400 hover:text-gray-600 dark:hover:text-white bg-gray-50 dark:bg-gray-700 rounded-full p-1.5 focus:outline-none transition-colors">
-                <span class="material-symbols-outlined text-sm">close</span>
-            </button>
-        </div>
-        
-        <!-- Android / Native Actions -->
-        <div id="pwa-native-actions" class="hidden flex gap-3">
-            <button id="pwa-install-btn" class="flex-1 bg-primary text-white font-bold py-2.5 rounded-xl text-sm shadow-md shadow-primary/20 hover:bg-red-700 transition-colors">Install Now</button>
-        </div>
-
-        <!-- iOS Instructions -->
-        <div id="pwa-ios-instructions" class="hidden bg-blue-50 dark:bg-blue-900/20 rounded-xl p-3 border border-blue-100 dark:border-blue-800">
-            <p class="text-xs text-blue-800 dark:text-blue-200 font-medium flex items-center gap-2 mb-2">
-                <span class="material-symbols-outlined text-base">ios_share</span> 1. Tap the Share button below
-            </p>
-            <p class="text-xs text-blue-800 dark:text-blue-200 font-medium flex items-center gap-2">
-                <span class="material-symbols-outlined text-base">add_box</span> 2. Select "Add to Home Screen"
-            </p>
-        </div>
-    </div>
-</div>
-
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const promptEl = document.getElementById('pwa-install-prompt');
-    const closeBtn = document.getElementById('pwa-close-btn');
-    const installBtn = document.getElementById('pwa-install-btn');
-    const nativeActions = document.getElementById('pwa-native-actions');
-    const iosInstructions = document.getElementById('pwa-ios-instructions');
-    
-    let deferredPrompt = null;
-    const COOLDOWN_DAYS = 7;
-    const DISMISSAL_KEY = 'pwa_prompt_dismissed';
-
-    const isInstalled = navigator.standalone || window.matchMedia('(display-mode: standalone)').matches || window.matchMedia('(display-mode: window-controls-overlay)').matches;
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    const isMobile = window.innerWidth <= 768 || /Mobi|Android/i.test(navigator.userAgent);
-    
-    function hasCooldown() {
-        const dismissed = localStorage.getItem(DISMISSAL_KEY);
-        if (!dismissed) return false;
-        const daysPassed = (Date.now() - parseInt(dismissed, 10)) / (1000 * 60 * 60 * 24);
-        return daysPassed < COOLDOWN_DAYS;
-    }
-
-    function setCooldown() {
-        localStorage.setItem(DISMISSAL_KEY, Date.now().toString());
-    }
-
-    function showPrompt() {
-        promptEl.classList.remove('hidden');
-        setTimeout(() => promptEl.classList.remove('translate-y-full'), 50);
-    }
-
-    function hidePrompt() {
-        promptEl.classList.add('translate-y-full');
-        setTimeout(() => promptEl.classList.add('hidden'), 500);
-    }
-
-    closeBtn.addEventListener('click', () => {
-        setCooldown();
-        hidePrompt();
-    });
-
-    if (isInstalled || !isMobile || hasCooldown()) {
-        return;
-    }
-
-    if (isIOS) {
-        iosInstructions.classList.remove('hidden');
-        setTimeout(showPrompt, 2500);
-    } 
-    else {
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            nativeActions.classList.remove('hidden');
-            setTimeout(showPrompt, 2500);
-        });
-
-        installBtn.addEventListener('click', async () => {
-            hidePrompt();
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    console.log('User accepted the install prompt');
-                } else {
-                    console.log('User dismissed the install prompt');
-                    setCooldown();
-                }
-                deferredPrompt = null;
-            }
-        });
-
-        window.addEventListener('appinstalled', () => {
-            hidePrompt();
-            deferredPrompt = null;
-            console.log('PWA was installed natively');
-        });
-    }
-});
-</script>
-
 </body>
 </html>

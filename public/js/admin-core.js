@@ -2,7 +2,7 @@
  * admin-core.js
  * Central Logic for Admin Side: UI, Notifications, & STRICT SESSION SECURITY
  */
-import { auth, db, doc, getDoc, signOut, onAuthStateChanged, onSnapshot, functions, httpsCallable } from './firebase-init.js';
+import { auth, db, doc, signOut, onAuthStateChanged, onSnapshot } from './firebase-init.js';
 
 // ==========================================
 // 1. FLIP CLOCK CSS INJECTION
@@ -429,7 +429,6 @@ class AdminSessionManager {
 
     function runUILogic() {
         initMobileMenu();
-        initBroadcastLogic(); 
     }
 
     function initMobileMenu() {
@@ -453,73 +452,6 @@ class AdminSessionManager {
         menuBtn.addEventListener('click', openMenu);
         if (closeBtn) closeBtn.addEventListener('click', closeMenu);
         if (overlay) overlay.addEventListener('click', closeMenu);
-    }
-
-    // ==========================================
-    // 6. BROADCAST LOGIC
-    // ==========================================
-    function initBroadcastLogic() {
-        const sendBtn = document.getElementById('btn-send-broadcast');
-        if (!sendBtn) return;
-
-        sendBtn.addEventListener('click', async function() {
-            const btn = this;
-            const titleInput = document.getElementById('notif-title');
-            const bodyInput = document.getElementById('notif-body');
-            const imageInput = document.getElementById('notif-image'); 
-            const urlInput = document.getElementById('notif-url'); 
-            
-            // --- NEW: Capture Audience Selection ---
-            const audienceInput = document.getElementById('notif-audience');
-            const audience = audienceInput ? audienceInput.value : 'users';
-            
-            const title = titleInput.value.trim();
-            const body = bodyInput.value.trim();
-            const imageUrl = imageInput ? imageInput.value.trim() : null; 
-            const clickUrl = urlInput && urlInput.value.trim() !== '' ? urlInput.value.trim() : '/member/memberDashboard.html';
-
-            if (!title || !body) {
-                NotificationService.toast('Please fill in both title and message.', 'error');
-                return;
-            }
-
-            // UI Loading State
-            const originalContent = btn.innerHTML;
-            btn.disabled = true;
-            btn.innerHTML = `<span class="material-symbols-outlined animate-spin text-xl">refresh</span> Sending...`;
-
-            try {
-                // Call Firebase Function (Now passes the 'audience' variable)
-                const sendBroadcast = httpsCallable(functions, 'sendBroadcast');
-                await sendBroadcast({ title, body, imageUrl, clickUrl, audience });
-
-                NotificationService.toast('Broadcast sent successfully!', 'success');
-                
-                // Reset and Close
-                titleInput.value = '';
-                bodyInput.value = '';
-                if(imageInput) imageInput.value = ''; 
-                if(urlInput) urlInput.value = ''; 
-                if(audienceInput) audienceInput.value = 'users';
-                
-                // Reset Char Count if exists
-                const charCount = document.getElementById('char-count');
-                if(charCount) {
-                    charCount.textContent = '0/120';
-                    charCount.classList.remove('text-red-500');
-                }
-                
-                document.getElementById('broadcast-modal').classList.add('hidden');
-
-            } catch (error) {
-                console.error('Broadcast Failed:', error);
-                const msg = error.message || 'Failed to send broadcast.';
-                NotificationService.toast(msg, 'error');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = originalContent;
-            }
-        });
     }
 
     onAuthStateChanged(auth, (user) => {

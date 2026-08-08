@@ -16,47 +16,77 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
-// Handle Background Notifications
+// SINGLE BACKGROUND PIPELINE (Strictly parses Data-Only payloads)
 messaging.onBackgroundMessage((payload) => {
-  console.log('[sw.js] Background Message:', payload);
-  
-  const notificationTitle = payload.notification.title;
-  const notificationOptions = {
-    body: payload.notification.body,
-    icon: '/assets/icon-192.png',
-    badge: '/assets/badge.png', // STRICT NATIVE BADGE INTEGRATION
-    image: payload.notification.image || null,
-    data: payload.data || {},
-    vibrate: [200, 100, 200]
-  };
+    const data = payload.data || {};
+    
+    const title = data.title || 'Cooperative Update';
+    const body = data.body || '';
+    const imageUrl = data.attachedImage || '';
+    const forceDrawer = data.forceDrawer || 'false';
+    const targetUrl = data.url || '/member/memberDashboard.html';
 
-  self.registration.showNotification(notificationTitle, notificationOptions);
+    const iconUrl = imageUrl ? (data.attachedIcon || '/assets/icon-192.png') : '/assets/icon-192.png';
+
+    const notificationOptions = {
+        body: body,
+        icon: iconUrl,
+        badge: '/assets/badge.png',
+        data: data, // Passes URL directly into click handler
+        vibrate: [200, 100, 200]
+    };
+
+    if (imageUrl) {
+        notificationOptions.image = imageUrl;
+    }
+
+    return self.registration.showNotification(title, notificationOptions);
 });
 
-// Handle Notification Clicks (Opens the App)
+// INTERCEPT PHYSICAL CLICKS ON NOTIFICATIONS
 self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-  const urlToOpen = event.notification.data.url || '/member/memberDashboard.html';
+    event.stopImmediatePropagation();
+    event.notification.close();
 
-  event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
-      // If tab is already open, focus it
-      for (let i = 0; i < windowClients.length; i++) {
-        const client = windowClients[i];
-        if (client.url === urlToOpen && 'focus' in client) {
-          return client.focus();
-        }
-      }
-      // Otherwise open new tab
-      if (clients.openWindow) {
-        return clients.openWindow(urlToOpen);
-      }
-    })
-  );
+    let targetUrl = '/member/memberDashboard.html';
+    const dataObj = event.notification.data;
+    
+    if (dataObj && dataObj.url) {
+        targetUrl = dataObj.url;
+    }
+
+    if (targetUrl.startsWith('/')) {
+        targetUrl = self.location.origin + targetUrl;
+    }
+
+    const isExternal = targetUrl.startsWith('http') && !targetUrl.includes(self.location.origin);
+
+    event.waitUntil(
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+            if (isExternal) {
+                return clients.openWindow(targetUrl);
+            }
+
+            for (let i = 0; i < windowClients.length; i++) {
+                const client = windowClients[i];
+                if (client.url && 'focus' in client) {
+                    return client.focus().then((focusedClient) => {
+                        if (focusedClient && focusedClient.navigate) {
+                            return focusedClient.navigate(targetUrl);
+                        }
+                    });
+                }
+            }
+
+            if (clients.openWindow) {
+                return clients.openWindow(targetUrl);
+            }
+        })
+    );
 });
 
 // ==========================================
-// 2. OFFLINE CACHING (Existing Logic)
+// 2. OFFLINE CACHING
 // ==========================================
 const CACHE_NAME = 'offline-cache-v2';
 const OFFLINE_ASSETS = [
@@ -86,9 +116,11 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Ignore Firestore/Firebase requests to prevent caching issues
-  if (event.request.url.includes('firestore.googleapis.com') || 
-      event.request.url.includes('googleapis.com')) {
+  // CRITICAL FIX: Bypass POST requests and Cloud Functions entirely to prevent Cache API crashes
+  if (event.request.method !== 'GET' ||
+      event.request.url.includes('firestore.googleapis.com') || 
+      event.request.url.includes('googleapis.com') ||
+      event.request.url.includes('cloudfunctions.net')) {
     return; 
   }
 
