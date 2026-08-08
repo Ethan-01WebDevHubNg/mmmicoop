@@ -404,7 +404,7 @@ function startDailyPayment() {
             }
         },
         onClose: () => { console.log("Squad Widget Closed"); },
-        key: "sandbox_pk_4f13577873497a5f09e7f6fd94ab1fa175d2e9b77de5",
+        key: "pk_59f298e7999d3bef0293627a86b20786947a6c15",
         email: user.email, 
         amount: totalAmount * 100, 
         currency_code: "NGN"

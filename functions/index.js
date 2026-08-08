@@ -15,7 +15,7 @@ const crypto = require("crypto");
 const squadTestKey = defineSecret('SQUAD_TEST_KEY');
 const squadLiveKey = defineSecret('SQUAD_LIVE_KEY');
 
-const IS_PROD = false; 
+const IS_PROD = true; 
 
 if (admin.apps.length === 0) {
   admin.initializeApp();
@@ -285,7 +285,7 @@ exports.sendBroadcast = onRequest(
     { 
         region: "us-central1",
         cors: true,
-        invoker: "public" // <-- THIS IS THE MISSING PIECE THAT BYPASSES THE CLOUD RUN IAM BLOCK
+        invoker: "public" 
     }, 
     async (req, res) => {
         try {
@@ -410,6 +410,8 @@ exports.sendBroadcast = onRequest(
                                 attachedIcon: graphicIconUrl || '',
                                 forceDrawer: 'false'
                             },
+                            android: { priority: 'high' },
+                            webpush: { headers: { Urgency: 'high' } },
                             topic: audience === 'admins' ? 'broadcast_admins' : 'broadcast'
                         };
 
@@ -521,6 +523,8 @@ exports.notifyOnTransaction = onDocumentWritten(
                     attachedIcon: '',
                     forceDrawer: 'true' 
                 },
+                android: { priority: 'high' },
+                webpush: { headers: { Urgency: 'high' } },
                 token: fcmToken 
             };
 

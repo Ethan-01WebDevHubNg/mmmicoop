@@ -33,7 +33,8 @@ messaging.onBackgroundMessage((payload) => {
         icon: iconUrl,
         badge: '/assets/badge.png',
         data: data, // Passes URL directly into click handler
-        vibrate: [200, 100, 200]
+        vibrate: [200, 100, 200],
+        requireInteraction: true // Forces heads-up drop-down banner
     };
 
     if (imageUrl) {
