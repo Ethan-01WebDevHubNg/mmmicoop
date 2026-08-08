@@ -5,6 +5,11 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>Dashboard - MMMI Admin</title>
 
+    <!-- Apple PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MMMi Admin">
+
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0f172a">
@@ -68,7 +73,7 @@
                     <span class="material-symbols-outlined">bar_chart</span><span>Reports</span>
                 </a>
                 <button onclick="document.getElementById('broadcast-modal').classList.remove('hidden')" class="w-full flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-left">
-                    <span class="material-symbols-outlined text-purple-500">campaign</span>
+                    <span class="material-symbols-outlined text-primary">campaign</span>
                     <span>Broadcast</span>
                 </button>
             </nav>
@@ -148,7 +153,7 @@
                     <a href="/admin/ManagePlans" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10"><span class="material-symbols-outlined">savings</span><span>Savings Plans</span></a>
                     <a href="/admin/reports" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10"><span class="material-symbols-outlined">bar_chart</span><span>Reports</span></a>
                     <button onclick="document.getElementById('broadcast-modal').classList.remove('hidden')" class="w-full flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-left">
-                        <span class="material-symbols-outlined text-purple-500">campaign</span>
+                        <span class="material-symbols-outlined text-primary">campaign</span>
                         <span>Broadcast</span>
                     </button>
                 </nav>
@@ -246,86 +251,106 @@
         </div>
     </div>
 
+    <!-- NEW MULTIPART UPLOAD BROADCAST MODAL -->
     <div id="broadcast-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
-    <div class="bg-white dark:bg-card-dark rounded-2xl shadow-2xl w-full max-w-md border border-gray-100 dark:border-gray-700 overflow-hidden transform transition-all scale-100">
-        
-        <div class="bg-purple-600 p-4 flex justify-between items-center">
-            <h3 class="text-white font-bold text-lg flex items-center gap-2">
-                <span class="material-symbols-outlined">campaign</span> New Broadcast
-            </h3>
-            <button onclick="document.getElementById('broadcast-modal').classList.add('hidden')" class="text-white/80 hover:text-white">
-                <span class="material-symbols-outlined">close</span>
-            </button>
-        </div>
-
-        <div class="p-6 space-y-4">
+        <div class="bg-white dark:bg-card-dark rounded-2xl shadow-2xl w-full max-w-md border border-gray-100 dark:border-gray-700 overflow-hidden transform transition-all scale-100 max-h-[90vh] flex flex-col">
             
-            <!-- NEW TARGET AUDIENCE DROPDOWN -->
-            <div>
-                <label class="block text-xs font-bold text-subtext-light dark:text-subtext-dark uppercase mb-1">Target Audience</label>
-                <div class="relative">
-                    <select id="notif-audience" class="w-full pl-10 pr-4 py-3 rounded-xl bg-gray-50 dark:bg-slate-800 border-none ring-1 ring-gray-200 dark:ring-gray-700 focus:ring-2 focus:ring-purple-500 text-sm font-bold text-gray-900 dark:text-white transition-all appearance-none cursor-pointer">
-                        <option value="users">Clients / Users Only</option>
-                        <option value="admins">Admins Only</option>
-                        <option value="all">Everyone (Admins + Users)</option>
-                    </select>
-                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">group</span>
-                    <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">expand_more</span>
-                </div>
+            <div class="bg-emerald-600 p-4 flex justify-between items-center shrink-0">
+                <h3 class="text-white font-bold text-lg flex items-center gap-2">
+                    <span class="material-symbols-outlined">campaign</span> New Broadcast
+                </h3>
+                <button onclick="document.getElementById('broadcast-modal').classList.add('hidden')" class="text-white/80 hover:text-white">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
             </div>
 
-            <div>
-                <label class="block text-xs font-bold text-subtext-light dark:text-subtext-dark uppercase mb-1">Highlight / Title</label>
-                <div class="relative">
-                    <input type="text" id="notif-title" placeholder="e.g., 📢 Meeting Reminder!" maxlength="40" 
-                        class="w-full pl-10 pr-4 py-3 rounded-xl bg-gray-50 dark:bg-slate-800 border-none ring-1 ring-gray-200 dark:ring-gray-700 focus:ring-2 focus:ring-purple-500 text-sm font-bold text-gray-900 dark:text-white transition-all">
-                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">title</span>
+            <div class="p-6 space-y-4 overflow-y-auto custom-scroll">
+                
+                <div>
+                    <label class="block text-xs font-bold text-subtext-light dark:text-subtext-dark uppercase mb-1">Target Audience</label>
+                    <div class="relative">
+                        <select id="notif-audience" class="w-full pl-10 pr-10 py-3 rounded-xl bg-gray-50 dark:bg-slate-800 bg-none border-none ring-1 ring-gray-200 dark:ring-gray-700 focus:ring-2 focus:ring-emerald-500 text-sm font-bold text-gray-900 dark:text-white transition-all appearance-none cursor-pointer">
+                            <option value="users">Clients / Users Only</option>
+                            <option value="admins">Admins Only</option>
+                            <option value="all">Everyone (Admins + Users)</option>
+                        </select>
+                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">group</span>
+                        <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">expand_more</span>
+                    </div>
                 </div>
-            </div>
 
-            <div>
-                <label class="block text-xs font-bold text-subtext-light dark:text-subtext-dark uppercase mb-1">Message Details</label>
-                <textarea id="notif-body" rows="3" maxlength="120" placeholder="Keep it short and punchy..." 
-                    class="w-full p-4 rounded-xl bg-gray-50 dark:bg-slate-800 border-none ring-1 ring-gray-200 dark:ring-gray-700 focus:ring-2 focus:ring-purple-500 text-sm text-gray-900 dark:text-white resize-none transition-all"></textarea>
-                <div class="flex justify-end mt-1">
-                    <span id="char-count" class="text-xs font-mono text-gray-400">0/120</span>
+                <div>
+                    <label class="block text-xs font-bold text-subtext-light dark:text-subtext-dark uppercase mb-1">Highlight / Title</label>
+                    <div class="relative">
+                        <input type="text" id="notif-title" placeholder="e.g., 📢 Meeting Reminder!" maxlength="40" 
+                            class="w-full pl-10 pr-4 py-3 rounded-xl bg-gray-50 dark:bg-slate-800 border-none ring-1 ring-gray-200 dark:ring-gray-700 focus:ring-2 focus:ring-emerald-500 text-sm font-bold text-gray-900 dark:text-white transition-all">
+                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">title</span>
+                    </div>
                 </div>
-            </div>
-            
-            <div>
-                <label class="block text-xs font-bold text-subtext-light dark:text-subtext-dark uppercase mb-1">Feature Image URL (Optional)</label>
-                <div class="relative">
-                    <input type="url" id="notif-image" placeholder="https://example.com/promo-graphic.jpg" 
-                        class="w-full pl-10 pr-4 py-3 rounded-xl bg-gray-50 dark:bg-slate-800 border-none ring-1 ring-gray-200 dark:ring-gray-700 focus:ring-2 focus:ring-purple-500 text-sm text-gray-900 dark:text-white transition-all">
-                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">image</span>
+
+                <div>
+                    <label class="block text-xs font-bold text-subtext-light dark:text-subtext-dark uppercase mb-1">Message Details</label>
+                    <textarea id="notif-body" rows="3" maxlength="120" placeholder="Keep it short and punchy..." 
+                        class="w-full p-4 rounded-xl bg-gray-50 dark:bg-slate-800 border-none ring-1 ring-gray-200 dark:ring-gray-700 focus:ring-2 focus:ring-emerald-500 text-sm text-gray-900 dark:text-white resize-none transition-all"></textarea>
+                    <div class="flex justify-end mt-1">
+                        <span id="char-count" class="text-xs font-mono text-gray-400">0/120</span>
+                    </div>
                 </div>
-            </div>
+                
+                <!-- NEW FILE PICKER -->
+                <div>
+                    <label class="block text-xs font-bold text-subtext-light dark:text-subtext-dark uppercase mb-1">Feature Image (Optional)</label>
+                    <div class="relative flex flex-col gap-2">
+                        <input type="file" id="notif-image-file" accept="image/png, image/jpeg, image/webp" class="hidden">
+                        
+                        <label for="notif-image-file" id="notif-image-dropzone" class="flex flex-col items-center justify-center w-full py-5 rounded-xl bg-gray-50 dark:bg-slate-800 border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-emerald-500 dark:hover:border-emerald-500 cursor-pointer transition-all group">
+                            <span class="material-symbols-outlined text-gray-400 group-hover:text-emerald-500 mb-1 text-3xl transition-colors">cloud_upload</span>
+                            <span id="notif-image-label" class="text-xs font-bold text-gray-500 dark:text-gray-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">Click to upload image (Max 5MB)</span>
+                            <span class="text-[10px] text-gray-400 mt-1">JPG, PNG, WEBP allowed</span>
+                        </label>
 
-            <div class="flex gap-2 justify-center pb-2">
-                <button type="button" onclick="insertEmoji('🔥')" class="hover:bg-gray-100 dark:hover:bg-white/5 p-2 rounded-lg transition">🔥</button>
-                <button type="button" onclick="insertEmoji('🚀')" class="hover:bg-gray-100 dark:hover:bg-white/5 p-2 rounded-lg transition">🚀</button>
-                <button type="button" onclick="insertEmoji('⚠️')" class="hover:bg-gray-100 dark:hover:bg-white/5 p-2 rounded-lg transition">⚠️</button>
-                <button type="button" onclick="insertEmoji('🎉')" class="hover:bg-gray-100 dark:hover:bg-white/5 p-2 rounded-lg transition">🎉</button>
-                <button type="button" onclick="insertEmoji('🔔')" class="hover:bg-gray-100 dark:hover:bg-white/5 p-2 rounded-lg transition">🔔</button>
-            </div>
+                        <!-- Hidden Preview Container -->
+                        <div id="notif-image-preview-container" class="hidden relative w-full h-32 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-inner">
+                            <img id="notif-image-preview" class="w-full h-full object-cover" src="" alt="Preview">
+                            <button type="button" id="notif-image-remove" class="absolute top-2 right-2 bg-black/60 text-white rounded-full p-1 hover:bg-red-500 transition-colors backdrop-blur-sm">
+                                <span class="material-symbols-outlined text-sm flex items-center justify-center">close</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-xs font-bold text-subtext-light dark:text-subtext-dark uppercase mb-1">Target URL (Optional)</label>
+                    <div class="relative">
+                        <input type="text" id="notif-url" placeholder="https://..., 080..., or WhatsApp 080..." 
+                            class="w-full pl-10 pr-4 py-3 rounded-xl bg-gray-50 dark:bg-slate-800 border-none ring-1 ring-gray-200 dark:ring-gray-700 focus:ring-2 focus:ring-emerald-500 text-sm text-gray-900 dark:text-white transition-all">
+                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">link</span>
+                    </div>
+                </div>
 
-            <button id="btn-send-broadcast" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-purple-600/30 transition-all flex items-center justify-center gap-2">
-                <span>Send Broadcast</span>
-                <span class="material-symbols-outlined text-sm">send</span>
-            </button>
+                <div class="flex gap-2 justify-center pb-2">
+                    <button type="button" onclick="insertEmoji('🔥')" class="hover:bg-gray-100 dark:hover:bg-white/5 p-2 rounded-lg transition">🔥</button>
+                    <button type="button" onclick="insertEmoji('🚀')" class="hover:bg-gray-100 dark:hover:bg-white/5 p-2 rounded-lg transition">🚀</button>
+                    <button type="button" onclick="insertEmoji('⚠️')" class="hover:bg-gray-100 dark:hover:bg-white/5 p-2 rounded-lg transition">⚠️</button>
+                    <button type="button" onclick="insertEmoji('🎉')" class="hover:bg-gray-100 dark:hover:bg-white/5 p-2 rounded-lg transition">🎉</button>
+                    <button type="button" onclick="insertEmoji('🔔')" class="hover:bg-gray-100 dark:hover:bg-white/5 p-2 rounded-lg transition">🔔</button>
+                </div>
+
+                <button id="btn-send-broadcast" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-emerald-600/30 transition-all flex items-center justify-center gap-2 mt-2">
+                    <span>Send Broadcast</span>
+                    <span class="material-symbols-outlined text-sm">send</span>
+                </button>
+            </div>
         </div>
     </div>
-</div>
 
 <script>
-    // Simple Emoji Injector
     function insertEmoji(emoji) {
         const body = document.getElementById('notif-body');
         body.value += emoji;
         updateCount();
     }
     
-    // Character Counter
     const bodyInput = document.getElementById('notif-body');
     const countDisplay = document.getElementById('char-count');
     
@@ -353,7 +378,6 @@
             loadDashboardData();
         });
 
-        // ... Profile Dropdown Logic (Standardized) ...
         function setupProfileDropdown(data) {
             const trigger = document.getElementById('top-profile-trigger');
             const dropdown = document.getElementById('top-profile-dropdown');
@@ -380,7 +404,6 @@
 
         async function loadDashboardData() {
             try {
-                // 1. Fetch Stats
                 const usersSnap = await getDocs(query(collection(db, "users")));
                 const activeUsers = usersSnap.docs.filter(d => !d.data().isDeleted).length;
                 document.getElementById('stat-members').textContent = activeUsers;
@@ -395,7 +418,6 @@
                 const pendingSnap = await getDocs(query(collectionGroup(db, 'transactions'), where('status', '==', 'Pending')));
                 document.getElementById('stat-pending').textContent = pendingSnap.size;
 
-                // Daily Inflow
                 const today = new Date();
                 today.setHours(0,0,0,0);
                 const dailySnap = await getDocs(query(collectionGroup(db, 'transactions'), where('date', '>=', today), where('type', '==', 'Credit'), where('status', '==', 'Success')));
@@ -403,10 +425,8 @@
                 dailySnap.docs.forEach(d => dailyTotal += parseFloat(d.data().amount || 0));
                 document.getElementById('stat-daily').textContent = formatCurrency(dailyTotal);
 
-                // 2. Fetch Recent Transactions with Member Join
                 const txnSnap = await getDocs(query(collectionGroup(db, 'transactions'), orderBy('date', 'desc'), limit(15)));
                 
-                // Map Users for quick lookup including Soft Delete status
                 const userMap = {};
                 usersSnap.docs.forEach(u => {
                     const ud = u.data();
@@ -451,7 +471,6 @@
             tbody.innerHTML = txns.map(t => {
                 const amountClass = t.type === 'Credit' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
                 
-                // Visual Logic for Archived Users
                 const memberHtml = t.isArchived 
                     ? `<span class="flex items-center gap-2 text-subtext-light font-mono line-through opacity-70" title="User Deleted">${t.displayMemberId} <span class="material-symbols-outlined text-[10px] text-red-500">archive</span></span>` 
                     : `<span class="font-mono font-bold text-text-light dark:text-text-dark">${t.displayMemberId}</span>`;
@@ -473,7 +492,6 @@
             }).join('');
         }
 
-        // Search Logic
         document.getElementById('txn-search').addEventListener('input', (e) => {
             const term = e.target.value.toLowerCase();
             const filtered = allTransactions.filter(t => 
@@ -502,5 +520,119 @@
     });
   }
 </script>
+
+<!-- PWA INSTALL PROMPT -->
+<div id="pwa-install-prompt" class="fixed bottom-0 left-0 right-0 z-[100] transform translate-y-full transition-transform duration-500 ease-out hidden sm:hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-t-2xl shadow-[0_-4px_20px_rgba(0,0,0,0.15)] border-t border-gray-100 dark:border-gray-700 p-5 pb-8">
+        <div class="flex items-start gap-4 mb-4">
+            <img src="/assets/icon-192.png" alt="App Icon" class="w-12 h-12 rounded-xl shadow-sm">
+            <div class="flex-1">
+                <h3 class="text-base font-bold text-gray-900 dark:text-white">Install MMMi Admin</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">Add MMMi to your Home Screen for the best app experience and to enable cooperative push notifications.</p>
+            </div>
+            <button id="pwa-close-btn" class="text-gray-400 hover:text-gray-600 dark:hover:text-white bg-gray-50 dark:bg-gray-700 rounded-full p-1.5 focus:outline-none transition-colors">
+                <span class="material-symbols-outlined text-sm">close</span>
+            </button>
+        </div>
+        
+        <!-- Android / Native Actions -->
+        <div id="pwa-native-actions" class="hidden flex gap-3">
+            <button id="pwa-install-btn" class="flex-1 bg-primary text-white font-bold py-2.5 rounded-xl text-sm shadow-md shadow-primary/20 hover:bg-red-700 transition-colors">Install Now</button>
+        </div>
+
+        <!-- iOS Instructions -->
+        <div id="pwa-ios-instructions" class="hidden bg-blue-50 dark:bg-blue-900/20 rounded-xl p-3 border border-blue-100 dark:border-blue-800">
+            <p class="text-xs text-blue-800 dark:text-blue-200 font-medium flex items-center gap-2 mb-2">
+                <span class="material-symbols-outlined text-base">ios_share</span> 1. Tap the Share button below
+            </p>
+            <p class="text-xs text-blue-800 dark:text-blue-200 font-medium flex items-center gap-2">
+                <span class="material-symbols-outlined text-base">add_box</span> 2. Select "Add to Home Screen"
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const promptEl = document.getElementById('pwa-install-prompt');
+    const closeBtn = document.getElementById('pwa-close-btn');
+    const installBtn = document.getElementById('pwa-install-btn');
+    const nativeActions = document.getElementById('pwa-native-actions');
+    const iosInstructions = document.getElementById('pwa-ios-instructions');
+    
+    let deferredPrompt = null;
+    const COOLDOWN_DAYS = 7;
+    const DISMISSAL_KEY = 'pwa_prompt_dismissed';
+
+    const isInstalled = navigator.standalone || window.matchMedia('(display-mode: standalone)').matches || window.matchMedia('(display-mode: window-controls-overlay)').matches;
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const isMobile = window.innerWidth <= 768 || /Mobi|Android/i.test(navigator.userAgent);
+    
+    function hasCooldown() {
+        const dismissed = localStorage.getItem(DISMISSAL_KEY);
+        if (!dismissed) return false;
+        const daysPassed = (Date.now() - parseInt(dismissed, 10)) / (1000 * 60 * 60 * 24);
+        return daysPassed < COOLDOWN_DAYS;
+    }
+
+    function setCooldown() {
+        localStorage.setItem(DISMISSAL_KEY, Date.now().toString());
+    }
+
+    function showPrompt() {
+        promptEl.classList.remove('hidden');
+        setTimeout(() => promptEl.classList.remove('translate-y-full'), 50);
+    }
+
+    function hidePrompt() {
+        promptEl.classList.add('translate-y-full');
+        setTimeout(() => promptEl.classList.add('hidden'), 500);
+    }
+
+    closeBtn.addEventListener('click', () => {
+        setCooldown();
+        hidePrompt();
+    });
+
+    if (isInstalled || !isMobile || hasCooldown()) {
+        return;
+    }
+
+    if (isIOS) {
+        iosInstructions.classList.remove('hidden');
+        setTimeout(showPrompt, 2500);
+    } 
+    else {
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            nativeActions.classList.remove('hidden');
+            setTimeout(showPrompt, 2500);
+        });
+
+        installBtn.addEventListener('click', async () => {
+            hidePrompt();
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    console.log('User accepted the install prompt');
+                } else {
+                    console.log('User dismissed the install prompt');
+                    setCooldown();
+                }
+                deferredPrompt = null;
+            }
+        });
+
+        window.addEventListener('appinstalled', () => {
+            hidePrompt();
+            deferredPrompt = null;
+            console.log('PWA was installed natively');
+        });
+    }
+});
+</script>
+
 </body>
 </html>

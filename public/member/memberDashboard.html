@@ -4,6 +4,12 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Member Dashboard - Cooperative Society</title>
+
+<!-- Apple PWA Meta Tags -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MMMi App">
+
 <link rel="icon" type="image/x-icon" href="/favicon.ico">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#0f172a">
@@ -48,9 +54,8 @@
 .dark .isometric-sidebar { background-color: #1e293b; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg id='hexagons' fill='%230f172a' fill-opacity='0.25' fill-rule='nonzero'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); }
 .plan-card.selected { border-color: #22c55e; background-color: rgba(34, 197, 94, 0.1); }
 .plan-card.selected h5, .plan-card.selected span { color: #22c55e; }
-/* Expand/Collapse Transition */
 .expand-wrapper { max-height: 0; overflow: hidden; transition: max-height 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
-.expand-wrapper.expanded { max-height: 2000px; } /* Large enough to hold 20 items */
+.expand-wrapper.expanded { max-height: 2000px; }
 
 .grecaptcha-badge { visibility: hidden; }
 input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
@@ -59,7 +64,6 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 .custom-scroll::-webkit-scrollbar-thumb { background-color: #e2e8f0; border-radius: 20px; }
 .dark .custom-scroll::-webkit-scrollbar-thumb { background-color: #334155; }
 
-/* Mobile Menu Blur */
 .content-area-transition { transition: filter 0.3s ease-in-out; }
 .content-blurred { filter: blur(10px); pointer-events: none; }
 </style>
@@ -975,32 +979,44 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 <script>
     window.addEventListener('fcm-foreground', async (e) => {
         const payload = e.detail;
-        if (payload && payload.notification) {
-            
-            // --- NEW: INTERCEPT DYNAMIC TRANSACTION ALERTS ---
-            // Force native system push notification instead of HTML toast
-            if (payload.data && payload.data.forceDrawer === 'true') {
+        
+        const data = payload.data || {};
+        const title = data.title;
+        const body = data.body;
+        
+        if (title && body) {
+            const forceDrawer = data.forceDrawer === 'true' || data.forceDrawer === true;
+            if (forceDrawer) {
                 if ('serviceWorker' in navigator) {
                     try {
                         const registration = await navigator.serviceWorker.ready;
-                        await registration.showNotification(payload.notification.title, {
-                            body: payload.notification.body,
-                            icon: '/assets/icon-192.png',
+                        
+                        const imageUrl = data.attachedImage || data.image || '';
+                        const iconUrl = imageUrl ? (data.attachedIcon || data.icon || '/assets/icon-192.png') : '/assets/icon-192.png';
+
+                        const notificationOptions = {
+                            body: body,
+                            icon: iconUrl,
                             badge: '/assets/badge.png',
-                            data: payload.data,
+                            data: data,
                             vibrate: [200, 100, 200]
-                        });
+                        };
+
+                        if (imageUrl) {
+                            notificationOptions.image = imageUrl;
+                        }
+
+                        await registration.showNotification(title, notificationOptions);
                     } catch (err) {
                         console.error('Failed to force native notification:', err);
                     }
                 }
-                return; // Stop execution here so the HTML toast is not drawn
+                return;
             }
             
-            // --- FALLBACK: Standard Broadcast HTML Toasts ---
-            // Conditionally generate the image HTML
-            const imageHtml = payload.notification.image 
-                ? `<img src="${payload.notification.image}" class="w-full h-32 object-cover rounded-lg mt-3 border border-gray-100 dark:border-gray-700">` 
+            const imgUrl = data.attachedImage || data.image;
+            const imageHtml = imgUrl 
+                ? `<img src="${imgUrl}" onerror="this.style.display='none'" class="w-full h-32 object-cover rounded-lg mt-3 border border-gray-100 dark:border-gray-700">` 
                 : '';
 
             const toast = document.createElement('div');
@@ -1010,8 +1026,8 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
                     <span class="material-symbols-outlined text-primary">notifications_active</span>
                 </div>
                 <div class="flex-1 w-full">
-                    <h4 class="font-bold text-gray-900 dark:text-white text-sm">${payload.notification.title}</h4>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">${payload.notification.body}</p>
+                    <h4 class="font-bold text-gray-900 dark:text-white text-sm">${title}</h4>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">${body}</p>
                     ${imageHtml}
                 </div>
                 <button onclick="this.parentElement.remove()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors focus:outline-none">
@@ -1020,7 +1036,6 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
             `;
             document.body.appendChild(toast);
             
-            // Auto-dismiss after 8 seconds
             setTimeout(() => {
                 if (toast.parentElement) toast.remove();
             }, 8000);
@@ -1028,6 +1043,133 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
     });
 </script>
 <!-- INJECT END: FCM Foreground Toast Listener -->
+
+<!-- SMART URL INTENT INTERCEPTOR -->
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('intent') === 'tel') {
+            const number = params.get('number');
+            if (number) {
+                window.location.href = `tel:${number}`;
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        }
+    });
+</script>
+
+<!-- PWA INSTALL PROMPT -->
+<div id="pwa-install-prompt" class="fixed bottom-0 left-0 right-0 z-[100] transform translate-y-full transition-transform duration-500 ease-out hidden sm:hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-t-2xl shadow-[0_-4px_20px_rgba(0,0,0,0.15)] border-t border-gray-100 dark:border-gray-700 p-5 pb-8">
+        <div class="flex items-start gap-4 mb-4">
+            <img src="/assets/icon-192.png" alt="App Icon" class="w-12 h-12 rounded-xl shadow-sm">
+            <div class="flex-1">
+                <h3 class="text-base font-bold text-gray-900 dark:text-white">Install MMMi App</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">Add MMMi to your Home Screen for the best app experience and to enable cooperative push notifications.</p>
+            </div>
+            <button id="pwa-close-btn" class="text-gray-400 hover:text-gray-600 dark:hover:text-white bg-gray-50 dark:bg-gray-700 rounded-full p-1.5 focus:outline-none transition-colors">
+                <span class="material-symbols-outlined text-sm">close</span>
+            </button>
+        </div>
+        
+        <!-- Android / Native Actions -->
+        <div id="pwa-native-actions" class="hidden flex gap-3">
+            <button id="pwa-install-btn" class="flex-1 bg-primary text-white font-bold py-2.5 rounded-xl text-sm shadow-md shadow-primary/20 hover:bg-red-700 transition-colors">Install Now</button>
+        </div>
+
+        <!-- iOS Instructions -->
+        <div id="pwa-ios-instructions" class="hidden bg-blue-50 dark:bg-blue-900/20 rounded-xl p-3 border border-blue-100 dark:border-blue-800">
+            <p class="text-xs text-blue-800 dark:text-blue-200 font-medium flex items-center gap-2 mb-2">
+                <span class="material-symbols-outlined text-base">ios_share</span> 1. Tap the Share button below
+            </p>
+            <p class="text-xs text-blue-800 dark:text-blue-200 font-medium flex items-center gap-2">
+                <span class="material-symbols-outlined text-base">add_box</span> 2. Select "Add to Home Screen"
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const promptEl = document.getElementById('pwa-install-prompt');
+    const closeBtn = document.getElementById('pwa-close-btn');
+    const installBtn = document.getElementById('pwa-install-btn');
+    const nativeActions = document.getElementById('pwa-native-actions');
+    const iosInstructions = document.getElementById('pwa-ios-instructions');
+    
+    let deferredPrompt = null;
+    const COOLDOWN_DAYS = 7;
+    const DISMISSAL_KEY = 'pwa_prompt_dismissed';
+
+    const isInstalled = navigator.standalone || window.matchMedia('(display-mode: standalone)').matches || window.matchMedia('(display-mode: window-controls-overlay)').matches;
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const isMobile = window.innerWidth <= 768 || /Mobi|Android/i.test(navigator.userAgent);
+    
+    function hasCooldown() {
+        const dismissed = localStorage.getItem(DISMISSAL_KEY);
+        if (!dismissed) return false;
+        const daysPassed = (Date.now() - parseInt(dismissed, 10)) / (1000 * 60 * 60 * 24);
+        return daysPassed < COOLDOWN_DAYS;
+    }
+
+    function setCooldown() {
+        localStorage.setItem(DISMISSAL_KEY, Date.now().toString());
+    }
+
+    function showPrompt() {
+        promptEl.classList.remove('hidden');
+        setTimeout(() => promptEl.classList.remove('translate-y-full'), 50);
+    }
+
+    function hidePrompt() {
+        promptEl.classList.add('translate-y-full');
+        setTimeout(() => promptEl.classList.add('hidden'), 500);
+    }
+
+    closeBtn.addEventListener('click', () => {
+        setCooldown();
+        hidePrompt();
+    });
+
+    if (isInstalled || !isMobile || hasCooldown()) {
+        return;
+    }
+
+    if (isIOS) {
+        iosInstructions.classList.remove('hidden');
+        setTimeout(showPrompt, 2500);
+    } 
+    else {
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            nativeActions.classList.remove('hidden');
+            setTimeout(showPrompt, 2500);
+        });
+
+        installBtn.addEventListener('click', async () => {
+            hidePrompt();
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    console.log('User accepted the install prompt');
+                } else {
+                    console.log('User dismissed the install prompt');
+                    setCooldown();
+                }
+                deferredPrompt = null;
+            }
+        });
+
+        window.addEventListener('appinstalled', () => {
+            hidePrompt();
+            deferredPrompt = null;
+            console.log('PWA was installed natively');
+        });
+    }
+});
+</script>
 
 </body>
 </html>
