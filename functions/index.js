@@ -484,30 +484,30 @@ exports.notifyOnTransaction = onDocumentWritten(
 
             if (category === 'daily') {
                 if (type === 'Credit') {
-                    title = 'Daily Target Hit! 🎯';
+                    title = 'DAILY TARGET HIT! 🎯';
                     body = `Great job, ${firstName}! Your daily contribution of ₦${amount} is safely locked in.`;
                 } else if (type === 'Debit') {
-                    title = 'Daily Savings Withdrawal 💸';
+                    title = 'DAILY SAVINGS WITHDRAWAL 💸';
                     body = `Hey ${firstName}, your withdrawal of ₦${amount} from your daily contribution is being processed and you should be credited soon.`;
                 }
             } 
             else if (category === 'savings') {
                 if (type === 'Credit') {
-                    title = 'Wallet Top-up Successful 💳';
+                    title = 'WALLET TOP-UP SUCCESSFUL 💳';
                     body = `${firstName}, your cooperative wallet was just credited with ₦${amount}.`;
                 } else if (type === 'Debit') {
-                    title = 'Wallet Debit 📉';
+                    title = 'WALLET DEBIT 📉';
                     body = `₦${amount} has been debited from your cooperative wallet, ${firstName}.`;
                 }
             } 
             else if (category === 'interest' || subType === 'INTEREST') {
-                title = 'Daily Interest! 📈';
+                title = 'DAILY INTEREST! 📈';
                 const dayString = interestDays == 1 ? 'day' : 'days';
                 body = `Hooray! ${firstName}, your cooperative savings just generated ₦${amount} in interest for the last ${interestDays} ${dayString}.`;
             } 
             else {
                 const isCredit = type === 'Credit';
-                title = isCredit ? 'Credit Alert! 💰' : 'Debit Alert! 💸';
+                title = isCredit ? 'CREDIT ALERT! 💰' : 'DEBIT ALERT! 💸';
                 body = isCredit 
                     ? `Hi ${firstName}, your account was credited with ₦${amount}.` 
                     : `Hi ${firstName}, ₦${amount} was debited from your account.`;

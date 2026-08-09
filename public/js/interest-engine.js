@@ -1,29 +1,16 @@
 /**
  * Interest Engine & Plan Manager (Firestore Driven)
- * * Updates:
- * 1. Fetches Plans from 'savings_plans' collection.
- * 2. Implements 90-Day Cycle Locking.
- * 3. Credits interest daily to Wallet Balance.
- * 4. Checks for Upgrade Availability (Filters out Deactivated Plans).
- * 5. HEALING LOGIC: Fixes missed first-day payouts for legacy users.
- * 6. UI FIX: Queues notification to display AFTER preloader.
- * 7. SECURITY FIX: Uses serverTimestamp() for lastInterestApplied to enable Rules enforcement.
- * 8. STABILITY FIX: Prevents "Healing" write from conflicting with "Interest" write in the same cycle.
- * 9. CACHE FIX: Forces server fetch to prevent "double payment" errors on stale data.
- * 10. ERROR HANDLING FIX: Silently swallows rules-based 'permission-denied' blocks to keep console clean.
  */
 
 const InterestEngine = (function() {
     
-    // --- Configuration ---
     let _plans = []; 
     let _db, _userId, _fs, _applyInterestFn;
-    let _pendingMessage = null; // Store toast here until preloader is done
+    let _pendingMessage = null; 
     
     const MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24;
     const CYCLE_DURATION_DAYS = 90; 
 
-    // --- Helpers: Professional Standalone Toast (Matches NotificationService) ---
     const Toast = {
         show: (message, type = 'success') => {
             const existing = document.getElementById('interest-toast');
@@ -63,19 +50,15 @@ const InterestEngine = (function() {
         }
     };
 
-    // --- CRITICAL FIX: BYPASS CACHE ---
     async function getUserData() {
         if (!_db || !_userId || !_fs) return null;
         const docRef = _fs.doc(_db, "users", _userId);
 
         try {
-            // Attempt to force a server fetch if the SDK function is available
-            // This prevents the "Stale Data" bug where the app tries to pay interest twice.
             if (_fs.getDocFromServer) {
                 const snap = await _fs.getDocFromServer(docRef);
                 return snap.exists() ? { ref: snap.ref, data: snap.data() } : null;
             } else {
-                // Fallback for older SDKs or standard calls
                 const snap = await _fs.getDoc(docRef);
                 return snap.exists() ? { ref: snap.ref, data: snap.data() } : null;
             }
@@ -88,19 +71,17 @@ const InterestEngine = (function() {
         }
     }
 
-    // --- 1. INITIALIZATION ---
     async function init(firestoreDb, userId, firebaseFunctions, applyInterestFn) {
         _db = firestoreDb;
         _userId = userId;
         _fs = firebaseFunctions; 
         _applyInterestFn = applyInterestFn;
-        _pendingMessage = null; // Reset on init
+        _pendingMessage = null;
 
         await fetchPlans();
         await checkAndApplyInterest(); 
     }
 
-    // --- NEW: Trigger Function called by Dashboard ---
     function showNotification() {
         if (_pendingMessage) {
             setTimeout(() => {
@@ -133,8 +114,6 @@ const InterestEngine = (function() {
     function getPlans() { 
         return _plans; 
     }
-
-    // --- 2. PLAN MANAGER LOGIC ---
     
     async function checkUpgradeAvailability() {
         if (!_plans || _plans.length === 0) return null;
@@ -216,7 +195,6 @@ const InterestEngine = (function() {
         }
     }
 
-    // --- 3. INTEREST LOGIC (HEALING + 24H + MIDNIGHT) ---
     async function checkAndApplyInterest() {
         const record = await getUserData();
         if (!record) return;
@@ -230,7 +208,6 @@ const InterestEngine = (function() {
         const plan = _plans.find(p => p.name.toLowerCase() === currentPlanName.toLowerCase());
         if (!plan) return; 
 
-        // 1. Establish Dates
         let planStartDate;
         if (data.planStartDate && typeof data.planStartDate.toDate === 'function') {
             planStartDate = data.planStartDate.toDate();
@@ -271,22 +248,25 @@ const InterestEngine = (function() {
                 console.log("Phase 1: Paying First 24h cycle.");
                 daysToCredit++;
                 anchor = new Date(firstCycleTarget);
+                requiresFlagUpdate = true; 
             } else {
                 console.log("Phase 1: Healing missing flag (Already paid).");
+                requiresFlagUpdate = true;
             }
-            requiresFlagUpdate = true;
         }
 
-        // --- PHASE 2: MIDNIGHT ALIGNMENT ---
         let safetyCounter = 0;
 
+        // --- PHASE 2: MIDNIGHT ALIGNMENT (STRICTLY UTC) ---
         while (safetyCounter < 365) {
             let nextMidnight = new Date(anchor);
-            nextMidnight.setDate(nextMidnight.getDate() + 1);
-            nextMidnight.setHours(0, 0, 0, 0); 
+            
+            // Advance by 1 day and lock to exactly 00:00:00 UTC
+            nextMidnight.setUTCDate(nextMidnight.getUTCDate() + 1);
+            nextMidnight.setUTCHours(0, 0, 0, 0); 
 
             if (nextMidnight.getTime() <= anchor.getTime()) {
-                nextMidnight.setDate(nextMidnight.getDate() + 1);
+                nextMidnight.setUTCDate(nextMidnight.getUTCDate() + 1);
             }
             
             if (now.getTime() >= nextMidnight.getTime()) {
@@ -297,8 +277,6 @@ const InterestEngine = (function() {
                 break;
             }
         }
-
-        // --- EXECUTE UPDATES (ATOMIC SAFEGUARD) ---
         
         if (requiresFlagUpdate && daysToCredit === 0) {
             try {
@@ -307,11 +285,9 @@ const InterestEngine = (function() {
                 } else {
                     await _fs.setDoc(record.ref, { firstCycleProcessed: true }, { merge: true });
                 }
-                console.log("Healing: firstCycleProcessed flag updated.");
-            } catch(e) { console.error("Flag Update Failed:", e); }
+            } catch(e) {}
         }
 
-        // 2. Pay Interest (Timezone Safe Check)
         const previousTimestamp = lastRunDate.getTime();
         const newTimestamp = anchor.getTime();
 
@@ -323,8 +299,12 @@ const InterestEngine = (function() {
                 try {
                     const secureTimestamp = _fs.serverTimestamp ? _fs.serverTimestamp() : new Date();
 
-                    // NOW PASSING 'daysToCredit' AS THE 4TH ARGUMENT FOR DYNAMIC NOTIFICATIONS
-                    await _applyInterestFn(_userId, interestToCredit, secureTimestamp, daysToCredit, true);
+                    const res = await _applyInterestFn(_userId, interestToCredit, secureTimestamp, daysToCredit, true, requiresFlagUpdate);
+                    
+                    if (res && res.skipped) {
+                        console.log("Engine: Cycle skipped to prevent double payment.");
+                        return;
+                    }
                     
                     const formattedInterest = new Intl.NumberFormat('en-NG', {style:'currency', currency:'NGN'}).format(interestToCredit);
                     
@@ -338,8 +318,6 @@ const InterestEngine = (function() {
                     const isPermissionDenied = e.message && e.message.includes("permission-denied");
                     
                     if (isPermissionDenied) {
-                        // GRACEFUL HANDLING: Silently absorb the permission error to prevent console spam.
-                        // This usually means the Firestore rules safely blocked a redundant interest call (Idempotency).
                         console.debug("Interest Engine: Cycle securely skipped or deferred by Rules.");
                     } else {
                         console.error("Interest Error:", e);

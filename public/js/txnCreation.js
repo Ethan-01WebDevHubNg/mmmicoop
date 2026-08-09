@@ -61,16 +61,13 @@ async function executeSecureDeposit(uid, amount, reference, category) {
 export async function recordWithdrawal(uid, memberId, amountRequest, bankDetails) {
     if (!uid) throw new Error("User ID is required.");
 
-    // --- FIX: GENERATE IDs OUTSIDE THE TRANSACTION LOOP ---
-    // This ensures that if runTransaction retries due to network/contention,
-    // it keeps trying to write to the SAME document ID, preventing duplicates.
+    // Generate IDs outside the transaction loop to prevent duplicates on retries
     const ts = Date.now();
-    const now = new Date(); // Lock the time
+    const now = new Date(); 
     const mainTxnId = `txn-${memberId}-${ts}`;
     const penTxnId = `txn-pen-${ts}`;
     const fftTxnId = `txn-fft-${ts}`;
     
-    // Create References upfront
     const mainRef = `WDR-${ts}`;
     const penRef = `PEN-${ts}`;
     const fftRef = `INT-RVK-${ts}`;
@@ -94,7 +91,6 @@ export async function recordWithdrawal(uid, memberId, amountRequest, bankDetails
 
             const planStart = data.planStartDate ? new Date(data.planStartDate) : new Date();
             
-            // Use 'now' defined outside for consistency
             const diffTime = Math.abs(now - planStart);
             const daysPassed = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
             
@@ -110,9 +106,7 @@ export async function recordWithdrawal(uid, memberId, amountRequest, bankDetails
                 description = "Savings Withdrawal (Mature Cycle)";
                 transaction.update(userRef, { cycleAccumulatedInterest: 0 });
             } else {
-                // 1% Penalty
                 penaltyKobo = Math.round(requestKobo * 0.01); 
-                // Forfeit Interest
                 interestForfeitKobo = cycleInterestPaidKobo; 
                 
                 const totalDeductionKobo = penaltyKobo + interestForfeitKobo;
@@ -136,7 +130,6 @@ export async function recordWithdrawal(uid, memberId, amountRequest, bankDetails
             if (penaltyKobo > 0) {
                 const penAmt = fromKobo(penaltyKobo);
                 feeBreakdown.push({ id: penTxnId, amount: penAmt, type: 'FEE_PENALTY_EARLY' });
-                // Note: Using the STABLE ID (penTxnId) defined outside
                 transaction.set(doc(db, "users", uid, "transactions", penTxnId), {
                     transactionId: penTxnId, userId: uid, amount: penAmt, type: "Debit", category: "savings",
                     sub_type: "FEE_PENALTY_EARLY", related_transaction_id: mainTxnId, description: "Early Withdrawal Penalty (1%)",
@@ -147,7 +140,6 @@ export async function recordWithdrawal(uid, memberId, amountRequest, bankDetails
             if (interestForfeitKobo > 0) {
                 const fftAmt = fromKobo(interestForfeitKobo);
                 feeBreakdown.push({ id: fftTxnId, amount: fftAmt, type: 'INTEREST_REVOCATION' });
-                // Note: Using the STABLE ID (fftTxnId) defined outside
                 transaction.set(doc(db, "users", uid, "transactions", fftTxnId), {
                     transactionId: fftTxnId, userId: uid, amount: fftAmt, type: "Debit", category: "savings",
                     sub_type: "INTEREST_REVOCATION", related_transaction_id: mainTxnId, description: "Interest Forfeited (Early Withdrawal)",
@@ -155,7 +147,6 @@ export async function recordWithdrawal(uid, memberId, amountRequest, bankDetails
                 });
             }
 
-            // Note: Using the STABLE ID (mainTxnId) defined outside
             transaction.set(doc(db, "users", uid, "transactions", mainTxnId), {
                 transactionId: mainTxnId, userId: uid, memberId: memberId, amount: fromKobo(finalPayoutKobo), ...bankDetails,
                 description: description, status: "Pending", type: "Debit", category: "savings",
@@ -166,17 +157,13 @@ export async function recordWithdrawal(uid, memberId, amountRequest, bankDetails
     } catch (e) { throw e; }
 }
 
-export async function applyDailyInterest(uid, interestAmount, datePayload, daysToCredit = 1, isAccrual = false) {
+export async function applyDailyInterest(uid, interestAmount, datePayload, daysToCredit = 1, isAccrual = false, needsFirstCycleFlag = false) {
     if (!uid || interestAmount <= 0) return;
     
-    // --- FIX: GENERATE IDs OUTSIDE ---
-    // This allows InterestEngine to retry calling this function safely if needed,
-    // although runTransaction handles internal retries.
     const ts = Date.now(); 
     const txId = `txn-int-${ts}`;
     const refId = `INT-${ts}`;
     
-    // Convert to Kobo for safe addition
     const interestKobo = toKobo(interestAmount);
 
     try {
@@ -184,6 +171,20 @@ export async function applyDailyInterest(uid, interestAmount, datePayload, daysT
             const userRef = doc(db, "users", uid);
             const userDoc = await transaction.get(userRef);
             const data = userDoc.data();
+
+            // --- IDEMPOTENCY CHECK (Prevents Race Conditions & Stale Data Loops) ---
+            let lastAppliedMillis = 0;
+            if (data.lastInterestApplied) {
+                lastAppliedMillis = typeof data.lastInterestApplied.toMillis === 'function' 
+                    ? data.lastInterestApplied.toMillis() 
+                    : new Date(data.lastInterestApplied).getTime();
+            }
+            const nowMillis = typeof datePayload.toMillis === 'function' ? datePayload.toMillis() : datePayload.getTime();
+            
+            // If interest was credited less than 12 hours ago, safely abort to prevent double-payments
+            if (nowMillis - lastAppliedMillis < 43200000) {
+                throw new Error("ALREADY_APPLIED");
+            }
             
             const currentBalanceKobo = toKobo(data["Wallet balance"] || 0);
             const currentCycleInterestKobo = toKobo(data.cycleAccumulatedInterest || 0);
@@ -191,11 +192,18 @@ export async function applyDailyInterest(uid, interestAmount, datePayload, daysT
             const newBalance = fromKobo(currentBalanceKobo + interestKobo);
             const newAccumulated = fromKobo(currentCycleInterestKobo + interestKobo);
 
-            transaction.update(userRef, {
+            let updates = {
                 "Wallet balance": newBalance,
                 "cycleAccumulatedInterest": newAccumulated,
                 "lastInterestApplied": datePayload // Secure server timestamp for Rules
-            });
+            };
+
+            // Atomically flag the first 24h cycle alongside the payment
+            if (needsFirstCycleFlag) {
+                updates["firstCycleProcessed"] = true;
+            }
+
+            transaction.update(userRef, updates);
 
             transaction.set(doc(db, "users", uid, "transactions", txId), {
                 transactionId: txId, 
@@ -208,15 +216,20 @@ export async function applyDailyInterest(uid, interestAmount, datePayload, daysT
                 reference: refId,  
                 status: "Success", 
                 date: datePayload,
-                days: daysToCredit // <-- THE INJECTION POINT FOR DYNAMIC NOTIFICATIONS
+                days: daysToCredit 
             });
         });
         return { success: true };
-    } catch (e) { throw e; }
+    } catch (e) { 
+        if (e.message === "ALREADY_APPLIED") {
+            console.log("Interest already applied recently. Transaction safely aborted.");
+            return { success: true, skipped: true };
+        }
+        throw e; 
+    }
 }
 
 export async function processDailyWithdrawal(uid, isEarly, destination = 'bank', memberId = null, bankDetails = {}) {
-    // --- FIX: GENERATE IDs OUTSIDE ---
     const ts = Date.now();
     const date = new Date();
     
@@ -241,7 +254,6 @@ export async function processDailyWithdrawal(uid, isEarly, destination = 'bank',
 
             if (!daily || daily.accumulated <= 0) throw new Error("No available funds to withdraw.");
 
-            // --- GRACE WITHDRAWAL LOGIC ---
             if (!daily.isActive) {
                 destination = 'bank'; 
                 isEarly = false;      
@@ -255,10 +267,8 @@ export async function processDailyWithdrawal(uid, isEarly, destination = 'bank',
                 accumulatedAtWithdrawal: Number(daily.accumulated) || 0
             };
 
-            // KOBO MATH
             const grossKobo = toKobo(daily.accumulated);
             const holdingFeeKobo = toKobo(daily.dailyAmount);
-            // 25% Penalty for early break
             const penaltyKobo = isEarly ? Math.round(grossKobo * 0.25) : 0;
             
             const netKobo = grossKobo - holdingFeeKobo - penaltyKobo;
@@ -314,7 +324,6 @@ export async function processDailyWithdrawal(uid, isEarly, destination = 'bank',
                 });
 
             } else {
-                // Bank Withdrawal
                 transaction.set(doc(db, "users", uid, "transactions", bankOutId), {
                     transactionId: bankOutId,
                     userId: uid,
