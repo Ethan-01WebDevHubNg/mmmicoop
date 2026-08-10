@@ -1,13 +1,18 @@
 <!DOCTYPE html>
-<html class="dark" lang="en">
+<html class="dark overflow-y-scroll overflow-x-hidden no-scrollbar" lang="en">
 <head>
     <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
     <title>My Profile - MMMI Admin</title>
     
+    <!-- Apple PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MMMi Admin">
+
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#0f172a">
+    <link rel="manifest" href="/manifest.json?v=2">
+    <meta id="theme-color-meta" name="theme-color" content="#0f172a">
     <link rel="apple-touch-icon" href="/assets/icon-192.png">
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
@@ -40,24 +45,42 @@
         .dark .isometric-sidebar { background-color: #1e293b; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg id='hexagons' fill='%230f172a' fill-opacity='0.25' fill-rule='nonzero'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); }
         @keyframes fadeInSlideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in-slide-up { animation: fadeInSlideUp 0.5s ease-out forwards; }
+        
+        /* Native App Scrollbar Hiding */
+        @media (max-width: 1024px) {
+            .no-scrollbar::-webkit-scrollbar { display: none; }
+            .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        }
     </style>
 </head>
-<body class="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark transition-colors duration-300 flex flex-col min-h-screen">
+<body class="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark transition-colors duration-300 flex flex-col min-h-screen no-scrollbar">
+
+    <!-- AUTO THEME SYNC SCRIPT -->
+    <script>
+        const themeMeta = document.getElementById('theme-color-meta');
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            if (themeMeta) themeMeta.setAttribute('content', '#0f172a');
+        } else {
+            document.documentElement.classList.remove('dark');
+            if (themeMeta) themeMeta.setAttribute('content', '#f8fafc');
+        }
+    </script>
 
     <div id="preloader" class="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-50/80 dark:bg-gray-900/90 backdrop-blur-[5px] transition-all duration-500">
-        <div id="preloader-card" class="bg-white dark:bg-gray-800 p-8 md:p-12 rounded-2xl shadow-xl flex flex-col items-center justify-center aspect-square ring-1 ring-gray-200 dark:ring-gray-700">
+        <div id="preloader-card" class="bg-white dark:bg-gray-800 p-8 md:p-12 rounded-2xl shadow-xl flex flex-col items-center justify-center aspect-square border border-gray-200 dark:border-gray-700">
             <span class="mt-8 text-xs md:text-sm text-gray-400 dark:text-gray-500 tracking-[0.2em] font-medium animate-pulse">LOADING PROFILE</span>
         </div>
     </div>
 
     <div class="flex flex-1">
-        <aside class="hidden lg:flex w-64 flex-col border-r border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 bg-white dark:bg-card-dark isometric-sidebar fixed h-full z-20">
-            <div class="flex h-16 items-center gap-3 px-6 border-b border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 bg-white/90 dark:bg-card-dark/90 backdrop-blur">
-                 <img class="size-8 dark:hidden" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20Logo%20-%20light%20mode.svg" alt="Logo">
-                 <img class="size-8 hidden dark:block" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg" alt="Logo">
+        <aside class="hidden lg:flex w-64 flex-col bg-white dark:bg-card-dark isometric-sidebar fixed h-full z-20 shadow-[4px_0_24px_rgba(0,0,0,0.02)] dark:shadow-[4px_0_24px_rgba(0,0,0,0.2)]">
+            <div class="flex h-16 items-center gap-3 px-6 bg-white/90 dark:bg-card-dark/90 backdrop-blur">
+                 <img class="size-8 dark:hidden app-logo" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20Logo%20-%20light%20mode.svg" alt="Logo">
+                 <img class="size-8 hidden dark:block app-logo" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg" alt="Logo">
                  <h1 class="text-lg font-bold tracking-tight">MMMI Admin</h1>
             </div>
-            <nav class="flex-1 space-y-1 p-4 overflow-y-auto">
+            <nav class="flex-1 space-y-1 p-4 overflow-y-auto no-scrollbar">
                 <a href="/admin/index" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
                     <span class="material-symbols-outlined">dashboard</span><span>Dashboard</span>
                 </a>
@@ -74,7 +97,7 @@
                     <span class="material-symbols-outlined">bar_chart</span><span>Reports</span>
                 </a>
             </nav>
-            <div class="p-4 border-t border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 bg-white/50 dark:bg-card-dark/50 mt-auto">
+            <div class="p-4 bg-white/50 dark:bg-card-dark/50 mt-auto">
                  <a class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10 mb-2" href="/admin/userManagement">
                     <span class="material-symbols-outlined">manage_accounts</span><span>Admin Users</span>
                 </a>
@@ -85,7 +108,7 @@
         </aside>
 
         <div class="flex flex-1 flex-col lg:ml-64 transition-all duration-300 w-full">
-            <header class="sticky top-0 z-30 w-full border-b border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 bg-white/80 dark:bg-card-dark/80 backdrop-blur-md">
+            <header class="sticky top-0 z-30 w-full bg-gradient-to-b from-background-light to-background-light/80 dark:from-background-dark dark:to-background-dark/80 backdrop-blur-md transition-all duration-300">
                 <div class="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-3">
                     <div class="flex items-center gap-4">
                         <button id="menu-btn" class="lg:hidden p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 text-text-light dark:text-text-dark">
@@ -101,12 +124,12 @@
                         </button>
                         
                         <div class="relative ml-2">
-                            <button type="button" id="top-profile-trigger" class="flex items-center gap-3 pl-4 border-l border-gray-200 dark:border-l-0 dark:ring-l dark:ring-gray-700 hover:opacity-80 focus:outline-none">
-                                <img id="admin-avatar" src="https://ui-avatars.com/api/?name=Admin&background=random" class="size-8 sm:size-9 rounded-full ring-2 ring-white dark:ring-gray-700">
+                            <button type="button" id="top-profile-trigger" class="flex items-center gap-3 pl-4 focus:outline-none">
+                                <img id="admin-avatar" src="https://ui-avatars.com/api/?name=Admin&background=random" class="size-8 sm:size-9 rounded-full ring-2 ring-white dark:ring-gray-700 object-cover">
                             </button>
 
-                            <div id="top-profile-dropdown" class="absolute right-0 z-50 mt-2 w-72 origin-top-right rounded-xl bg-white dark:bg-card-dark shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none hidden transform transition-all duration-200 opacity-0 scale-95 origin-top-right">
-                                <div class="px-5 py-5 border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-slate-800/50 rounded-t-xl">
+                            <div id="top-profile-dropdown" class="absolute right-0 z-50 mt-2 w-72 origin-top-right rounded-xl bg-white dark:bg-card-dark shadow-2xl ring-1 ring-black/5 focus:outline-none hidden transform transition-all duration-200 opacity-0 scale-95 origin-top-right">
+                                <div class="px-5 py-5 bg-gray-50/50 dark:bg-slate-800/50 rounded-t-xl">
                                     <div class="flex items-center gap-3">
                                         <img id="dd-avatar" class="size-10 rounded-full ring-2 ring-white dark:ring-gray-600 object-cover" src="https://ui-avatars.com/api/?name=Admin&background=random" alt="">
                                         <div class="overflow-hidden">
@@ -135,11 +158,11 @@
             </header>
 
             <div id="mobile-menu-overlay" class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden backdrop-blur-sm"></div>
-            <aside id="mobile-menu" class="fixed top-0 left-0 h-full w-64 bg-white dark:bg-card-dark isometric-sidebar flex flex-col border-r border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 shadow-2xl z-50 transform -translate-x-full transition-transform duration-300 lg:hidden">
+            <aside id="mobile-menu" class="fixed top-0 left-0 h-full w-64 bg-white dark:bg-card-dark isometric-sidebar flex flex-col shadow-2xl z-50 transform -translate-x-full transition-transform duration-300 lg:hidden">
                 <div class="flex items-center justify-between mb-8 px-6 pt-6">
                     <div class="flex items-center gap-2">
-                         <img class="size-8 dark:hidden" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20Logo%20-%20light%20mode.svg" alt="Logo">
-                         <img class="size-8 hidden dark:block" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg" alt="Logo">
+                         <img class="size-8 dark:hidden app-logo" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20Logo%20-%20light%20mode.svg" alt="Logo">
+                         <img class="size-8 hidden dark:block app-logo" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg" alt="Logo">
                          <span class="font-bold text-lg">Menu</span>
                     </div>
                     <button id="close-menu-btn" class="p-1 rounded hover:bg-black/5 dark:hover:bg-white/5">
@@ -147,25 +170,15 @@
                     </button>
                 </div>
                 
-                <nav class="flex-1 space-y-2 overflow-y-auto px-4">
-                    <a href="/admin/index" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
-                        <span class="material-symbols-outlined">dashboard</span><span>Dashboard</span>
-                    </a>
-                    <a href="/admin/Memberlists" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
-                        <span class="material-symbols-outlined">groups</span><span>Members</span>
-                    </a>
-                    <a href="/admin/withdrwalRequests" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
-                        <span class="material-symbols-outlined">payments</span><span>Withdrawals</span>
-                    </a>
-                    <a href="/admin/ManagePlans" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
-                        <span class="material-symbols-outlined">savings</span><span>Savings Plans</span>
-                    </a>
-                    <a href="/admin/reports" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
-                        <span class="material-symbols-outlined">bar_chart</span><span>Reports</span>
-                    </a>
+                <nav class="flex-1 space-y-2 overflow-y-auto px-4 no-scrollbar">
+                    <a href="/admin/index" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10"><span class="material-symbols-outlined">dashboard</span><span>Dashboard</span></a>
+                    <a href="/admin/Memberlists" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10"><span class="material-symbols-outlined">groups</span><span>Members</span></a>
+                    <a href="/admin/withdrwalRequests" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10"><span class="material-symbols-outlined">payments</span><span>Withdrawals</span></a>
+                    <a href="/admin/ManagePlans" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10"><span class="material-symbols-outlined">savings</span><span>Savings Plans</span></a>
+                    <a href="/admin/reports" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10"><span class="material-symbols-outlined">bar_chart</span><span>Reports</span></a>
                 </nav>
 
-                <div class="p-4 border-t border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 mt-auto bg-gray-50/50 dark:bg-slate-800/30">
+                <div class="p-4 mt-auto bg-gray-50/50 dark:bg-slate-800/30">
                     <a href="/admin/userManagement" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10 mb-2">
                         <span class="material-symbols-outlined">manage_accounts</span><span>Admin Users</span>
                     </a>
@@ -175,14 +188,14 @@
                 </div>
             </aside>
 
-            <main class="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in-slide-up">
+            <main class="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in-slide-up no-scrollbar">
                 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div class="lg:col-span-2">
-                        <div class="bg-card-light dark:bg-card-dark rounded-2xl border-none ring-1 ring-gray-200 dark:ring-gray-700 p-8 shadow-sm flex flex-col md:flex-row items-center gap-8">
+                        <div class="bg-card-light dark:bg-card-dark rounded-2xl shadow-md p-8 flex flex-col md:flex-row items-center gap-8 border-0">
                             
                             <div class="relative group">
-                                <div id="large-avatar-container" class="size-32 rounded-full ring-4 ring-gray-100 dark:ring-gray-800 overflow-hidden bg-gray-50 flex items-center justify-center relative">
+                                <div id="large-avatar-container" class="size-32 rounded-full overflow-hidden bg-gray-50 dark:bg-gray-800 flex items-center justify-center relative shadow-inner">
                                     <img id="large-avatar" class="size-full object-cover" src="https://ui-avatars.com/api/?name=Admin&background=random" alt="Admin">
                                     <div id="upload-spinner" class="absolute inset-0 bg-black/50 hidden items-center justify-center">
                                         <span class="material-symbols-outlined animate-spin text-white">refresh</span>
@@ -196,11 +209,11 @@
 
                             <div class="flex-1 w-full text-center md:text-left space-y-4">
                                 <div>
-                                    <h2 id="p-name" class="text-2xl font-black text-text-light dark:text-text-dark">Loading...</h2>
+                                    <h2 id="p-name" class="text-2xl font-black text-text-light dark:text-white">Loading...</h2>
                                     <p id="p-email" class="text-subtext-light dark:text-subtext-dark font-medium">loading@mmmi.com</p>
                                 </div>
                                 <div class="flex flex-wrap justify-center md:justify-start gap-2">
-                                    <span id="p-role-badge" class="px-3 py-1.5 rounded-full text-xs font-bold bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 border border-gray-200 dark:border-gray-700 uppercase tracking-wider">
+                                    <span id="p-role-badge" class="px-3 py-1.5 rounded-full text-xs font-bold bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 uppercase tracking-wider">
                                         Checking Role...
                                     </span>
                                 </div>
@@ -212,9 +225,9 @@
                             </div>
                         </div>
 
-                        <div class="mt-8 bg-card-light dark:bg-card-dark rounded-2xl border-none ring-1 ring-gray-200 dark:ring-gray-700 shadow-sm overflow-hidden">
-                            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-slate-900">
-                                <h3 class="text-lg font-bold text-text-light dark:text-text-dark">Account Overview</h3>
+                        <div class="mt-8 bg-card-light dark:bg-card-dark rounded-2xl shadow-md overflow-hidden border-0">
+                            <div class="px-6 py-4 bg-gray-50/80 dark:bg-slate-900/80 border-b border-gray-200 dark:border-gray-800/50">
+                                <h3 class="text-lg font-bold text-text-light dark:text-white">Account Overview</h3>
                             </div>
                             
                             <div class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -224,32 +237,35 @@
                                 </div>
                                 <div class="p-4 rounded-xl bg-gray-50 dark:bg-slate-800/50">
                                     <p class="text-xs font-bold text-subtext-light uppercase">Member Since</p>
-                                    <p id="p-joined" class="text-lg font-bold text-text-light dark:text-text-dark mt-1">...</p>
+                                    <p id="p-joined" class="text-lg font-bold text-text-light dark:text-white mt-1">...</p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <div class="lg:col-span-1">
-                        <div class="bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-2xl p-8 shadow-xl">
-                            <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <div class="bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-2xl p-8 shadow-xl relative overflow-hidden border border-white/5">
+                            <h3 class="font-bold text-lg mb-4 flex items-center gap-2 relative z-10">
                                 <span class="material-symbols-outlined text-yellow-400">shield</span> Permitted Actions
                             </h3>
-                            <p class="text-slate-300 text-sm mb-6">Your role grants you specific access levels within the portal.</p>
+                            <p class="text-slate-300 text-sm mb-6 relative z-10">Your role grants you specific access levels within the portal.</p>
                             
-                            <ul id="permissions-list" class="space-y-3 text-sm">
+                            <ul id="permissions-list" class="space-y-3 text-sm relative z-10">
                                 <li class="flex items-center gap-3 opacity-50"><span class="material-symbols-outlined text-sm">check_circle</span> Loading permissions...</li>
                             </ul>
 
-                            <div class="mt-8 pt-6 border-t border-white/10">
+                            <div class="mt-8 pt-6 border-t border-white/10 relative z-10">
                                 <p class="text-xs text-slate-400">Need elevated access? Contact the Super Admin.</p>
                             </div>
+                            
+                            <!-- decorative background icon -->
+                            <span class="material-symbols-outlined absolute -bottom-8 -right-8 text-[150px] text-white/5 pointer-events-none">admin_panel_settings</span>
                         </div>
                     </div>
                 </div>
             </main>
 
-            <footer class="flex-shrink-0 text-center p-4 text-sm text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 mt-auto">
+            <footer class="flex-shrink-0 text-center p-4 text-sm text-gray-500 dark:text-gray-400 mt-auto bg-white/50 dark:bg-card-dark/50 z-30">
               <div class="flex flex-col sm:flex-row justify-center items-center gap-2 sm:gap-6">
                 <p>&copy; 2026 <a class="hover:text-primary hover:underline" href="https://mountainmovingministryintl.org/" rel="noopener noreferrer" target="_blank">Mountain Moving Ministry Intl.</a> All rights reserved.</p>
                 <div class="flex gap-4 sm:gap-6">
@@ -263,7 +279,6 @@
     <script type="module" src="../js/admin-core.js"></script>
     <script type="module" src="../js/role-check.js"></script>
     <script type="module">
-        // FIX: Import SDK instances from firebase-init.js and Logic helpers from admin-firebase.js
         import { db, storage, doc, updateDoc, storageRef, uploadBytes, getDownloadURL, sendPasswordResetEmail } from '../js/firebase-init.js';
         import { auth, formatDate } from '../js/admin-firebase.js';
         import { NotificationService } from '../js/admin-core.js';
@@ -272,22 +287,32 @@
 
         window.addEventListener('admin-ready', async (e) => {
             const { adminData } = e.detail;
-            
-            // --- NEW: Profile Dropdown Logic ---
             setupProfileDropdown(adminData);
-            
+            setupMobileMenu();
             currentUserDoc = adminData;
             renderProfile(adminData);
             setupUpload();
         });
 
-        // --- Dropdown Implementation ---
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        if(themeToggleBtn) {
+            themeToggleBtn.addEventListener('click', () => {
+                setTimeout(() => {
+                    const isDark = document.documentElement.classList.contains('dark');
+                    const themeMeta = document.getElementById('theme-color-meta');
+                    if(themeMeta) themeMeta.setAttribute('content', isDark ? '#0f172a' : '#f8fafc');
+                    document.querySelectorAll('.app-logo').forEach(i => {
+                        i.src = isDark ? "https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg" : "https://mountainmovingministryintl.org/gallery/MMMi%20Header%20Logo%20-%20light%20mode.svg";
+                    });
+                }, 50);
+            });
+        }
+
         function setupProfileDropdown(data) {
             const trigger = document.getElementById('top-profile-trigger');
             const dropdown = document.getElementById('top-profile-dropdown');
             const avatar = document.getElementById('admin-avatar');
             
-            // Populate Dropdown Data
             document.getElementById('dd-name').textContent = data.name || 'Admin';
             document.getElementById('dd-email').textContent = data.email || '';
             document.getElementById('dd-role').textContent = data.role === 'super_admin' ? 'Super Admin' : 'Admin';
@@ -296,7 +321,6 @@
                 avatar.src = data.photoURL;
             }
 
-            // Toggle Logic
             trigger.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const isHidden = dropdown.classList.contains('hidden');
@@ -307,24 +331,37 @@
                         dropdown.classList.add('opacity-100', 'scale-100');
                     });
                 } else {
-                    closeDropdown();
+                    dropdown.classList.add('hidden', 'opacity-0', 'scale-95');
                 }
             });
 
-            // Close on Click Outside
             document.addEventListener('click', (e) => {
                 if(!dropdown.contains(e.target) && !trigger.contains(e.target)) {
-                    closeDropdown();
+                    dropdown.classList.add('hidden', 'opacity-0', 'scale-95');
                 }
             });
-
-            function closeDropdown() {
-                dropdown.classList.remove('opacity-100', 'scale-100');
-                dropdown.classList.add('opacity-0', 'scale-95');
-                setTimeout(() => dropdown.classList.add('hidden'), 200);
-            }
         }
-        // -------------------------------
+
+        function setupMobileMenu() {
+            const menuBtn = document.getElementById('menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const overlay = document.getElementById('mobile-menu-overlay');
+            const closeBtn = document.getElementById('close-menu-btn');
+
+            const openMenu = () => {
+                mobileMenu.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            };
+
+            const closeMenu = () => {
+                mobileMenu.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            };
+
+            menuBtn.addEventListener('click', openMenu);
+            closeBtn.addEventListener('click', closeMenu);
+            overlay.addEventListener('click', closeMenu);
+        }
 
         function renderProfile(data) {
             document.getElementById('p-name').textContent = data.name || 'Admin';
@@ -335,17 +372,15 @@
                 document.getElementById('large-avatar').src = data.photoURL;
             }
 
-            // Role Badge
             const badge = document.getElementById('p-role-badge');
             if (data.role === 'super_admin') {
                 badge.textContent = 'Super Admin';
-                badge.className = 'px-3 py-1.5 rounded-full text-xs font-bold bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 border border-purple-200 dark:border-purple-800 uppercase tracking-wider shadow-sm';
+                badge.className = 'px-3 py-1.5 rounded-full text-xs font-bold bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 uppercase tracking-wider';
             } else {
                 badge.textContent = 'Standard Admin';
-                badge.className = 'px-3 py-1.5 rounded-full text-xs font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 dark:border-blue-800 uppercase tracking-wider shadow-sm';
+                badge.className = 'px-3 py-1.5 rounded-full text-xs font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 uppercase tracking-wider';
             }
 
-            // Permissions List with Capsules
             const list = document.getElementById('permissions-list');
             let items = '';
             
@@ -369,7 +404,6 @@
             list.innerHTML = items;
         }
 
-        // --- PASSWORD RESET ---
         document.getElementById('reset-pwd-btn').addEventListener('click', async () => {
             const confirmed = await NotificationService.confirm("Reset Password", `Send a password reset link to ${currentUserDoc.email}?`);
             if (confirmed) {
@@ -382,7 +416,6 @@
             }
         });
 
-        // --- PROFILE PICTURE UPLOAD ---
         function setupUpload() {
             const trigger = document.getElementById('upload-trigger');
             const input = document.getElementById('file-input');
@@ -394,7 +427,6 @@
                 const file = e.target.files[0];
                 if (!file) return;
 
-                // Validation
                 if (file.size > 2 * 1024 * 1024) {
                     NotificationService.toast("File too large (Max 2MB)", 'error');
                     return;
@@ -404,29 +436,24 @@
                     return;
                 }
 
-                // UI Loading
                 spinner.classList.remove('hidden');
                 spinner.classList.add('flex');
                 trigger.disabled = true;
 
                 try {
-                    // 1. Upload to Storage using the UID-based path
                     const path = `profile_images/${auth.currentUser.uid}/profile.jpg`;
                     const fileRef = storageRef(storage, path);
                     const snapshot = await uploadBytes(fileRef, file);
                     const url = await getDownloadURL(snapshot.ref);
 
-                    // 2. Update Firestore (Admins Collection)
                     await updateDoc(doc(db, "admins", auth.currentUser.uid), {
                         photoURL: url
                     });
 
-                    // 3. Update UI
                     document.getElementById('large-avatar').src = url;
                     const headerAvatar = document.getElementById('admin-avatar');
                     if(headerAvatar) headerAvatar.src = url;
                     
-                    // Update dropdown avatar too
                     const ddAvatar = document.getElementById('dd-avatar');
                     if(ddAvatar) ddAvatar.src = url;
                     
@@ -444,7 +471,7 @@
             });
         }
     </script>
-    <script>
+<script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('/sw.js')

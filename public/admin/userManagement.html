@@ -1,14 +1,19 @@
 <!DOCTYPE html>
-<html class="dark" lang="en">
+<html class="dark overflow-y-scroll overflow-x-hidden no-scrollbar" lang="en">
 <head>
     <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>User Management - MMMI Admin</title>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+    <title>Admin Users - MMMI Admin</title>
     
+    <!-- Apple PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MMMi Admin">
+
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#0f172a">
-    <link rel="apple-touch-icon" href="/assets/icon-192.png">    
+    <link rel="manifest" href="/manifest.json?v=2">
+    <meta id="theme-color-meta" name="theme-color" content="#0f172a">
+    <link rel="apple-touch-icon" href="/assets/icon-192.png">
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -41,20 +46,41 @@
         @keyframes fadeInSlideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in-slide-up { animation: fadeInSlideUp 0.5s ease-out forwards; }
         
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        /* Native App Scrollbar Hiding */
+        @media (max-width: 1024px) {
+            .no-scrollbar::-webkit-scrollbar { display: none; }
+            .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        }
     </style>
 </head>
-<body class="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark transition-colors duration-300 flex flex-col min-h-screen">
+<body class="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark transition-colors duration-300 flex flex-col min-h-screen no-scrollbar">
+
+    <!-- AUTO THEME SYNC SCRIPT -->
+    <script>
+        const themeMeta = document.getElementById('theme-color-meta');
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            if (themeMeta) themeMeta.setAttribute('content', '#0f172a');
+        } else {
+            document.documentElement.classList.remove('dark');
+            if (themeMeta) themeMeta.setAttribute('content', '#f8fafc');
+        }
+    </script>
+
+    <div id="preloader" class="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-50/80 dark:bg-gray-900/90 backdrop-blur-[5px] transition-all duration-500">
+        <div id="preloader-card" class="bg-white dark:bg-gray-800 p-8 md:p-12 rounded-2xl shadow-xl flex flex-col items-center justify-center aspect-square border border-gray-200 dark:border-gray-700">
+            <span class="mt-8 text-xs md:text-sm text-gray-400 dark:text-gray-500 tracking-[0.2em] font-medium animate-pulse">LOADING SYSTEM</span>
+        </div>
+    </div>
 
     <div class="flex flex-1">
-        <aside class="hidden lg:flex w-64 flex-col border-r border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 bg-white dark:bg-card-dark isometric-sidebar fixed h-full z-20">
-            <div class="flex h-16 items-center gap-3 px-6 border-b border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 bg-white/90 dark:bg-card-dark/90 backdrop-blur">
-                 <img class="size-8 dark:hidden" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20Logo%20-%20light%20mode.svg" alt="Logo">
-                 <img class="size-8 hidden dark:block" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg" alt="Logo">
+        <aside class="hidden lg:flex w-64 flex-col bg-white dark:bg-card-dark isometric-sidebar fixed h-full z-20 shadow-[4px_0_24px_rgba(0,0,0,0.02)] dark:shadow-[4px_0_24px_rgba(0,0,0,0.2)]">
+            <div class="flex h-16 items-center gap-3 px-6 bg-white/90 dark:bg-card-dark/90 backdrop-blur">
+                 <img class="size-8 dark:hidden app-logo" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20Logo%20-%20light%20mode.svg" alt="Logo">
+                 <img class="size-8 hidden dark:block app-logo" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg" alt="Logo">
                  <h1 class="text-lg font-bold tracking-tight">MMMI Admin</h1>
             </div>
-            <nav class="flex-1 space-y-1 p-4 overflow-y-auto">
+            <nav class="flex-1 space-y-1 p-4 overflow-y-auto no-scrollbar">
                 <a href="/admin/index" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
                     <span class="material-symbols-outlined">dashboard</span><span>Dashboard</span>
                 </a>
@@ -71,8 +97,8 @@
                     <span class="material-symbols-outlined">bar_chart</span><span>Reports</span>
                 </a>
             </nav>
-            <div class="p-4 border-t border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 bg-white/50 dark:bg-card-dark/50 mt-auto">
-                 <a class="flex items-center gap-3 rounded-lg bg-primary text-white px-4 py-3 text-sm font-bold shadow-md shadow-primary/20 transition-colors mb-2" href="/admin/userManagement">
+            <div class="p-4 bg-white/50 dark:bg-card-dark/50 mt-auto">
+                 <a class="flex items-center gap-3 rounded-lg bg-primary text-white px-4 py-3 text-sm font-bold shadow-md shadow-primary/20 mb-2" href="/admin/userManagement">
                     <span class="material-symbols-outlined text-white">manage_accounts</span><span>Admin Users</span>
                 </a>
                 <button class="logout-trigger w-full flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors mt-2 text-left">
@@ -81,9 +107,8 @@
             </div>
         </aside>
 
-        <div class="flex flex-1 flex-col lg:ml-64 transition-all duration-300 w-full lg:h-screen lg:overflow-hidden">
-            
-            <header class="flex-shrink-0 sticky top-0 z-30 w-full border-b border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 bg-white/80 dark:bg-card-dark/80 backdrop-blur-md">
+        <div class="flex flex-1 flex-col lg:ml-64 transition-all duration-300 w-full">
+            <header class="sticky top-0 z-30 w-full bg-gradient-to-b from-background-light to-background-light/80 dark:from-background-dark dark:to-background-dark/80 backdrop-blur-md transition-all duration-300">
                 <div class="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-3">
                     <div class="flex items-center gap-4">
                         <button id="menu-btn" class="lg:hidden p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 text-text-light dark:text-text-dark">
@@ -99,12 +124,12 @@
                         </button>
                         
                         <div class="relative ml-2">
-                            <button type="button" id="top-profile-trigger" class="flex items-center gap-3 pl-4 border-l border-gray-200 dark:border-l-0 dark:ring-l dark:ring-gray-700 hover:opacity-80 focus:outline-none">
-                                <img id="admin-avatar" src="https://ui-avatars.com/api/?name=Admin&background=random" class="size-8 sm:size-9 rounded-full ring-2 ring-white dark:ring-gray-700">
+                            <button type="button" id="top-profile-trigger" class="flex items-center gap-3 pl-4 focus:outline-none">
+                                <img id="admin-avatar" src="https://ui-avatars.com/api/?name=Admin&background=random" class="size-8 sm:size-9 rounded-full ring-2 ring-white dark:ring-gray-700 object-cover">
                             </button>
 
-                            <div id="top-profile-dropdown" class="absolute right-0 z-50 mt-2 w-72 origin-top-right rounded-xl bg-white dark:bg-card-dark shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none hidden transform transition-all duration-200 opacity-0 scale-95 origin-top-right">
-                                <div class="px-5 py-5 border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-slate-800/50 rounded-t-xl">
+                            <div id="top-profile-dropdown" class="absolute right-0 z-50 mt-2 w-72 origin-top-right rounded-xl bg-white dark:bg-card-dark shadow-2xl ring-1 ring-black/5 focus:outline-none hidden transform transition-all duration-200 opacity-0 scale-95 origin-top-right">
+                                <div class="px-5 py-5 bg-gray-50/50 dark:bg-slate-800/50 rounded-t-xl">
                                     <div class="flex items-center gap-3">
                                         <img id="dd-avatar" class="size-10 rounded-full ring-2 ring-white dark:ring-gray-600 object-cover" src="https://ui-avatars.com/api/?name=Admin&background=random" alt="">
                                         <div class="overflow-hidden">
@@ -133,11 +158,11 @@
             </header>
 
             <div id="mobile-menu-overlay" class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden backdrop-blur-sm"></div>
-            <aside id="mobile-menu" class="fixed top-0 left-0 h-full w-64 bg-white dark:bg-card-dark isometric-sidebar flex flex-col border-r border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 shadow-2xl z-50 transform -translate-x-full transition-transform duration-300 lg:hidden">
+            <aside id="mobile-menu" class="fixed top-0 left-0 h-full w-64 bg-white dark:bg-card-dark isometric-sidebar flex flex-col shadow-2xl z-50 transform -translate-x-full transition-transform duration-300 lg:hidden">
                 <div class="flex items-center justify-between mb-8 px-6 pt-6">
                     <div class="flex items-center gap-2">
-                         <img class="size-8 dark:hidden" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20Logo%20-%20light%20mode.svg" alt="Logo">
-                         <img class="size-8 hidden dark:block" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg" alt="Logo">
+                         <img class="size-8 dark:hidden app-logo" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20Logo%20-%20light%20mode.svg" alt="Logo">
+                         <img class="size-8 hidden dark:block app-logo" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg" alt="Logo">
                          <span class="font-bold text-lg">Menu</span>
                     </div>
                     <button id="close-menu-btn" class="p-1 rounded hover:bg-black/5 dark:hover:bg-white/5">
@@ -145,7 +170,7 @@
                     </button>
                 </div>
                 
-                <nav class="flex-1 space-y-2 overflow-y-auto px-4">
+                <nav class="flex-1 space-y-2 overflow-y-auto px-4 no-scrollbar">
                     <a href="/admin/index" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10"><span class="material-symbols-outlined">dashboard</span><span>Dashboard</span></a>
                     <a href="/admin/Memberlists" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10"><span class="material-symbols-outlined">groups</span><span>Members</span></a>
                     <a href="/admin/withdrwalRequests" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10"><span class="material-symbols-outlined">payments</span><span>Withdrawals</span></a>
@@ -153,7 +178,7 @@
                     <a href="/admin/reports" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10"><span class="material-symbols-outlined">bar_chart</span><span>Reports</span></a>
                 </nav>
 
-                <div class="p-4 border-t border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 mt-auto bg-gray-50/50 dark:bg-slate-800/30">
+                <div class="p-4 mt-auto bg-gray-50/50 dark:bg-slate-800/30">
                     <a href="/admin/userManagement" class="flex items-center gap-3 rounded-lg bg-primary text-white px-4 py-3 text-sm font-bold shadow-md shadow-primary/20 mb-2">
                         <span class="material-symbols-outlined text-white">manage_accounts</span><span>Admin Users</span>
                     </a>
@@ -163,81 +188,46 @@
                 </div>
             </aside>
 
-            <main class="flex-grow flex flex-col container mx-auto lg:overflow-hidden animate-fade-in-slide-up">
+            <main class="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in-slide-up no-scrollbar">
                 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-3 px-4 sm:px-6 py-8 lg:p-0 lg:h-full lg:overflow-hidden">
-                    
-                    <div class="space-y-6 lg:h-full lg:overflow-y-auto no-scrollbar lg:py-6 lg:pl-8 lg:pr-1">
-                        
-                        <div id="create-admin-wrapper" class="hidden w-full">
-                            <div class="bg-card-light dark:bg-card-dark rounded-2xl border-none ring-1 ring-gray-200 dark:ring-gray-700 shadow-sm overflow-hidden">
-                                <div class="px-6 py-4 bg-gray-100 dark:bg-slate-900 border-b border-gray-200 dark:border-gray-700">
-                                    <h2 class="text-lg font-bold text-text-light dark:text-text-dark">Register New Admin</h2>
-                                    <p class="text-xs text-subtext-light">Create credentials for a new dashboard user.</p>
-                                </div>
-                                
-                                <div class="p-6">
-                                    <form id="create-admin-form" class="space-y-4">
-                                        <div><label class="text-xs font-bold text-subtext-light uppercase tracking-wide block mb-1.5">Full Name</label><input id="a-name" type="text" required class="w-full rounded-lg bg-gray-50 dark:bg-gray-800 border-none ring-1 ring-gray-200 dark:ring-gray-700 text-sm p-2.5 text-text-light dark:text-text-dark"></div>
-                                        <div><label class="text-xs font-bold text-subtext-light uppercase tracking-wide block mb-1.5">Email</label><input id="a-email" type="email" required class="w-full rounded-lg bg-gray-50 dark:bg-gray-800 border-none ring-1 ring-gray-200 dark:ring-gray-700 text-sm p-2.5 text-text-light dark:text-text-dark"></div>
-                                        <div><label class="text-xs font-bold text-subtext-light uppercase tracking-wide block mb-1.5">Phone Number</label><input id="a-phone" type="tel" required class="w-full rounded-lg bg-gray-50 dark:bg-gray-800 border-none ring-1 ring-gray-200 dark:ring-gray-700 text-sm p-2.5 text-text-light dark:text-text-dark"></div>
-                                        <div><label class="text-xs font-bold text-subtext-light uppercase tracking-wide block mb-1.5">Role</label>
-                                            <select id="a-role" required class="w-full rounded-lg bg-gray-50 dark:bg-gray-800 border-none ring-1 ring-gray-200 dark:ring-gray-700 text-sm p-2.5 text-text-light dark:text-text-dark">
-                                                <option value="admin">Admin (Standard)</option>
-                                                <option value="super_admin">Super Admin (Full Access)</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label class="text-xs font-bold text-subtext-light uppercase tracking-wide block mb-1.5">Password</label>
-                                            <div class="relative">
-                                                <input id="a-password" type="password" required minlength="6" class="w-full rounded-lg bg-gray-50 dark:bg-gray-800 border-none ring-1 ring-gray-200 dark:ring-gray-700 text-sm font-mono p-2.5 text-text-light dark:text-text-dark pr-10">
-                                                <button type="button" id="toggle-pwd-btn" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                                                    <span class="material-symbols-outlined text-lg">visibility</span>
-                                                </button>
-                                            </div>
-                                            <p class="text-[10px] text-subtext-light mt-1">Press and hold eye icon to view</p>
-                                        </div>
-                                        <div class="pt-2"><button type="submit" id="submit-btn" class="w-full bg-primary text-white font-bold py-3 rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 text-sm">Create Account</button></div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800 rounded-2xl p-6">
-                            <h3 class="font-bold text-sm text-blue-800 dark:text-blue-300 mb-2 flex items-center gap-2"><span class="material-symbols-outlined text-lg">info</span> Role Guide</h3>
-                            <ul class="text-xs text-blue-700 dark:text-blue-200 space-y-2 list-disc list-inside">
-                                <li><strong>Admin:</strong> Can view members, process withdrawals, and see reports.</li>
-                                <li><strong>Super Admin:</strong> Can manage other admins, delete data, and override settings.</li>
-                            </ul>
-                        </div>
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+                    <div class="flex flex-col gap-1">
+                        <h2 class="text-3xl font-black tracking-tight text-text-light dark:text-text-dark">User Management</h2>
+                        <p class="text-subtext-light dark:text-subtext-dark text-sm">Control administrative access and roles.</p>
                     </div>
-
-                    <div id="list-column" class="lg:col-span-2 space-y-8 lg:overflow-y-auto lg:h-full no-scrollbar lg:pl-[0.2rem] lg:pr-8 lg:py-6">
-                        <div class="bg-card-light dark:bg-card-dark rounded-2xl border-none ring-1 ring-gray-200 dark:ring-gray-700 shadow-sm overflow-hidden shrink-0">
-                            <div class="px-6 py-4 bg-gray-100 dark:bg-slate-900 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                                <div><h2 class="text-lg font-bold text-text-light dark:text-text-dark">System Administrators</h2><p class="text-xs text-subtext-light">Authorized personnel.</p></div>
-                                <span class="material-symbols-outlined text-subtext-light opacity-50 text-3xl">shield_person</span>
-                            </div>
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-left text-sm whitespace-nowrap">
-                                    <thead class="bg-gray-50 dark:bg-slate-800/50 text-subtext-light dark:text-subtext-dark">
-                                        <tr>
-                                            <th class="px-6 py-4 font-semibold">Admin Profile</th>
-                                            <th class="px-6 py-4 font-semibold">Role</th>
-                                            <th class="px-6 py-4 font-semibold">Status</th>
-                                            <th class="px-6 py-4 font-semibold text-right">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="admin-table-body" class="divide-y divide-gray-200 dark:divide-gray-800"><tr><td colspan="4" class="px-6 py-8 text-center text-subtext-light">Loading admins...</td></tr></tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
+                    <button id="add-admin-btn" class="hidden flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 font-bold text-sm">
+                        <span class="material-symbols-outlined text-lg">person_add</span> Create Admin User
+                    </button>
                 </div>
+
+                <div class="bg-card-light dark:bg-card-dark rounded-2xl shadow-md overflow-hidden border-0">
+                    <div class="px-6 py-4 bg-gray-50/80 dark:bg-slate-900/80 flex flex-col sm:flex-row justify-between items-center gap-4 border-b border-gray-200 dark:border-gray-800/50">
+                        <h3 class="font-bold text-lg text-text-light dark:text-text-dark">Admin Roster</h3>
+                        <div class="relative w-full sm:w-64">
+                            <input id="admin-search" type="text" placeholder="Search by name or email..." class="w-full pl-9 pr-4 py-2 rounded-lg bg-white dark:bg-card-dark border-none ring-1 ring-gray-200 dark:ring-gray-700 text-sm focus:ring-primary shadow-sm dark:text-white">
+                            <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm">search</span>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto no-scrollbar">
+                        <table class="w-full text-left text-sm whitespace-nowrap">
+                            <thead class="bg-gray-50/50 dark:bg-slate-800/30 text-subtext-light dark:text-subtext-dark">
+                                <tr>
+                                    <th class="px-6 py-4 font-semibold border-b border-gray-100 dark:border-gray-800/50">Admin User</th>
+                                    <th class="px-6 py-4 font-semibold border-b border-gray-100 dark:border-gray-800/50">Role</th>
+                                    <th class="px-6 py-4 font-semibold border-b border-gray-100 dark:border-gray-800/50">Date Added</th>
+                                    <th class="px-6 py-4 font-semibold text-right border-b border-gray-100 dark:border-gray-800/50">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-table-body" class="divide-y divide-gray-100 dark:divide-gray-800/50">
+                                <tr><td colspan="4" class="px-6 py-12 text-center text-subtext-light animate-pulse">Loading admins...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
             </main>
 
-            <footer class="flex-shrink-0 text-center p-4 text-sm text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 mt-auto bg-white/50 dark:bg-card-dark/50 z-30">
+            <footer class="flex-shrink-0 text-center p-4 text-sm text-gray-500 dark:text-gray-400 mt-auto bg-white/50 dark:bg-card-dark/50 z-30">
               <div class="flex flex-col sm:flex-row justify-center items-center gap-2 sm:gap-6">
                 <p>&copy; 2026 <a class="hover:text-primary hover:underline" href="https://mountainmovingministryintl.org/" rel="noopener noreferrer" target="_blank">Mountain Moving Ministry Intl.</a> All rights reserved.</p>
                 <div class="flex gap-4 sm:gap-6">
@@ -248,36 +238,81 @@
         </div>
     </div>
 
-    <div id="admin-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-        <div class="bg-white dark:bg-card-dark rounded-2xl w-full max-w-sm ring-1 ring-gray-200 dark:ring-gray-700 overflow-hidden transform scale-95 opacity-0 transition-all duration-200" id="admin-modal-content">
-            <div class="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                <h3 class="text-lg font-bold text-text-light dark:text-text-dark">Admin Details</h3>
-                <button onclick="closeAdminModal()" class="text-gray-400 hover:text-gray-600"><span class="material-symbols-outlined">close</span></button>
+    <!-- Modal Form (Hidden) -->
+    <div id="admin-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm hidden p-4">
+        <div class="bg-white dark:bg-card-dark rounded-2xl w-full max-w-md shadow-2xl transform scale-95 opacity-0 transition-all duration-200" id="admin-modal-content">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center">
+                <h3 class="text-xl font-bold text-text-light dark:text-text-dark" id="modal-title">Create Admin User</h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"><span class="material-symbols-outlined">close</span></button>
             </div>
-            <div class="p-6 space-y-4" id="modal-body"></div>
+            <form id="admin-form" class="p-6 space-y-4">
+                <input type="hidden" id="admin-id">
+                <div>
+                    <label class="block text-xs font-bold text-subtext-light uppercase mb-1">Full Name</label>
+                    <input type="text" id="admin-name" required class="w-full rounded-lg bg-gray-50 dark:bg-gray-800 border-none ring-1 ring-gray-200 dark:ring-gray-700 text-sm focus:ring-primary p-3 dark:text-white">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-subtext-light uppercase mb-1">Email Address</label>
+                    <input type="email" id="admin-email" required class="w-full rounded-lg bg-gray-50 dark:bg-gray-800 border-none ring-1 ring-gray-200 dark:ring-gray-700 text-sm focus:ring-primary p-3 dark:text-white">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-subtext-light uppercase mb-1">Role</label>
+                    <select id="admin-role" class="w-full rounded-lg bg-gray-50 dark:bg-gray-800 border-none ring-1 ring-gray-200 dark:ring-gray-700 text-sm focus:ring-primary p-3 dark:text-white">
+                        <option value="admin">Standard Admin</option>
+                        <option value="super_admin">Super Admin</option>
+                    </select>
+                </div>
+                <div id="password-group">
+                    <label class="block text-xs font-bold text-subtext-light uppercase mb-1">Temporary Password</label>
+                    <input type="text" id="admin-pwd" class="w-full rounded-lg bg-gray-50 dark:bg-gray-800 border-none ring-1 ring-gray-200 dark:ring-gray-700 text-sm focus:ring-primary p-3 dark:text-white" value="Mmmi@2026" required>
+                    <p class="text-[10px] text-gray-500 mt-1">They must change this upon first login.</p>
+                </div>
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="closeModal()" class="flex-1 px-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">Cancel</button>
+                    <button type="submit" id="btn-save-admin" class="flex-1 px-4 py-2.5 rounded-lg bg-primary text-white text-sm font-bold hover:bg-primary/90 shadow-lg shadow-primary/20">Save Admin</button>
+                </div>
+            </form>
         </div>
     </div>
 
     <script type="module" src="../js/admin-core.js"></script>
     <script type="module" src="../js/role-check.js"></script>
     <script type="module">
-        import { db, collection, getDocs, query, orderBy, deleteDoc, doc, updateDoc, functions, httpsCallable } from '../js/firebase-init.js';
-        import { createAdminUser, formatDate } from '../js/admin-firebase.js';
+        import { db, doc, collection, getDocs, setDoc, deleteDoc, updateDoc } from '../js/firebase-init.js';
         import { NotificationService } from '../js/admin-core.js';
+        import { formatDate } from '../js/admin-firebase.js';
 
         let isSuperAdmin = false;
+        let allAdmins = [];
 
         window.addEventListener('admin-ready', (e) => {
             const { adminData } = e.detail;
             setupProfileDropdown(adminData);
+            setupMobileMenu();
+            
             isSuperAdmin = adminData.role === 'super_admin';
             
             if (isSuperAdmin) {
-                document.getElementById('create-admin-wrapper').classList.remove('hidden');
+                document.getElementById('add-admin-btn').classList.remove('hidden');
+                document.getElementById('add-admin-btn').addEventListener('click', () => openModal());
             }
+
             loadAdmins();
-            setupPasswordToggle();
         });
+
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        if(themeToggleBtn) {
+            themeToggleBtn.addEventListener('click', () => {
+                setTimeout(() => {
+                    const isDark = document.documentElement.classList.contains('dark');
+                    const themeMeta = document.getElementById('theme-color-meta');
+                    if(themeMeta) themeMeta.setAttribute('content', isDark ? '#0f172a' : '#f8fafc');
+                    document.querySelectorAll('.app-logo').forEach(i => {
+                        i.src = isDark ? "https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg" : "https://mountainmovingministryintl.org/gallery/MMMi%20Header%20Logo%20-%20light%20mode.svg";
+                    });
+                }, 50);
+            });
+        }
 
         function setupProfileDropdown(data) {
             const trigger = document.getElementById('top-profile-trigger');
@@ -302,145 +337,109 @@
                         dropdown.classList.add('opacity-100', 'scale-100');
                     });
                 } else {
-                    closeDropdown();
+                    dropdown.classList.add('hidden', 'opacity-0', 'scale-95');
                 }
             });
 
             document.addEventListener('click', (e) => {
                 if(!dropdown.contains(e.target) && !trigger.contains(e.target)) {
-                    closeDropdown();
+                    dropdown.classList.add('hidden', 'opacity-0', 'scale-95');
                 }
             });
-
-            function closeDropdown() {
-                dropdown.classList.remove('opacity-100', 'scale-100');
-                dropdown.classList.add('opacity-0', 'scale-95');
-                setTimeout(() => dropdown.classList.add('hidden'), 200);
-            }
         }
 
-        function setupPasswordToggle() {
-            const btn = document.getElementById('toggle-pwd-btn');
-            const input = document.getElementById('a-password');
-            
-            const showPwd = () => input.type = 'text';
-            const hidePwd = () => input.type = 'password';
+        function setupMobileMenu() {
+            const menuBtn = document.getElementById('menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const overlay = document.getElementById('mobile-menu-overlay');
+            const closeBtn = document.getElementById('close-menu-btn');
 
-            btn.addEventListener('mousedown', showPwd);
-            btn.addEventListener('mouseup', hidePwd);
-            btn.addEventListener('mouseleave', hidePwd);
-            btn.addEventListener('touchstart', (e) => { e.preventDefault(); showPwd(); });
-            btn.addEventListener('touchend', hidePwd);
+            const openMenu = () => {
+                mobileMenu.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            };
+
+            const closeMenu = () => {
+                mobileMenu.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            };
+
+            menuBtn.addEventListener('click', openMenu);
+            closeBtn.addEventListener('click', closeMenu);
+            overlay.addEventListener('click', closeMenu);
         }
 
         async function loadAdmins() {
             const tbody = document.getElementById('admin-table-body');
             try {
-                const q = query(collection(db, "admins"), orderBy("createdAt", "desc"));
-                const snapshot = await getDocs(q);
-                
-                if (snapshot.empty) {
-                    tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-8 text-center text-subtext-light">No admins found.</td></tr>`;
-                    return;
-                }
-
-                tbody.innerHTML = snapshot.docs.map(doc => {
-                    const data = doc.data();
-                    const isSuper = data.role === 'super_admin';
-                    const isActive = data.isActive !== false; // Default to true if undefined
-                    
-                    return `
-                        <tr class="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors group">
-                            <td class="px-6 py-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="size-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs ring-1 ring-primary/20">${data.name ? data.name.charAt(0).toUpperCase() : 'A'}</div>
-                                    <div class="flex flex-col">
-                                        <span class="font-bold text-text-light dark:text-text-dark text-sm">${data.name || 'Unknown'}</span>
-                                        <span class="text-xs text-subtext-light">${data.email}</span>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4">
-                                <span class="px-2.5 py-1 rounded-full text-xs font-bold ${isSuper ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'}">${isSuper ? 'Super Admin' : 'Admin'}</span>
-                            </td>
-                            <td class="px-6 py-4">
-                                <span class="px-2.5 py-1 rounded-full text-xs font-bold ${isActive ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'}">${isActive ? 'Active' : 'Inactive'}</span>
-                            </td>
-                            <td class="px-6 py-4 text-right">
-                                <button onclick='openAdminModal(${JSON.stringify({id: doc.id, ...data}).replace(/'/g, "&apos;")})' class="p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500"><span class="material-symbols-outlined text-lg">visibility</span></button>
-                            </td>
-                        </tr>
-                    `;
-                }).join('');
-
+                const snap = await getDocs(collection(db, "admins"));
+                allAdmins = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderAdmins(allAdmins);
             } catch(e) {
                 console.error(e);
                 tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-8 text-center text-red-500">Error loading admins.</td></tr>`;
             }
         }
 
-        window.openAdminModal = (data) => {
+        function renderAdmins(data) {
+            const tbody = document.getElementById('admin-table-body');
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-8 text-center text-subtext-light">No admins found.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = data.map(admin => {
+                const roleBadge = admin.role === 'super_admin' 
+                    ? '<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">Super Admin</span>' 
+                    : '<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">Admin</span>';
+                
+                let controls = '';
+                if (isSuperAdmin) {
+                    controls = `
+                        <button onclick="openModal('${admin.id}')" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><span class="material-symbols-outlined text-[20px]">edit</span></button>
+                        <button onclick="deleteAdmin('${admin.id}')" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><span class="material-symbols-outlined text-[20px]">delete</span></button>
+                    `;
+                }
+
+                return `
+                <tr class="hover:bg-gray-50/80 dark:hover:bg-slate-800/50 transition-colors group">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <img src="${admin.photoURL || `https://ui-avatars.com/api/?name=${admin.name}&background=random`}" class="size-10 rounded-full object-cover">
+                            <div>
+                                <div class="font-bold text-text-light dark:text-text-dark">${admin.name || 'Unknown'}</div>
+                                <div class="text-xs text-subtext-light">${admin.email}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">${roleBadge}</td>
+                    <td class="px-6 py-4 text-xs font-mono text-subtext-light">${formatDate(admin.createdAt)}</td>
+                    <td class="px-6 py-4 text-right flex justify-end gap-1 opacity-50 group-hover:opacity-100 transition-opacity">
+                        ${controls || '<span class="text-xs italic text-gray-400">Restricted</span>'}
+                    </td>
+                </tr>
+                `;
+            }).join('');
+        }
+
+        window.openModal = (id = null) => {
             const modal = document.getElementById('admin-modal');
             const content = document.getElementById('admin-modal-content');
-            const body = document.getElementById('modal-body');
-            const isActive = data.isActive !== false;
+            
+            document.getElementById('admin-form').reset();
+            document.getElementById('admin-id').value = id || '';
+            document.getElementById('modal-title').textContent = id ? 'Edit Admin' : 'Create Admin User';
+            document.getElementById('password-group').style.display = id ? 'none' : 'block';
+            document.getElementById('admin-email').disabled = !!id;
 
-            let permissionsText = "";
-            if (data.role === 'super_admin') {
-                permissionsText = `
-                    <ul class="text-xs text-subtext-light list-disc list-inside space-y-1">
-                        <li>Full System Access</li>
-                        <li>Manage All Admins</li>
-                        <li>Create/Delete Plans</li>
-                        <li>Financial Overrides</li>
-                    </ul>
-                `;
-            } else {
-                permissionsText = `
-                    <ul class="text-xs text-subtext-light list-disc list-inside space-y-1">
-                        <li>View Member Data</li>
-                        <li>Process Withdrawals</li>
-                        <li>View Reports</li>
-                        <li>Manage Member Registrations</li>
-                    </ul>
-                `;
+            if (id) {
+                const admin = allAdmins.find(a => a.id === id);
+                if(admin) {
+                    document.getElementById('admin-name').value = admin.name || '';
+                    document.getElementById('admin-email').value = admin.email || '';
+                    document.getElementById('admin-role').value = admin.role || 'admin';
+                }
             }
-
-            let controls = '';
-            if (isSuperAdmin) {
-                controls = `
-                    <div class="pt-4 border-t border-gray-200 dark:border-gray-700 space-y-3">
-                        <button onclick="toggleAdminStatus('${data.id}', ${!isActive})" class="w-full py-2 rounded-lg font-bold text-xs ${isActive ? 'bg-orange-50 text-orange-600' : 'bg-green-50 text-green-600'}">
-                            ${isActive ? 'Deactivate Account' : 'Activate Account'}
-                        </button>
-                        <button onclick="deleteAdmin('${data.id}')" class="w-full py-2 rounded-lg bg-red-50 text-red-600 font-bold text-xs hover:bg-red-100 dark:hover:bg-red-900/20">Delete Permanently</button>
-                    </div>
-                `;
-            }
-
-            body.innerHTML = `
-                <div class="flex items-center gap-4 mb-4">
-                    <div class="size-12 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xl">${data.name.charAt(0)}</div>
-                    <div>
-                        <h4 class="font-bold text-lg text-text-light dark:text-text-dark">${data.name}</h4>
-                        <p class="text-xs text-subtext-light">${data.email}</p>
-                        <p class="text-xs font-bold text-text-light dark:text-text-dark mt-1 flex items-center gap-1">
-                            <span class="material-symbols-outlined text-sm">call</span> ${data.phoneNumber || 'N/A'}
-                        </p>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-2 text-sm mb-4">
-                    <div class="bg-gray-50 dark:bg-gray-800 p-2 rounded"><span class="text-xs text-subtext-light block">Role</span><span class="font-bold text-text-light dark:text-text-dark">${data.role}</span></div>
-                    <div class="bg-gray-50 dark:bg-gray-800 p-2 rounded"><span class="text-xs text-subtext-light block">Status</span><span class="font-bold ${isActive ? 'text-green-500' : 'text-red-500'}">${isActive ? 'Active' : 'Inactive'}</span></div>
-                </div>
-                
-                <div class="bg-gray-50 dark:bg-gray-800 p-3 rounded mb-2">
-                    <span class="text-xs font-bold text-subtext-light block mb-2 uppercase tracking-wide">Permissions</span>
-                    ${permissionsText}
-                </div>
-
-                ${controls}
-            `;
 
             modal.classList.remove('hidden');
             requestAnimationFrame(() => {
@@ -449,62 +448,102 @@
             });
         };
 
-        window.closeAdminModal = () => {
-            document.getElementById('admin-modal').classList.add('hidden');
+        window.closeModal = () => {
+            const modal = document.getElementById('admin-modal');
+            const content = document.getElementById('admin-modal-content');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 200);
         };
 
-        window.toggleAdminStatus = async (id, status) => {
-            if(!await NotificationService.confirm("Update Status?", "Change admin access?")) return;
+        document.getElementById('admin-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-save-admin');
+            const originalText = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = "Processing...";
+
+            const id = document.getElementById('admin-id').value;
+            const data = {
+                name: document.getElementById('admin-name').value,
+                role: document.getElementById('admin-role').value,
+            };
+
             try {
-                await updateDoc(doc(db, "admins", id), { isActive: status });
-                NotificationService.toast("Status updated", 'success');
+                if (id) {
+                    await updateDoc(doc(db, "admins", id), data);
+                    NotificationService.toast("Admin updated successfully", "success");
+                } else {
+                    const token = await window.auth.currentUser.getIdToken();
+                    const email = document.getElementById('admin-email').value;
+                    const password = document.getElementById('admin-pwd').value;
+                    
+                    const response = await fetch('https://us-central1-mmmi-cooperative-portal.cloudfunctions.net/createAdminUser', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ email, password, name: data.name, role: data.role })
+                    });
+
+                    const result = await response.json();
+                    if(result.error) throw new Error(result.error);
+                    NotificationService.toast("Admin created successfully", "success");
+                }
+                closeModal();
                 loadAdmins();
-                closeAdminModal();
-            } catch(e) { NotificationService.toast(e.message, 'error'); }
-        };
+            } catch (err) {
+                console.error(err);
+                NotificationService.toast(err.message, "error");
+            } finally {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        });
 
         window.deleteAdmin = async (id) => {
-            if(!await NotificationService.confirm("DELETE ADMIN", "This will remove database access AND delete the login credentials. This cannot be undone.", "Delete Forever")) return;
-            try {
-                await deleteDoc(doc(db, "admins", id));
+            if (id === window.auth.currentUser.uid) {
+                NotificationService.toast("You cannot delete your own account.", "error");
+                return;
+            }
+
+            const confirmed = await NotificationService.confirm("Delete Admin", "Are you sure? They will immediately lose access.", "Delete");
+            if (confirmed) {
                 try {
-                    const deleteUserFunc = httpsCallable(functions, 'deleteUser');
-                    await deleteUserFunc({ uid: id });
-                    NotificationService.toast("Admin account and credentials deleted", 'success');
-                } catch(cloudError) {
-                    console.warn("Cloud function error:", cloudError);
-                    NotificationService.toast("Admin DB deleted, but Auth cleanup failed. Check Cloud Functions.", "warning");
+                    const token = await window.auth.currentUser.getIdToken();
+                    
+                    const response = await fetch('https://us-central1-mmmi-cooperative-portal.cloudfunctions.net/deleteAdminUser', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ uid: id })
+                    });
+
+                    const result = await response.json();
+                    if(result.error) throw new Error(result.error);
+                    
+                    NotificationService.toast("Admin deleted", "success");
+                    loadAdmins();
+                } catch(e) {
+                    console.error(e);
+                    NotificationService.toast(e.message, "error");
                 }
-                loadAdmins();
-                closeAdminModal();
-            } catch(e) { NotificationService.toast(e.message, 'error'); }
+            }
         };
 
-        document.getElementById('create-admin-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('submit-btn');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<span class="material-symbols-outlined animate-spin text-sm">refresh</span> Creating...';
-            btn.disabled = true;
-
-            try {
-                await createAdminUser({
-                    name: document.getElementById('a-name').value,
-                    email: document.getElementById('a-email').value,
-                    role: document.getElementById('a-role').value,
-                    password: document.getElementById('a-password').value,
-                    phoneNumber: document.getElementById('a-phone').value 
-                });
-                NotificationService.toast('Admin created successfully!', 'success');
-                e.target.reset();
-                loadAdmins();
-            } catch (err) { NotificationService.toast(err.message, 'error'); }
-            
-            btn.disabled = false;
-            btn.innerHTML = originalText;
+        document.getElementById('admin-search').addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const filtered = allAdmins.filter(a => 
+                (a.name && a.name.toLowerCase().includes(term)) || 
+                (a.email && a.email.toLowerCase().includes(term))
+            );
+            renderAdmins(filtered);
         });
     </script>
-    <script>
+<script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('/sw.js')

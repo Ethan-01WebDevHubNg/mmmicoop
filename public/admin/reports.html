@@ -1,13 +1,18 @@
 <!DOCTYPE html>
-<html class="dark overflow-y-scroll" lang="en">
+<html class="dark overflow-y-scroll overflow-x-hidden no-scrollbar" lang="en">
 <head>
     <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
     <title>Reports - MMMI Admin</title>
     
+    <!-- Apple PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MMMi Admin">
+
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#0f172a">
+    <link rel="manifest" href="/manifest.json?v=2">
+    <meta id="theme-color-meta" name="theme-color" content="#0f172a">
     <link rel="apple-touch-icon" href="/assets/icon-192.png">    
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
@@ -41,8 +46,11 @@
         .dark .isometric-sidebar { background-color: #1e293b; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg id='hexagons' fill='%230f172a' fill-opacity='0.25' fill-rule='nonzero'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); }
         @keyframes fadeInSlideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in-slide-up { animation: fadeInSlideUp 0.5s ease-out forwards; }
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        @media (max-width: 1024px) {
+            .no-scrollbar::-webkit-scrollbar { display: none; }
+            .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        }
         
         .chart-tooltip {
             position: absolute;
@@ -64,30 +72,41 @@
         }
     </style>
 </head>
-<body class="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark transition-colors duration-300 flex flex-col min-h-screen">
+<body class="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark transition-colors duration-300 flex flex-col min-h-screen no-scrollbar">
+
+    <script>
+        const themeMeta = document.getElementById('theme-color-meta');
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            if (themeMeta) themeMeta.setAttribute('content', '#0f172a');
+        } else {
+            document.documentElement.classList.remove('dark');
+            if (themeMeta) themeMeta.setAttribute('content', '#f8fafc');
+        }
+    </script>
 
     <div class="flex flex-1">
-        <aside class="hidden lg:flex w-64 flex-col border-r border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 bg-white dark:bg-card-dark isometric-sidebar fixed h-full z-20">
-            <div class="flex h-16 items-center gap-3 px-6 border-b border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 bg-white/90 dark:bg-card-dark/90 backdrop-blur">
-                 <img class="size-8 dark:hidden" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20Logo%20-%20light%20mode.svg" alt="Logo">
-                 <img class="size-8 hidden dark:block" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg" alt="Logo">
+        <aside class="hidden lg:flex w-64 flex-col border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-card-dark isometric-sidebar fixed h-full z-20">
+            <div class="flex h-16 items-center gap-3 px-6 border-b border-gray-200 dark:border-gray-800 bg-white/90 dark:bg-card-dark/90 backdrop-blur">
+                 <img class="size-8 dark:hidden app-logo" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20Logo%20-%20light%20mode.svg" alt="Logo">
+                 <img class="size-8 hidden dark:block app-logo" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg" alt="Logo">
                  <h1 class="text-lg font-bold tracking-tight">MMMI Admin</h1>
             </div>
-            <nav class="flex-1 space-y-1 p-4 overflow-y-auto">
+            <nav class="flex-1 space-y-1 p-4 overflow-y-auto no-scrollbar">
                 <a href="/admin/index" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10 transition-colors"><span class="material-symbols-outlined">dashboard</span><span>Dashboard</span></a>
                 <a href="/admin/Memberlists" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10 transition-colors"><span class="material-symbols-outlined">groups</span><span>Members</span></a>
                 <a href="/admin/withdrwalRequests" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10 transition-colors"><span class="material-symbols-outlined">payments</span><span>Withdrawals</span></a>
                 <a href="/admin/ManagePlans" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10 transition-colors"><span class="material-symbols-outlined">savings</span><span>Savings Plans</span></a>
                 <a href="/admin/reports" class="flex items-center gap-3 rounded-lg bg-primary text-white px-4 py-3 text-sm font-bold shadow-md shadow-primary/20 transition-colors"><span class="material-symbols-outlined text-white">bar_chart</span><span>Reports</span></a>
             </nav>
-            <div class="p-4 border-t border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 bg-white/50 dark:bg-card-dark/50 mt-auto">
+            <div class="p-4 border-t border-gray-200 dark:border-gray-800 bg-white/50 dark:bg-card-dark/50 mt-auto">
                  <a class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10 mb-2" href="/admin/userManagement"><span class="material-symbols-outlined">manage_accounts</span><span>Admin Users</span></a>
                 <button class="logout-trigger w-full flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors mt-2 text-left"><span class="material-symbols-outlined">logout</span><span>Logout</span></button>
             </div>
         </aside>
 
         <div class="flex flex-1 flex-col lg:ml-64 transition-all duration-300 min-w-0">
-            <header class="sticky top-0 z-30 w-full border-b border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 bg-white/80 dark:bg-card-dark/80 backdrop-blur-md">
+            <header class="sticky top-0 z-30 w-full bg-gradient-to-b from-background-light to-background-light/80 dark:from-background-dark dark:to-background-dark/80 backdrop-blur-md transition-all duration-300">
                 <div class="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-3">
                     <div class="flex items-center gap-4">
                         <button id="menu-btn" class="lg:hidden p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 text-text-light dark:text-text-dark"><span class="material-symbols-outlined">menu</span></button>
@@ -98,11 +117,11 @@
                         <button id="theme-toggle" class="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 text-text-light dark:text-text-dark"><span class="material-symbols-outlined dark:hidden">dark_mode</span><span class="material-symbols-outlined hidden dark:inline">light_mode</span></button>
                         
                         <div class="relative ml-2">
-                            <button type="button" id="top-profile-trigger" class="flex items-center gap-3 pl-4 border-l border-gray-200 dark:border-l-0 dark:ring-l dark:ring-gray-700 hover:opacity-80 focus:outline-none">
-                                <img id="admin-avatar" src="https://ui-avatars.com/api/?name=Admin&background=random" class="size-8 sm:size-9 rounded-full ring-2 ring-white dark:ring-gray-700">
+                            <button type="button" id="top-profile-trigger" class="flex items-center gap-3 pl-4 border-l border-gray-200 dark:border-l-0 dark:border-gray-700 hover:opacity-80 focus:outline-none">
+                                <img id="admin-avatar" src="https://ui-avatars.com/api/?name=Admin&background=random" class="size-8 sm:size-9 rounded-full ring-2 ring-white dark:ring-gray-700 object-cover">
                             </button>
 
-                            <div id="top-profile-dropdown" class="absolute right-0 z-50 mt-2 w-72 origin-top-right rounded-xl bg-white dark:bg-card-dark shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none hidden transform transition-all duration-200 opacity-0 scale-95 origin-top-right">
+                            <div id="top-profile-dropdown" class="absolute right-0 z-50 mt-2 w-72 origin-top-right rounded-xl bg-white dark:bg-card-dark shadow-2xl ring-1 ring-black/5 focus:outline-none hidden transform transition-all duration-200 opacity-0 scale-95 origin-top-right">
                                 <div class="px-5 py-5 border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-slate-800/50 rounded-t-xl">
                                     <div class="flex items-center gap-3">
                                         <img id="dd-avatar" class="size-10 rounded-full ring-2 ring-white dark:ring-gray-600 object-cover" src="https://ui-avatars.com/api/?name=Admin&background=random" alt="">
@@ -132,17 +151,17 @@
             </header>
 
             <div id="mobile-menu-overlay" class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden backdrop-blur-sm"></div>
-            <aside id="mobile-menu" class="fixed top-0 left-0 h-full w-64 bg-white dark:bg-card-dark isometric-sidebar flex flex-col border-r border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 shadow-2xl z-50 transform -translate-x-full transition-transform duration-300 lg:hidden">
+            <aside id="mobile-menu" class="fixed top-0 left-0 h-full w-64 bg-white dark:bg-card-dark isometric-sidebar flex flex-col border-r border-gray-200 dark:border-gray-800 shadow-2xl z-50 transform -translate-x-full transition-transform duration-300 lg:hidden">
                 <div class="flex items-center justify-between mb-8 px-6 pt-6">
                     <div class="flex items-center gap-2">
-                         <img class="size-8 dark:hidden" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20Logo%20-%20light%20mode.svg" alt="Logo">
-                         <img class="size-8 hidden dark:block" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg" alt="Logo">
+                         <img class="size-8 dark:hidden app-logo" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20Logo%20-%20light%20mode.svg" alt="Logo">
+                         <img class="size-8 hidden dark:block app-logo" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg" alt="Logo">
                          <span class="font-bold text-lg">Menu</span>
                     </div>
                     <button id="close-menu-btn" class="p-1 rounded hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">close</span></button>
                 </div>
                 
-                <nav class="flex-1 space-y-2 overflow-y-auto px-4">
+                <nav class="flex-1 space-y-2 overflow-y-auto px-4 no-scrollbar">
                     <a href="/admin/index" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10"><span class="material-symbols-outlined">dashboard</span><span>Dashboard</span></a>
                     <a href="/admin/Memberlists" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10"><span class="material-symbols-outlined">groups</span><span>Members</span></a>
                     <a href="/admin/withdrwalRequests" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10"><span class="material-symbols-outlined">payments</span><span>Withdrawals</span></a>
@@ -150,7 +169,7 @@
                     <a href="/admin/reports" class="flex items-center gap-3 rounded-lg bg-primary text-white px-4 py-3 text-sm font-bold shadow-md shadow-primary/20"><span class="material-symbols-outlined text-white">bar_chart</span><span>Reports</span></a>
                 </nav>
 
-                <div class="p-4 border-t border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 mt-auto bg-gray-50/50 dark:bg-slate-800/30">
+                <div class="p-4 border-t border-gray-200 dark:border-gray-800 mt-auto bg-gray-50/50 dark:bg-slate-800/30">
                     <a href="/admin/userManagement" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10 mb-2">
                         <span class="material-symbols-outlined">manage_accounts</span><span>Admin Users</span>
                     </a>
@@ -160,16 +179,16 @@
                 </div>
             </aside>
 
-            <main class="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in-slide-up">
+            <main class="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in-slide-up no-scrollbar">
                 
-                <div class="mb-8 flex justify-center gap-4 border-b border-gray-200 dark:border-none dark:ring-b dark:ring-gray-700 overflow-x-auto hide-scrollbar">
+                <div class="mb-8 flex justify-center gap-4 overflow-x-auto no-scrollbar">
                     <button onclick="switchTab('financial')" id="tab-financial" class="px-6 py-2 text-sm font-bold border-b-2 border-primary text-primary hover:text-text-light dark:hover:text-text-dark transition-colors whitespace-nowrap">Financial Reports</button>
                     <button onclick="switchTab('member')" id="tab-member" class="px-6 py-2 text-sm font-bold border-b-2 border-transparent text-subtext-light hover:text-text-light dark:hover:text-text-dark transition-colors whitespace-nowrap">Member Reports</button>
                 </div>
 
                 <div id="content-financial" class="block space-y-8">
-                    <div class="bg-card-light dark:bg-card-dark rounded-2xl border-none ring-1 ring-gray-200 dark:ring-gray-700 shadow-sm overflow-hidden">
-                        <div class="px-6 py-4 bg-gray-100 dark:bg-slate-900 border-b border-gray-200 dark:border-gray-700">
+                    <div class="bg-card-light dark:bg-card-dark rounded-2xl shadow-md overflow-hidden border-0">
+                        <div class="px-6 py-4 bg-gray-50/80 dark:bg-slate-900/80 border-b border-gray-200 dark:border-gray-800/50">
                              <h3 class="text-lg font-bold text-text-light dark:text-text-dark">Report Configuration</h3>
                         </div>
                         <div class="p-6 flex flex-col md:flex-row gap-4 items-end">
@@ -194,28 +213,28 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="bg-green-50 dark:bg-green-900/10 ring-1 ring-green-200 dark:ring-green-800 rounded-2xl p-6">
+                        <div class="bg-green-50 dark:bg-green-900/10 rounded-2xl p-6 shadow-sm">
                             <p class="text-green-700 dark:text-green-400 text-sm font-bold uppercase tracking-wide">Total Inflow</p>
                             <h3 id="r-inflow" class="text-2xl font-black text-green-800 dark:text-green-300 mt-1">₦0.00</h3>
                         </div>
-                        <div class="bg-red-50 dark:bg-red-900/10 ring-1 ring-red-200 dark:ring-red-800 rounded-2xl p-6">
+                        <div class="bg-red-50 dark:bg-red-900/10 rounded-2xl p-6 shadow-sm">
                             <p class="text-red-700 dark:text-red-400 text-sm font-bold uppercase tracking-wide">Total Outflow</p>
                             <h3 id="r-outflow" class="text-2xl font-black text-red-800 dark:text-red-300 mt-1">₦0.00</h3>
                         </div>
-                        <div class="bg-card-light dark:bg-card-dark ring-1 ring-gray-200 dark:ring-gray-700 rounded-2xl p-6">
+                        <div class="bg-card-light dark:bg-card-dark rounded-2xl p-6 shadow-sm">
                             <p class="text-subtext-light text-sm font-bold uppercase tracking-wide">Net Volume</p>
                             <h3 id="r-count" class="text-2xl font-black text-text-light dark:text-text-dark mt-1">0</h3>
                         </div>
                     </div>
 
-                    <div class="bg-card-light dark:bg-card-dark rounded-2xl border-none ring-1 ring-gray-200 dark:ring-gray-700 shadow-sm overflow-hidden">
-                        <div class="px-6 py-4 bg-gray-100 dark:bg-slate-900 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                    <div class="bg-card-light dark:bg-card-dark rounded-2xl shadow-md overflow-hidden border-0">
+                        <div class="px-6 py-4 bg-gray-50/80 dark:bg-slate-900/80 border-b border-gray-200 dark:border-gray-800/50 flex justify-between items-center">
                             <h2 class="text-lg font-bold text-text-light dark:text-text-dark">Detailed Transaction Logs</h2>
                             <button onclick="exportXLSX()" class="text-xs font-bold text-primary hover:underline flex items-center gap-1"><span class="material-symbols-outlined text-sm">download</span> Export Excel</button>
                         </div>
-                        <div class="overflow-x-auto">
+                        <div class="overflow-x-auto no-scrollbar">
                             <table class="w-full text-left text-sm whitespace-nowrap">
-                                <thead class="bg-gray-50 dark:bg-slate-800/50 text-subtext-light dark:text-subtext-dark">
+                                <thead class="bg-gray-50/50 dark:bg-slate-800/30 text-subtext-light dark:text-subtext-dark border-b border-gray-100 dark:border-gray-800/50">
                                     <tr>
                                         <th class="px-6 py-4 font-semibold">Transaction ID</th>
                                         <th class="px-6 py-4 font-semibold">Member ID</th>
@@ -226,7 +245,7 @@
                                         <th class="px-6 py-4 font-semibold text-center">Status</th>
                                     </tr>
                                 </thead>
-                                <tbody id="report-body" class="divide-y divide-gray-200 dark:divide-gray-800"><tr><td colspan="7" class="px-6 py-12 text-center text-subtext-light">Select filters and click "Run Report"</td></tr></tbody>
+                                <tbody id="report-body" class="divide-y divide-gray-100 dark:divide-gray-800/50"><tr><td colspan="7" class="px-6 py-12 text-center text-subtext-light">Select filters and click "Run Report"</td></tr></tbody>
                             </table>
                         </div>
                     </div>
@@ -237,27 +256,27 @@
                         </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        <div class="bg-card-light dark:bg-card-dark rounded-2xl ring-1 ring-gray-200 dark:ring-gray-700 overflow-hidden flex flex-col h-96">
-                            <div class="px-6 py-4 bg-gray-100 dark:bg-slate-900 border-b border-gray-200 dark:border-gray-700">
+                        <div class="bg-card-light dark:bg-card-dark rounded-2xl shadow-md overflow-hidden flex flex-col h-96 border-0">
+                            <div class="px-6 py-4 bg-gray-50/80 dark:bg-slate-900/80 border-b border-gray-200 dark:border-gray-800/50">
                                 <h3 class="font-bold text-text-light dark:text-text-dark">Account Creations (Last 30 Days)</h3>
                             </div>
                             <div class="p-6 flex-1 w-full h-full relative" id="graph-creations"></div>
                         </div>
-                        <div class="bg-card-light dark:bg-card-dark rounded-2xl ring-1 ring-gray-200 dark:ring-gray-700 overflow-hidden flex flex-col h-96">
-                            <div class="px-6 py-4 bg-gray-100 dark:bg-slate-900 border-b border-gray-200 dark:border-gray-700">
+                        <div class="bg-card-light dark:bg-card-dark rounded-2xl shadow-md overflow-hidden flex flex-col h-96 border-0">
+                            <div class="px-6 py-4 bg-gray-50/80 dark:bg-slate-900/80 border-b border-gray-200 dark:border-gray-800/50">
                                 <h3 class="font-bold text-text-light dark:text-text-dark">Top-Up Volume (Last 30 Days)</h3>
                             </div>
                             <div class="p-6 flex-1 w-full h-full relative" id="graph-topups"></div>
                         </div>
                     </div>
 
-                    <div class="bg-card-light dark:bg-card-dark rounded-2xl ring-1 ring-gray-200 dark:ring-gray-700 shadow-sm overflow-hidden">
-                        <div class="px-6 py-4 bg-gray-100 dark:bg-slate-900 border-b border-gray-200 dark:border-gray-700">
+                    <div class="bg-card-light dark:bg-card-dark rounded-2xl shadow-md overflow-hidden border-0">
+                        <div class="px-6 py-4 bg-gray-50/80 dark:bg-slate-900/80 border-b border-gray-200 dark:border-gray-800/50">
                             <h3 class="font-bold text-text-light dark:text-text-dark">Member Activity Logs</h3>
                         </div>
-                        <div class="overflow-x-auto">
+                        <div class="overflow-x-auto no-scrollbar">
                              <table class="w-full text-left text-sm whitespace-nowrap">
-                                <thead class="bg-gray-50 dark:bg-slate-800/50 text-subtext-light dark:text-subtext-dark">
+                                <thead class="bg-gray-50/50 dark:bg-slate-800/30 text-subtext-light dark:text-subtext-dark border-b border-gray-100 dark:border-gray-800/50">
                                     <tr>
                                         <th class="px-6 py-4 font-semibold">Timestamp</th>
                                         <th class="px-6 py-4 font-semibold">User</th>
@@ -265,7 +284,7 @@
                                         <th class="px-6 py-4 font-semibold">Details</th>
                                     </tr>
                                 </thead>
-                                <tbody id="member-logs-body" class="divide-y divide-gray-200 dark:divide-gray-800">
+                                <tbody id="member-logs-body" class="divide-y divide-gray-100 dark:divide-gray-800/50">
                                     <tr><td colspan="4" class="px-6 py-8 text-center text-subtext-light">Loading logs...</td></tr>
                                 </tbody>
                              </table>
@@ -275,7 +294,7 @@
 
             </main>
 
-            <footer class="flex-shrink-0 text-center p-4 text-sm text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 mt-auto">
+            <footer class="flex-shrink-0 text-center p-4 text-sm text-gray-500 dark:text-gray-400 mt-auto bg-white/50 dark:bg-card-dark/50 z-30">
               <div class="flex flex-col sm:flex-row justify-center items-center gap-2 sm:gap-6">
                 <p>&copy; 2026 <a class="hover:text-primary hover:underline" href="https://mountainmovingministryintl.org/" rel="noopener noreferrer" target="_blank">Mountain Moving Ministry Intl.</a> All rights reserved.</p>
                 <div class="flex gap-4 sm:gap-6">
@@ -300,11 +319,26 @@
         window.addEventListener('admin-ready', (e) => {
              const { adminData } = e.detail;
              setupProfileDropdown(adminData);
+             setupMobileMenu();
              const date = new Date();
              document.getElementById('f-start').valueAsDate = new Date(date.getFullYear(), date.getMonth(), 1);
              document.getElementById('f-end').valueAsDate = new Date(date.getFullYear(), date.getMonth() + 1, 0);
              runReport();
         });
+
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        if(themeToggleBtn) {
+            themeToggleBtn.addEventListener('click', () => {
+                setTimeout(() => {
+                    const isDark = document.documentElement.classList.contains('dark');
+                    const themeMeta = document.getElementById('theme-color-meta');
+                    if(themeMeta) themeMeta.setAttribute('content', isDark ? '#0f172a' : '#f8fafc');
+                    document.querySelectorAll('.app-logo').forEach(i => {
+                        i.src = isDark ? "https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg" : "https://mountainmovingministryintl.org/gallery/MMMi%20Header%20Logo%20-%20light%20mode.svg";
+                    });
+                }, 50);
+            });
+        }
 
         function setupProfileDropdown(data) {
             const trigger = document.getElementById('top-profile-trigger');
@@ -330,6 +364,29 @@
             });
         }
 
+        function setupMobileMenu() {
+            const menuBtn = document.getElementById('menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const overlay = document.getElementById('mobile-menu-overlay');
+            const closeBtn = document.getElementById('close-menu-btn');
+
+            if(!menuBtn || !mobileMenu || !overlay || !closeBtn) return;
+
+            const openMenu = () => {
+                mobileMenu.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            };
+
+            const closeMenu = () => {
+                mobileMenu.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            };
+
+            menuBtn.addEventListener('click', openMenu);
+            closeBtn.addEventListener('click', closeMenu);
+            overlay.addEventListener('click', closeMenu);
+        }
+
         window.switchTab = (tab) => {
             const tabs = ['financial', 'member'];
             tabs.forEach(t => {
@@ -337,12 +394,12 @@
                 const btn = document.getElementById(`tab-${t}`);
                 if (t === tab) {
                     content.classList.remove('hidden');
-                    btn.classList.add('border-primary', 'text-primary');
+                    btn.classList.add('border-b-2', 'border-primary', 'text-primary');
                     btn.classList.remove('border-transparent', 'text-subtext-light');
                     if (t === 'member') loadMemberReports();
                 } else {
                     content.classList.add('hidden');
-                    btn.classList.remove('border-primary', 'text-primary');
+                    btn.classList.remove('border-b-2', 'border-primary', 'text-primary');
                     btn.classList.add('border-transparent', 'text-subtext-light');
                 }
             });
@@ -404,7 +461,6 @@
 
                 if (filtered.length > 0) {
                     const userMap = {};
-                    // NEW: Updated mapping to include 'isDeleted' status
                     const usersSnap = await getDocs(query(collection(db, "users")));
                     usersSnap.docs.forEach(u => {
                         const d = u.data();
@@ -415,7 +471,6 @@
                         const userData = userMap[t.userId];
                         let memberLabel = userData ? userData.id : (t.memberId || 'N/A');
                         
-                        // NEW: Visual tag for Archived Users
                         if (userData && userData.isDeleted) {
                             memberLabel += ' (Archived)';
                         }
@@ -457,7 +512,7 @@
                 const sign = isOrgIncome ? '+' : '-';
 
                 return `
-                <tr class="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors">
+                <tr class="hover:bg-gray-50/80 dark:hover:bg-slate-800/50 transition-colors">
                     <td class="px-6 py-4 text-xs font-mono text-subtext-light">${t.transactionId || t.id}</td>
                     <td class="px-6 py-4 text-xs font-mono font-bold text-text-light dark:text-text-dark">${t.realMemberId || t.memberId || '-'}</td>
                     <td class="px-6 py-4 text-sm font-medium text-text-light dark:text-text-dark">${formatShortDate(t.date)}</td>
@@ -560,7 +615,7 @@
         function renderCards(metrics) {
             const container = document.getElementById('member-metrics');
             container.innerHTML = metrics.map(m => `
-                <div class="bg-card-light dark:bg-card-dark p-6 rounded-2xl ring-1 ring-gray-200 dark:ring-gray-700 shadow-sm">
+                <div class="bg-card-light dark:bg-card-dark p-6 rounded-2xl shadow-sm">
                     <p class="text-xs font-bold text-subtext-light uppercase tracking-wide">${m.title}</p>
                     <h3 class="text-3xl font-black text-text-light dark:text-text-dark mt-2">${m.val}</h3>
                     <div class="flex items-center gap-1 mt-2 text-xs font-bold text-green-600 dark:text-green-400">
@@ -577,7 +632,7 @@
                  return;
             }
             tbody.innerHTML = logs.map(l => `
-                <tr class="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors">
+                <tr class="hover:bg-gray-50/80 dark:hover:bg-slate-800/50 transition-colors">
                     <td class="px-6 py-4 text-xs font-mono text-subtext-light">${formatDate(l.timestamp)}</td>
                     <td class="px-6 py-4 font-bold text-text-light dark:text-text-dark">${l.user}</td>
                     <td class="px-6 py-4"><span class="px-2 py-1 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 rounded text-xs font-bold">${l.action}</span></td>
@@ -734,7 +789,6 @@
             });
         }
         
-        // --- Added: Swipe Gesture Support for Main Content ---
         const mainContent = document.querySelector('main');
         let touchStartX = 0;
         let touchEndX = 0;
@@ -749,11 +803,9 @@
         }, {passive: true});
 
         function handleSwipe() {
-            // Swipe Left (Show Member Reports - Right Tab)
             if (touchEndX < touchStartX - 50) {
                 switchTab('member');
             }
-            // Swipe Right (Show Financial Reports - Left Tab)
             if (touchEndX > touchStartX + 50) {
                 switchTab('financial');
             }

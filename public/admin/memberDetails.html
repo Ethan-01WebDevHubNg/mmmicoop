@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html class="dark" lang="en">
+<html class="dark overflow-y-scroll overflow-x-hidden no-scrollbar" lang="en">
 <head>
     <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
     <title>Member Details - MMMI Admin</title>
     
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#0f172a">
+    <link rel="manifest" href="/manifest.json?v=2">
+    <meta id="theme-color-meta" name="theme-color" content="#0f172a">
     <link rel="apple-touch-icon" href="/assets/icon-192.png">    
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
@@ -43,10 +43,12 @@
         @keyframes fadeInSlideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in-slide-up { animation: fadeInSlideUp 0.5s ease-out forwards; }
         
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        /* Universal Brutal Scrollbar Hiding (Desktop & Mobile) */
+        ::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
+        * { -ms-overflow-style: none !important; scrollbar-width: none !important; }
+        .no-scrollbar::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
+        .no-scrollbar { -ms-overflow-style: none !important; scrollbar-width: none !important; }
 
-        /* Premium Gold Button Style */
         .btn-gold {
             background: linear-gradient(135deg, #FFD700 0%, #FDB931 100%);
             color: #5c3a00;
@@ -62,7 +64,6 @@
         }
         .btn-gold:active { transform: translateY(1px); }
 
-        /* Archival Styles */
         .grayscale-mode {
             filter: grayscale(100%);
             opacity: 0.6;
@@ -86,22 +87,33 @@
         }
     </style>
 </head>
-<body class="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark transition-colors duration-300 flex flex-col min-h-screen">
+<body class="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark transition-colors duration-300 flex flex-col min-h-screen no-scrollbar">
+
+    <script>
+        const themeMeta = document.getElementById('theme-color-meta');
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            if (themeMeta) themeMeta.setAttribute('content', '#0f172a');
+        } else {
+            document.documentElement.classList.remove('dark');
+            if (themeMeta) themeMeta.setAttribute('content', '#f8fafc');
+        }
+    </script>
 
     <div id="preloader" class="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-50/80 dark:bg-gray-900/90 backdrop-blur-[5px] transition-all duration-500">
-        <div id="preloader-card" class="bg-white dark:bg-gray-800 p-8 md:p-12 rounded-2xl shadow-xl flex flex-col items-center justify-center aspect-square ring-1 ring-gray-200 dark:ring-gray-700">
+        <div id="preloader-card" class="bg-white dark:bg-gray-800 p-8 md:p-12 rounded-2xl shadow-xl flex flex-col items-center justify-center aspect-square border border-gray-200 dark:border-gray-700">
             <span class="mt-8 text-xs md:text-sm text-gray-400 dark:text-gray-500 tracking-[0.2em] font-medium animate-pulse">FETCHING PROFILE</span>
         </div>
     </div>
 
     <div class="flex flex-1">
-        <aside class="hidden lg:flex w-64 flex-col border-r border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 bg-white dark:bg-card-dark isometric-sidebar fixed h-full z-20">
-            <div class="flex h-16 items-center gap-3 px-6 border-b border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 bg-white/90 dark:bg-card-dark/90 backdrop-blur">
-                 <img class="size-8 dark:hidden" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20Logo%20-%20light%20mode.svg" alt="Logo">
-                 <img class="size-8 hidden dark:block" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg" alt="Logo">
+        <aside class="hidden lg:flex w-64 flex-col bg-white dark:bg-card-dark isometric-sidebar fixed h-full z-20 shadow-[4px_0_24px_rgba(0,0,0,0.02)] dark:shadow-[4px_0_24px_rgba(0,0,0,0.2)]">
+            <div class="flex h-16 items-center gap-3 px-6 bg-white/90 dark:bg-card-dark/90 backdrop-blur border-b border-transparent">
+                 <img class="size-8 dark:hidden app-logo" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20Logo%20-%20light%20mode.svg" alt="Logo">
+                 <img class="size-8 hidden dark:block app-logo" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg" alt="Logo">
                  <h1 class="text-lg font-bold tracking-tight">MMMI Admin</h1>
             </div>
-            <nav class="flex-1 space-y-1 p-4 overflow-y-auto">
+            <nav class="flex-1 space-y-1 p-4 overflow-y-auto no-scrollbar">
                 <a href="/admin/index" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
                     <span class="material-symbols-outlined">dashboard</span><span>Dashboard</span>
                 </a>
@@ -118,7 +130,7 @@
                     <span class="material-symbols-outlined">bar_chart</span><span>Reports</span>
                 </a>
             </nav>
-            <div class="p-4 border-t border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 bg-white/50 dark:bg-card-dark/50 mt-auto">
+            <div class="p-4 bg-white/50 dark:bg-card-dark/50 mt-auto">
                  <a class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10 mb-2" href="/admin/userManagement">
                     <span class="material-symbols-outlined">manage_accounts</span><span>Admin Users</span>
                 </a>
@@ -129,7 +141,7 @@
         </aside>
 
         <div class="flex flex-1 flex-col lg:ml-64 transition-all duration-300 w-full lg:h-screen lg:overflow-hidden">
-            <header class="flex-shrink-0 sticky top-0 z-30 w-full border-b border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 bg-white/80 dark:bg-card-dark/80 backdrop-blur-md">
+            <header class="flex-shrink-0 sticky top-0 z-30 w-full bg-gradient-to-b from-background-light to-background-light/80 dark:from-background-dark dark:to-background-dark/80 backdrop-blur-md transition-all duration-300 border-0">
                 <div class="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-3">
                     <div class="flex items-center gap-4">
                         <button id="menu-btn" class="lg:hidden p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 text-text-light dark:text-text-dark">
@@ -148,12 +160,12 @@
                         </button>
                         
                         <div class="relative ml-2">
-                            <button type="button" id="top-profile-trigger" class="flex items-center gap-3 pl-4 border-l border-gray-200 dark:border-l-0 dark:ring-l dark:ring-gray-700 hover:opacity-80 focus:outline-none">
-                                <img id="admin-avatar" src="https://ui-avatars.com/api/?name=Admin&background=random" class="size-8 sm:size-9 rounded-full ring-2 ring-white dark:ring-gray-700">
+                            <button type="button" id="top-profile-trigger" class="flex items-center gap-3 pl-4 focus:outline-none">
+                                <img id="admin-avatar" src="https://ui-avatars.com/api/?name=Admin&background=random" class="size-8 sm:size-9 rounded-full ring-2 ring-white dark:ring-gray-700 object-cover">
                             </button>
 
-                            <div id="top-profile-dropdown" class="absolute right-0 z-50 mt-2 w-72 origin-top-right rounded-xl bg-white dark:bg-card-dark shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none hidden transform transition-all duration-200 opacity-0 scale-95 origin-top-right">
-                                <div class="px-5 py-5 border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-slate-800/50 rounded-t-xl">
+                            <div id="top-profile-dropdown" class="absolute right-0 z-50 mt-2 w-72 origin-top-right rounded-xl bg-white dark:bg-card-dark shadow-2xl ring-1 ring-black/5 focus:outline-none hidden transform transition-all duration-200 opacity-0 scale-95 origin-top-right">
+                                <div class="px-5 py-5 bg-gray-50/50 dark:bg-slate-800/50 rounded-t-xl">
                                     <div class="flex items-center gap-3">
                                         <img id="dd-avatar" class="size-10 rounded-full ring-2 ring-white dark:ring-gray-600 object-cover" src="https://ui-avatars.com/api/?name=Admin&background=random" alt="">
                                         <div class="overflow-hidden">
@@ -182,17 +194,19 @@
             </header>
 
             <div id="mobile-menu-overlay" class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden backdrop-blur-sm"></div>
-            <aside id="mobile-menu" class="fixed top-0 left-0 h-full w-64 bg-white dark:bg-card-dark isometric-sidebar flex flex-col border-r border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 shadow-2xl z-50 transform -translate-x-full transition-transform duration-300 lg:hidden">
+            <aside id="mobile-menu" class="fixed top-0 left-0 h-full w-64 bg-white dark:bg-card-dark isometric-sidebar flex flex-col shadow-2xl z-50 transform -translate-x-full transition-transform duration-300 lg:hidden">
                 <div class="flex items-center justify-between mb-8 px-6 pt-6">
                     <div class="flex items-center gap-2">
-                         <img class="size-8 dark:hidden" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20Logo%20-%20light%20mode.svg" alt="Logo">
-                         <img class="size-8 hidden dark:block" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg" alt="Logo">
+                         <img class="size-8 dark:hidden app-logo" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20Logo%20-%20light%20mode.svg" alt="Logo">
+                         <img class="size-8 hidden dark:block app-logo" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg" alt="Logo">
                          <span class="font-bold text-lg">Menu</span>
                     </div>
-                    <button id="close-menu-btn" class="p-1 rounded hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">close</span></button>
+                    <button id="close-menu-btn" class="p-1 rounded hover:bg-black/5 dark:hover:bg-white/5">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
                 </div>
                 
-                <nav class="flex-1 space-y-2 overflow-y-auto px-4">
+                <nav class="flex-1 space-y-2 overflow-y-auto px-4 no-scrollbar">
                     <a href="/admin/index" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10"><span class="material-symbols-outlined">dashboard</span><span>Dashboard</span></a>
                     <a href="/admin/Memberlists" class="flex items-center gap-3 rounded-lg bg-primary text-white px-4 py-3 text-sm font-bold shadow-md shadow-primary/20"><span class="material-symbols-outlined text-white">groups</span><span>Members</span></a>
                     <a href="/admin/withdrwalRequests" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10"><span class="material-symbols-outlined">payments</span><span>Withdrawals</span></a>
@@ -200,7 +214,7 @@
                     <a href="/admin/reports" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10"><span class="material-symbols-outlined">bar_chart</span><span>Reports</span></a>
                 </nav>
 
-                <div class="p-4 border-t border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 mt-auto bg-gray-50/50 dark:bg-slate-800/30">
+                <div class="p-4 mt-auto bg-gray-50/50 dark:bg-slate-800/30">
                     <a href="/admin/userManagement" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10 mb-2">
                         <span class="material-symbols-outlined">manage_accounts</span><span>Admin Users</span>
                     </a>
@@ -210,16 +224,16 @@
                 </div>
             </aside>
 
-            <main class="flex-grow flex flex-col container mx-auto lg:overflow-hidden animate-fade-in-slide-up">
+            <main class="flex-grow flex flex-col container mx-auto lg:overflow-hidden animate-fade-in-slide-up no-scrollbar">
                 
                 <div id="content" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-3 px-4 sm:px-6 py-8 lg:p-0 lg:h-full lg:overflow-hidden">
                     
                     <div class="lg:col-span-2 space-y-8 lg:overflow-y-auto lg:h-full no-scrollbar lg:pr-1 lg:pl-8 lg:py-6">
                         
-                        <div id="profile-card" class="bg-card-light dark:bg-card-dark rounded-2xl ring-1 ring-gray-200 dark:ring-gray-700 shadow-sm relative group overflow-hidden transition-all duration-300">
+                        <div id="profile-card" class="bg-card-light dark:bg-card-dark rounded-2xl shadow-sm border-0 relative group overflow-hidden transition-all duration-300">
                             <div id="inactive-watermark" class="hidden watermark">INACTIVE</div>
 
-                            <div class="px-6 py-4 bg-gray-100 dark:bg-slate-900 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                            <div class="px-6 py-4 bg-gray-50/80 dark:bg-slate-900/80 border-b border-gray-200 dark:border-gray-800/50 flex justify-between items-center">
                                 <h2 class="text-lg font-bold text-text-light dark:text-text-dark font-display">Personal Information</h2>
                                 <div class="flex items-center">
                                     <button id="edit-btn" onclick="toggleEditMode()" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-xs font-bold hover:bg-primary hover:text-white transition-all disabled:opacity-50">
@@ -275,8 +289,8 @@
                             </div>
                         </div>
 
-                        <div class="bg-card-light dark:bg-card-dark rounded-2xl ring-1 ring-gray-200 dark:ring-gray-700 shadow-sm overflow-hidden">
-                            <div class="px-6 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-slate-800/30 flex flex-wrap gap-4 justify-between items-center text-sm">
+                        <div class="bg-card-light dark:bg-card-dark rounded-2xl shadow-sm border-0 overflow-hidden">
+                            <div class="px-6 py-3 border-b border-gray-200 dark:border-gray-800/50 bg-gray-50/80 dark:bg-slate-900/80 flex flex-wrap gap-4 justify-between items-center text-sm no-scrollbar overflow-x-auto">
                                 <div class="flex items-center gap-2">
                                     <label class="font-bold text-subtext-light dark:text-subtext-dark flex items-center gap-1"><span class="material-symbols-outlined text-sm">calendar_month</span> Year:</label>
                                     <select id="filter-year" onchange="resetAndLoadTxns()" class="bg-white dark:bg-card-dark border-none ring-1 ring-gray-200 dark:ring-gray-700 rounded-lg text-xs font-bold py-1.5 px-3 focus:ring-primary dark:text-white">
@@ -298,7 +312,7 @@
                                 </div>
                             </div>
 
-                            <div class="px-6 py-4 bg-gray-100 dark:bg-slate-900 border-b border-gray-200 dark:border-gray-700 flex flex-col md:flex-row justify-between items-center gap-4">
+                            <div class="px-6 py-4 bg-gray-50/80 dark:bg-slate-900/80 flex flex-col md:flex-row justify-between items-center gap-4">
                                 <div class="flex items-center gap-4">
                                     <h2 class="text-lg font-bold text-text-light dark:text-text-dark">Transactions</h2>
                                     <button onclick="exportStatementPDF()" class="text-xs font-bold text-primary hover:underline flex items-center gap-1">
@@ -317,9 +331,9 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="overflow-x-auto">
+                            <div class="overflow-x-auto no-scrollbar">
                                 <table class="w-full text-left text-sm whitespace-nowrap">
-                                    <thead class="bg-gray-50 dark:bg-slate-800/50 text-subtext-light dark:text-subtext-dark">
+                                    <thead class="bg-gray-50 dark:bg-slate-800/50 text-subtext-light dark:text-subtext-dark border-y border-gray-100 dark:border-gray-800/50">
                                         <tr>
                                             <th class="px-6 py-4 font-semibold">Date</th>
                                             <th class="px-6 py-4 font-semibold">ID</th>
@@ -329,10 +343,10 @@
                                             <th class="px-6 py-4 font-semibold text-right">Actions</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="txn-table" class="divide-y divide-gray-200 dark:divide-gray-800"></tbody>
+                                    <tbody id="txn-table" class="divide-y divide-gray-200 dark:divide-gray-800/50"></tbody>
                                 </table>
                             </div>
-                            <div class="p-4 border-t border-gray-200 dark:border-none dark:ring-t dark:ring-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-slate-800/30">
+                            <div class="p-4 border-t border-gray-200 dark:border-gray-800/50 flex justify-between items-center bg-gray-50/50 dark:bg-slate-800/30">
                                 <button onclick="prevPage()" class="p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-30"><span class="material-symbols-outlined text-sm">chevron_left</span></button>
                                 <span id="page-indicator" class="text-xs font-mono text-subtext-light">Page 1</span>
                                 <button onclick="nextPage()" class="p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-30"><span class="material-symbols-outlined text-sm">chevron_right</span></button>
@@ -342,7 +356,7 @@
 
                     <div id="metrics-column" class="space-y-6 lg:h-full lg:overflow-y-auto no-scrollbar lg:py-6 lg:pr-8 lg:pl-[0.2rem] transition-all duration-300">
                         
-                        <div class="bg-gradient-to-br from-primary to-red-700 text-white rounded-2xl p-8 shadow-xl relative overflow-hidden">
+                        <div class="bg-gradient-to-br from-primary to-red-700 text-white rounded-2xl p-8 shadow-xl border-0 relative overflow-hidden">
                             <div class="relative z-10">
                                 <p class="text-white/80 text-sm font-medium">Total Savings Balance</p>
                                 <h3 id="p-balance" class="text-4xl font-black mt-2 tracking-tight">₦0.00</h3>
@@ -361,8 +375,8 @@
                             <span class="material-symbols-outlined absolute -bottom-8 -right-8 text-[180px] text-white/10 pointer-events-none">account_balance_wallet</span>
                         </div>
 
-                        <div class="bg-card-light dark:bg-card-dark rounded-2xl ring-1 ring-gray-200 dark:ring-gray-700 shadow-sm overflow-hidden">
-                            <div class="px-6 py-4 bg-gray-100 dark:bg-slate-900 border-b border-gray-200 dark:border-gray-700">
+                        <div class="bg-card-light dark:bg-card-dark rounded-2xl shadow-sm border-0 overflow-hidden">
+                            <div class="px-6 py-4 bg-gray-50/80 dark:bg-slate-900/80 border-b border-gray-200 dark:border-gray-800/50">
                                 <h3 class="font-bold text-lg text-text-light dark:text-text-dark">Daily Contribution</h3>
                             </div>
                             <div class="p-6 space-y-4 text-sm">
@@ -393,8 +407,8 @@
                             </div>
                         </div>
 
-                        <div class="bg-card-light dark:bg-card-dark rounded-2xl ring-1 ring-gray-200 dark:ring-gray-700 shadow-sm overflow-hidden">
-                            <div class="px-6 py-4 bg-gray-100 dark:bg-slate-900 border-b border-gray-200 dark:border-gray-700">
+                        <div class="bg-card-light dark:bg-card-dark rounded-2xl shadow-sm border-0 overflow-hidden">
+                            <div class="px-6 py-4 bg-gray-50/80 dark:bg-slate-900/80 border-b border-gray-200 dark:border-gray-800/50">
                                 <h3 class="font-bold text-sm text-subtext-light uppercase">Admin Controls</h3>
                             </div>
                             <div class="p-6 space-y-3">
@@ -410,20 +424,20 @@
                 </div>
             </main>
 
-            <footer class="flex-shrink-0 text-center p-4 text-sm text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 mt-auto bg-white/50 dark:bg-card-dark/50 z-30">
-              <div class="flex flex-col sm:flex-row justify-center items-center gap-2 sm:gap-6">
-                <p>&copy; 2026 <a class="hover:text-primary hover:underline" href="https://mountainmovingministryintl.org/" rel="noopener noreferrer" target="_blank">Mountain Moving Ministry Intl.</a> All rights reserved.</p>
-                <div class="flex gap-4 sm:gap-6">
-                  <a class="hover:text-primary" href="https://ethan01.com" rel="noopener noreferrer" target="_blank">Contact Developer</a>
+            <footer class="flex-shrink-0 text-center p-4 text-sm text-gray-500 dark:text-gray-400 mt-auto bg-white/50 dark:bg-card-dark/50 z-30">
+                <div class="flex flex-col sm:flex-row justify-center items-center gap-2 sm:gap-6">
+                    <p>&copy; 2026 <a class="hover:text-primary hover:underline" href="https://mountainmovingministryintl.org/" rel="noopener noreferrer" target="_blank">Mountain Moving Ministry Intl.</a> All rights reserved.</p>
+                    <div class="flex gap-4 sm:gap-6">
+                    <a class="hover:text-primary" href="https://ethan01.com" rel="noopener noreferrer" target="_blank">Contact Developer</a>
+                    </div>
                 </div>
-              </div>
             </footer>
         </div>
     </div>
 
     <div id="txn-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-        <div class="bg-white dark:bg-card-dark rounded-2xl shadow-2xl w-full max-w-md ring-1 ring-gray-200 dark:ring-gray-700 overflow-hidden transform scale-95 opacity-0 transition-all duration-200" id="txn-modal-content">
-            <div class="p-6 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center">
+        <div class="bg-white dark:bg-card-dark rounded-2xl shadow-2xl w-full max-w-md border-0 ring-1 ring-gray-200 dark:ring-gray-700 overflow-hidden transform scale-95 opacity-0 transition-all duration-200" id="txn-modal-content">
+            <div class="p-6 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center bg-gray-50/80 dark:bg-slate-900/80">
                 <h3 class="text-lg font-bold text-text-light dark:text-text-dark">Transaction Details</h3>
                 <button onclick="closeTxnModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"><span class="material-symbols-outlined">close</span></button>
             </div>
@@ -431,7 +445,7 @@
                 <div id="modal-details" class="text-sm space-y-3"></div>
             </div>
             
-            <div class="p-6 bg-gray-50 dark:bg-gray-800 sm:flex sm:flex-col sm:gap-3">
+            <div class="p-6 bg-gray-50 dark:bg-gray-800/50 sm:flex sm:flex-col sm:gap-3">
                     
                 <div id="m-pending-actions" class="flex flex-row-reverse w-full gap-3 hidden">
                     <button onclick="approveTxn()" type="button" class="inline-flex w-full justify-center rounded-lg bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500 sm:ml-3 sm:w-auto">Approve</button>
@@ -466,7 +480,7 @@
                 <div class="space-y-4">
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Admin Password</label>
-                        <input type="password" id="auth-password" class="w-full rounded-lg bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-sm focus:ring-primary focus:border-primary p-2.5" placeholder="Enter password">
+                        <input type="password" id="auth-password" class="w-full rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-sm focus:ring-primary focus:border-primary p-2.5" placeholder="Enter password">
                     </div>
                     <div class="flex gap-3">
                         <button onclick="closeAuthModal()" class="flex-1 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 text-sm font-bold hover:bg-gray-50 dark:hover:bg-gray-800">Cancel</button>
@@ -497,6 +511,9 @@
             checkUserPendingTransactions
         } from '../js/admin-firebase.js';
         import { NotificationService } from '../js/admin-core.js';
+        
+        window.NotificationService = NotificationService;
+        window.auth = auth;
 
         let currentUid = null;
         let originalData = {};
@@ -512,17 +529,32 @@
             if(adminData && adminData.role) adminRole = adminData.role;
             setupProfileDropdown(adminData);
             
-            // Only show delete button if Super Admin
             if (adminData.role === 'super_admin') {
-                document.getElementById('btn-delete-user').classList.remove('hidden');
+                const delBtn = document.getElementById('btn-delete-user');
+                if(delBtn) delBtn.classList.remove('hidden');
             }
             populateYearFilter();
             loadMember();
+            setupMobileMenu();
         });
 
-        // ... (Existing Profile Dropdown & Filter Logic matches previous file) ...
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        if(themeToggleBtn) {
+            themeToggleBtn.addEventListener('click', () => {
+                setTimeout(() => {
+                    const isDark = document.documentElement.classList.contains('dark');
+                    const themeMeta = document.getElementById('theme-color-meta');
+                    if(themeMeta) themeMeta.setAttribute('content', isDark ? '#0f172a' : '#f8fafc');
+                    document.querySelectorAll('.app-logo').forEach(i => {
+                        i.src = isDark ? "https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg" : "https://mountainmovingministryintl.org/gallery/MMMi%20Header%20Logo%20-%20light%20mode.svg";
+                    });
+                }, 50);
+            });
+        }
+
         function populateYearFilter() {
             const yearSelect = document.getElementById('filter-year');
+            if(!yearSelect) return;
             const currentYear = new Date().getFullYear();
             for (let i = 0; i < 5; i++) {
                 const year = currentYear - i;
@@ -559,7 +591,29 @@
             });
         }
 
-        // --- CORE MEMBER LOGIC ---
+        function setupMobileMenu() {
+            const menuBtn = document.getElementById('menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const overlay = document.getElementById('mobile-menu-overlay');
+            const closeBtn = document.getElementById('close-menu-btn');
+
+            if(!menuBtn || !mobileMenu || !overlay || !closeBtn) return;
+
+            const openMenu = () => {
+                mobileMenu.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            };
+
+            const closeMenu = () => {
+                mobileMenu.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            };
+
+            menuBtn.addEventListener('click', openMenu);
+            closeBtn.addEventListener('click', closeMenu);
+            overlay.addEventListener('click', closeMenu);
+        }
+
         async function loadMember() {
             const urlParams = new URLSearchParams(window.location.search);
             currentUid = urlParams.get('uid');
@@ -577,7 +631,8 @@
                 originalData = data; 
                 populateFields(data);
                 resetAndLoadTxns();
-                document.getElementById('content').classList.remove('hidden');
+                const contentDiv = document.getElementById('content');
+                if(contentDiv) contentDiv.classList.remove('hidden');
 
             } catch (e) {
                 console.error(e);
@@ -586,7 +641,6 @@
         }
 
         function populateFields(data) {
-            // Basic Fields
             document.getElementById('inp-firstName').value = data.firstName || '';
             document.getElementById('inp-surname').value = data.surname || '';
             document.getElementById('inp-phone').value = data.phoneNumber || '';
@@ -601,7 +655,6 @@
             document.getElementById('p-planDate').textContent = formatDate(data.planStartDate);
             renderPlanBadge(data.User_Plan || 'None');
 
-            // --- DELETED / ARCHIVED STATE LOGIC ---
             const isDeleted = data.isDeleted === true;
             const profileCard = document.getElementById('profile-card');
             const metricsCol = document.getElementById('metrics-column');
@@ -611,19 +664,17 @@
             const txtDeactivate = document.getElementById('txt-deactivate');
 
             if (isDeleted) {
-                // Apply visual disabling
                 profileCard.classList.add('grayscale-mode');
                 metricsCol.classList.add('grayscale-mode');
                 watermark.classList.remove('hidden');
                 
-                // Disable controls
                 editBtn.disabled = true;
                 btnDeactivate.disabled = true;
                 txtDeactivate.textContent = "Account Archived";
-                document.getElementById('btn-delete-user').classList.add('hidden'); // Hide delete if already deleted
+                const delBtn = document.getElementById('btn-delete-user');
+                if(delBtn) delBtn.classList.add('hidden'); 
                 
             } else {
-                // Active State Logic
                 profileCard.classList.remove('grayscale-mode');
                 metricsCol.classList.remove('grayscale-mode');
                 watermark.classList.add('hidden');
@@ -641,7 +692,6 @@
                 }
             }
 
-            // Daily Stats
             const daily = data.dailyContribution || {};
             const dStatus = document.getElementById('d-status');
             if (daily.isActive) {
@@ -688,7 +738,6 @@
             `;
         }
 
-        // --- TRANSACTION LOGIC (Same as provided, handles viewing deleted user history perfectly) ---
         window.resetAndLoadTxns = async () => {
             lastVisible = null;
             firstVisible = null;
@@ -741,7 +790,7 @@
                     const td = t.data();
                     const isCredit = td.type === 'Credit';
                     return `
-                        <tr class="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors">
+                        <tr class="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors border-y border-gray-100 dark:border-gray-800/50">
                             <td class="px-6 py-4 whitespace-nowrap text-subtext-light text-xs font-mono">${formatDate(td.date)}</td>
                             <td class="px-6 py-4 font-mono text-xs text-subtext-light">${t.id.substring(0, 8)}...</td>
                             <td class="px-6 py-4 font-bold ${isCredit ? 'text-green-600' : 'text-red-600'}">${td.type}</td>
@@ -774,7 +823,7 @@
 
         function getStatusCapsule(status) {
             status = status || 'Unknown';
-            let styles = "bg-gray-100 text-gray-600";
+            let styles = "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300";
             if (status === 'Success') styles = "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300";
             if (status === 'Pending') styles = "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300";
             if (status === 'Rejected') styles = "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300";
@@ -782,24 +831,19 @@
             return `<span class="px-2 py-1 rounded-full text-xs font-bold ${styles}">${status}</span>`;
         }
 
-        // --- DELETION LOGIC (GUARDRAIL IMPLEMENTATION) ---
-
         window.deleteUser = async () => {
-            // Step A: Check for Pending Transactions
             try {
                 const hasPending = await checkUserPendingTransactions(currentUid);
                 
-                // Scenario 1: Pending Exists
                 if (hasPending) {
                     await NotificationService.confirm(
                         "Action Denied", 
                         "Kindly process pending withdrawals before User account deletion.",
                         "OK"
                     );
-                    return; // Abort
+                    return; 
                 }
 
-                // Scenario 2: No Pending - Confirm Action
                 const confirmed = await NotificationService.confirm(
                     "Security Check", 
                     "Has this user's pending transactions/withdrawals been processed completely? \n\nClicking 'Yes' will archive this user.", 
@@ -810,7 +854,6 @@
                     try {
                         await deleteMember(currentUid);
                         NotificationService.toast("User Archived. Redirecting...", "success");
-                        // Redirect to Member List to see update
                         setTimeout(() => window.location.href = 'Memberlists', 1500);
                     } catch(e) { 
                         console.error(e);
@@ -824,9 +867,8 @@
             }
         };
 
-        // --- OTHER UTILS ---
         window.toggleEditMode = () => {
-            if(document.getElementById('inactive-watermark').classList.contains('hidden') === false) return; // Prevent if deleted
+            if(document.getElementById('inactive-watermark').classList.contains('hidden') === false) return;
             document.getElementById('edit-btn').classList.add('hidden');
             document.getElementById('edit-actions').classList.remove('hidden');
             const inputs = document.querySelectorAll('#profile-form input, #profile-form select');
@@ -884,16 +926,11 @@
             }
         };
 
-        // --- EXPORT PDF FUNCTIONALITY (OPTIMIZED & REDESIGNED) ---
-        
-        // Helper: Fetches image and resizes it to reduce PDF file size
         const getBase64ImageFromURL = (url) => {
             return new Promise((resolve) => {
                 var img = new Image();
                 img.setAttribute("crossOrigin", "anonymous");
                 img.onload = () => {
-                    // Optimization: Resize large images to max 800px width
-                    // This creates a smaller base64 string, drastically reducing PDF size
                     const maxWidth = 800;
                     let width = img.width;
                     let height = img.height;
@@ -909,7 +946,6 @@
                     var ctx = canvas.getContext("2d");
                     ctx.drawImage(img, 0, 0, width, height);
                     
-                    // Return data and aspect ratio for proper placement
                     var dataURL = canvas.toDataURL("image/png");
                     resolve({ dataURL, ratio: width / height });
                 };
@@ -922,7 +958,6 @@
             if (!originalData) return;
             NotificationService.toast("Generating Optimized PDF...", "success");
             
-            // 1. Prepare Filter Data
             const category = document.getElementById('txn-category-toggle').value;
             const year = parseInt(document.getElementById('filter-year').value);
             const startMonth = parseInt(document.getElementById('filter-month-start').value);
@@ -930,40 +965,34 @@
             const startDate = new Date(year, startMonth, 1);
             const endDate = new Date(year, endMonth + 1, 0, 23, 59, 59);
 
-            // CHANGED: Grab the search term from the input box
             const searchTerm = document.getElementById('txn-search').value.toLowerCase().trim();
 
-            // 2. Initialize jsPDF with Compression
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({
                 orientation: 'p',
                 unit: 'mm',
                 format: 'a4',
-                compress: true // ENABLE COMPRESSION to keep file size low
+                compress: true 
             });
             
             const pageWidth = doc.internal.pageSize.width;
             const margin = 14;
 
-            // 3. Load & Place Optimized Logo
             const logoUrl = "../assets/MMMi for mpa pdf.png"; 
             const imgData = await getBase64ImageFromURL(logoUrl);
 
-            let headerBottomY = 40; // Default if no logo
+            let headerBottomY = 40; 
 
             if(imgData && imgData.dataURL) {
                 try {
-                    // Calculate logo dimensions maintaining aspect ratio
-                    // CHANGED: Reduced logo width to 15mm for better fit
                     const logoWidth = 20; 
                     const logoHeight = logoWidth / imgData.ratio;
                     
                     doc.addImage(imgData.dataURL, 'PNG', margin, 10, logoWidth, logoHeight);
-                    headerBottomY = 10 + logoHeight + 10; // Update Y position for next elements
+                    headerBottomY = 10 + logoHeight + 10; 
                 } catch(e) { console.warn("Logo add failed", e); }
             }
             
-            // 4. Header Text (Professional Right Alignment)
             doc.setFont("helvetica", "bold");
             doc.setFontSize(16);
             doc.setTextColor(40, 40, 40);
@@ -975,15 +1004,12 @@
             const dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
             doc.text(`Generated on: ${dateStr}`, pageWidth - margin, 26, { align: 'right' });
 
-            // Horizontal Divider
             doc.setDrawColor(220, 220, 220);
             doc.setLineWidth(0.5);
             doc.line(margin, headerBottomY, pageWidth - margin, headerBottomY);
 
-            // 5. Member Details & Summary Section
             const contentStart = headerBottomY + 8;
             
-            // Left Column: Member Info
             doc.setFontSize(10);
             doc.setTextColor(40, 40, 40);
             doc.setFont("helvetica", "bold");
@@ -1002,7 +1028,6 @@
             doc.text(originalData.email || 'No Email', margin, yPos); yPos += lineHeight;
             doc.text(originalData.phoneNumber || 'No Phone', margin, yPos);
 
-            // Right Column: Financial Summary
             const col2X = pageWidth / 2 + 10;
             
             doc.setFont("helvetica", "bold");
@@ -1016,16 +1041,14 @@
 
             yPos = contentStart + 6;
             
-            // Wallet Balance
             doc.setTextColor(100, 100, 100);
             doc.text("Cooperative Savings:", col2X, yPos);
             doc.setFont("helvetica", "bold");
             doc.setTextColor(0, 0, 0);
             doc.text(`NGN ${bal}`, pageWidth - margin, yPos, { align: 'right' });
             
-            yPos += lineHeight + 2; // Extra spacing
+            yPos += lineHeight + 2; 
 
-            // Daily Balance
             doc.setFont("helvetica", "normal");
             doc.setTextColor(100, 100, 100);
             doc.text("Daily Contribution:", col2X, yPos);
@@ -1033,13 +1056,10 @@
             doc.setTextColor(0, 0, 0);
             doc.text(`NGN ${dailyBal}`, pageWidth - margin, yPos, { align: 'right' });
 
-            // 6. Transactions Data Processing (Optimized)
-            // Fetch ALL transactions descending
             const q = query(collection(db, "users", currentUid, "transactions"), orderBy('date', 'desc'));
             const snap = await getDocs(q);
             let txns = snap.docs.map(d => d.data());
 
-            // Ledger Logic
             let runningMain = parseFloat(originalData["Wallet balance"] || 0);
             let runningDaily = parseFloat(originalData.dailyContribution?.accumulated || 0);
 
@@ -1048,7 +1068,6 @@
                 const isDaily = t.category === 'daily';
                 let currentTxnBalance = isDaily ? runningDaily : runningMain; 
 
-                // Reverse calculation
                 if (t.status === 'Success') {
                     if (t.type === 'Credit') {
                         if (isDaily) runningDaily -= amount; else runningMain -= amount;
@@ -1059,14 +1078,11 @@
                 return { ...t, calculatedBalance: currentTxnBalance };
             });
 
-            // Filter logic: Ensure strict linking to dropdown selection AND Search Input
             const filteredTxns = processedTxns.filter(t => {
                 const tDate = t.date.toDate();
                 const isDateValid = tDate >= startDate && tDate <= endDate;
-                // CHANGED: Strict category filtering to match dropdown logic
                 const isCategoryValid = category === 'all' || t.category === category;
                 
-                // CHANGED: Added Search Term Filtering Logic
                 const matchesSearch = searchTerm === '' || 
                     t.transactionId.toLowerCase().includes(searchTerm) ||
                     t.type.toLowerCase().includes(searchTerm) ||
@@ -1087,14 +1103,13 @@
                 t.status
             ]);
 
-            // 7. Generate Table
             doc.autoTable({
                 startY: yPos + 10,
                 head: [['Date', 'Trans. ID', 'Type', 'Category', 'Amount', 'Balance', 'Status']],
                 body: tableData,
                 theme: 'striped',
                 headStyles: { 
-                    fillColor: [227, 25, 25], // Primary Red
+                    fillColor: [227, 25, 25], 
                     fontSize: 8,
                     fontStyle: 'bold',
                     halign: 'center'
@@ -1105,14 +1120,13 @@
                     valign: 'middle'
                 },
                 columnStyles: {
-                    0: { cellWidth: 25 }, // Date
-                    1: { cellWidth: 25 }, // ID
-                    4: { fontStyle: 'bold', halign: 'right' }, // Amount
-                    5: { fontStyle: 'bold', halign: 'right', textColor: [60, 60, 60] }, // Balance
-                    6: { halign: 'center' } // Status
+                    0: { cellWidth: 25 }, 
+                    1: { cellWidth: 25 }, 
+                    4: { fontStyle: 'bold', halign: 'right' }, 
+                    5: { fontStyle: 'bold', halign: 'right', textColor: [60, 60, 60] }, 
+                    6: { halign: 'center' } 
                 },
                 didDrawPage: function (data) {
-                    // Footer
                     doc.setFontSize(8);
                     doc.setTextColor(150, 150, 150);
                     doc.text("MMMi Admin System", margin, doc.internal.pageSize.height - 10);
@@ -1120,18 +1134,154 @@
                 }
             });
 
-            // 8. Save
             doc.save(`MMMi_Statement_${originalData.firstName}_${new Date().toISOString().split('T')[0]}.pdf`);
             NotificationService.toast("Download Started", "success");
         };
 
-        window.openTxnModal = async (txnId) => { currentTxnId = txnId; const modal = document.getElementById('txn-modal'); const content = document.getElementById('txn-modal-content'); const detailsDiv = document.getElementById('modal-details'); modal.classList.remove('hidden'); requestAnimationFrame(() => { content.classList.remove('scale-95', 'opacity-0'); content.classList.add('scale-100', 'opacity-100'); }); try { const txnSnap = await getDoc(doc(db, "users", currentUid, "transactions", txnId)); if(!txnSnap.exists()) throw new Error("Transaction not found"); const t = txnSnap.data(); currentTxnAmount = t.amount; detailsDiv.innerHTML = ` <div class="grid grid-cols-2 gap-4"> <div><p class="text-xs text-subtext-light">Transaction ID</p><p class="font-mono font-bold select-all">${t.transactionId || txnId}</p></div> <div><p class="text-xs text-subtext-light">Date</p><p class="font-bold">${formatDate(t.date)}</p></div> <div><p class="text-xs text-subtext-light">Amount</p><p class="font-black text-xl text-primary">${formatCurrency(t.amount)}</p></div> <div><p class="text-xs text-subtext-light">Type</p><p class="font-bold">${t.type}</p></div> <div class="col-span-2"><p class="text-xs text-subtext-light">Status</p><div class="mt-1">${getStatusCapsule(t.status)}</div></div> <div class="col-span-2"><p class="text-xs text-subtext-light">Description</p><p class="text-sm bg-gray-50 dark:bg-gray-800 p-2 rounded">${t.description || 'None'}</p></div> ${t.adminAction ? `<div class="col-span-2 pt-2 border-t border-gray-100 dark:border-gray-700"><p class="text-xs text-gray-400 italic">Action: ${t.adminAction}</p></div>` : ''} </div> `; const pendingActions = document.getElementById('m-pending-actions'); const closeOnly = document.getElementById('m-close-only'); const revBtn = document.getElementById('m-reverse-btn'); pendingActions.classList.add('hidden'); closeOnly.classList.add('hidden'); revBtn.classList.add('hidden'); if (t.status === 'Pending') { pendingActions.classList.remove('hidden'); } else { closeOnly.classList.remove('hidden'); } if (t.status === 'Success' && adminRole === 'super_admin') { revBtn.classList.remove('hidden'); } } catch (e) { detailsDiv.innerHTML = `<p class="text-red-500">Error loading details.</p>`; } };
-        window.closeTxnModal = () => { const modal = document.getElementById('txn-modal'); const content = document.getElementById('txn-modal-content'); content.classList.remove('scale-100', 'opacity-100'); content.classList.add('scale-95', 'opacity-0'); setTimeout(() => modal.classList.add('hidden'), 200); currentTxnId = null; };
-        window.approveTxn = async () => { if(!currentTxnId) return; try { await approveWithdrawal(`users/${currentUid}/transactions/${currentTxnId}`, currentTxnId); NotificationService.toast("Transaction Approved", "success"); closeTxnModal(); loadTransactions(); loadMember(); } catch(e) { NotificationService.toast(e.message, 'error'); } };
-        window.rejectTxn = async () => { if(!currentTxnId) return; const confirmed = await NotificationService.confirm("Reject Transaction", "Are you sure? This will refund the user if funds were deducted.", "Reject"); if(confirmed) { try { await rejectWithdrawal(currentUid, currentTxnId, currentTxnAmount); NotificationService.toast("Transaction Rejected & Refunded", "success"); closeTxnModal(); loadTransactions(); loadMember(); } catch(e) { NotificationService.toast(e.message, 'error'); } } };
-        document.getElementById('m-reverse-btn').addEventListener('dblclick', () => { document.getElementById('auth-modal').classList.remove('hidden'); document.getElementById('auth-password').value = ''; document.getElementById('auth-password').focus(); });
+        window.openTxnModal = async (txnId) => { 
+            currentTxnId = txnId; 
+            const modal = document.getElementById('txn-modal'); 
+            const content = document.getElementById('txn-modal-content'); 
+            const detailsDiv = document.getElementById('modal-details'); 
+            modal.classList.remove('hidden'); 
+            requestAnimationFrame(() => { 
+                content.classList.remove('scale-95', 'opacity-0'); 
+                content.classList.add('scale-100', 'opacity-100'); 
+            }); 
+            try { 
+                const txnSnap = await getDoc(doc(db, "users", currentUid, "transactions", txnId)); 
+                if(!txnSnap.exists()) throw new Error("Transaction not found"); 
+                const t = txnSnap.data(); 
+                currentTxnAmount = t.amount; 
+                detailsDiv.innerHTML = ` 
+                <div class="grid grid-cols-2 gap-4"> 
+                    <div><p class="text-xs text-subtext-light">Transaction ID</p><p class="font-mono font-bold select-all">${t.transactionId || txnId}</p></div> 
+                    <div><p class="text-xs text-subtext-light">Date</p><p class="font-bold">${formatDate(t.date)}</p></div> 
+                    <div><p class="text-xs text-subtext-light">Amount</p><p class="font-black text-xl text-primary">${formatCurrency(t.amount)}</p></div> 
+                    <div><p class="text-xs text-subtext-light">Type</p><p class="font-bold">${t.type}</p></div> 
+                    <div class="col-span-2"><p class="text-xs text-subtext-light">Status</p><div class="mt-1">${getStatusCapsule(t.status)}</div></div> 
+                    <div class="col-span-2"><p class="text-xs text-subtext-light">Description</p><p class="text-sm bg-gray-50 dark:bg-gray-800 p-2 rounded">${t.description || 'None'}</p></div> 
+                    ${t.adminAction ? `<div class="col-span-2 pt-2 border-t border-gray-100 dark:border-gray-700"><p class="text-xs text-gray-400 italic">Action: ${t.adminAction}</p></div>` : ''} 
+                </div> `; 
+                const pendingActions = document.getElementById('m-pending-actions'); 
+                const closeOnly = document.getElementById('m-close-only'); 
+                const revBtn = document.getElementById('m-reverse-btn'); 
+                pendingActions.classList.add('hidden'); 
+                closeOnly.classList.add('hidden'); 
+                revBtn.classList.add('hidden'); 
+                if (t.status === 'Pending') { 
+                    pendingActions.classList.remove('hidden'); 
+                } else { 
+                    closeOnly.classList.remove('hidden'); 
+                } 
+                if (t.status === 'Success' && adminRole === 'super_admin') { 
+                    revBtn.classList.remove('hidden'); 
+                } 
+            } catch (e) { 
+                detailsDiv.innerHTML = `<p class="text-red-500">Error loading details.</p>`; 
+            } 
+        };
+        
+        window.closeTxnModal = () => { 
+            const modal = document.getElementById('txn-modal'); 
+            const content = document.getElementById('txn-modal-content'); 
+            content.classList.remove('scale-100', 'opacity-100'); 
+            content.classList.add('scale-95', 'opacity-0'); 
+            setTimeout(() => modal.classList.add('hidden'), 200); 
+            currentTxnId = null; 
+        };
+        
+        window.approveTxn = async () => { 
+            if(!currentTxnId) return; 
+            try { 
+                await approveWithdrawal(`users/${currentUid}/transactions/${currentTxnId}`, currentTxnId); 
+                NotificationService.toast("Transaction Approved", "success"); 
+                closeTxnModal(); 
+                loadTransactions(); 
+                loadMember(); 
+            } catch(e) { 
+                NotificationService.toast(e.message, 'error'); 
+            } 
+        };
+        
+        window.rejectTxn = async () => { 
+            if(!currentTxnId) return; 
+            const confirmed = await NotificationService.confirm("Reject Transaction", "Are you sure? This will refund the user if funds were deducted.", "Reject"); 
+            if(confirmed) { 
+                try { 
+                    await rejectWithdrawal(currentUid, currentTxnId, currentTxnAmount); 
+                    NotificationService.toast("Transaction Rejected & Refunded", "success"); 
+                    closeTxnModal(); 
+                    loadTransactions(); 
+                    loadMember(); 
+                } catch(e) { 
+                    NotificationService.toast(e.message, 'error'); 
+                } 
+            } 
+        };
+        
+        const revBtn = document.getElementById('m-reverse-btn');
+        if(revBtn) {
+            revBtn.addEventListener('dblclick', () => { 
+                document.getElementById('auth-modal').classList.remove('hidden'); 
+                document.getElementById('auth-password').value = ''; 
+                document.getElementById('auth-password').focus(); 
+            });
+        }
+        
         window.closeAuthModal = () => { document.getElementById('auth-modal').classList.add('hidden'); };
-        window.confirmReverse = async () => { const pwd = document.getElementById('auth-password').value; const btn = document.getElementById('auth-confirm-btn'); if (!pwd) return NotificationService.toast("Password required", "error"); btn.innerHTML = 'Verifying...'; btn.disabled = true; try { if (!auth.currentUser) throw new Error("No admin session"); const credential = EmailAuthProvider.credential(auth.currentUser.email, pwd); await reauthenticateWithCredential(auth.currentUser, credential); btn.innerHTML = 'Reversing...'; await reverseTransaction(currentUid, currentTxnId, auth.currentUser.email); NotificationService.toast("Reversal Successful", "success"); closeAuthModal(); closeTxnModal(); loadTransactions(); loadMember(); } catch (error) { console.error(error); if(error.code === 'auth/wrong-password') { NotificationService.toast("Incorrect Password", "error"); } else { NotificationService.toast(error.message || "Failed", "error"); } } finally { btn.innerHTML = 'Verify & Reverse'; btn.disabled = false; } };
+        
+        window.confirmReverse = async () => { 
+            const pwd = document.getElementById('auth-password').value; 
+            const btn = document.getElementById('auth-confirm-btn'); 
+            if (!pwd) return NotificationService.toast("Password required", "error"); 
+            btn.innerHTML = 'Verifying...'; 
+            btn.disabled = true; 
+            try { 
+                if (!auth.currentUser) throw new Error("No admin session"); 
+                const credential = EmailAuthProvider.credential(auth.currentUser.email, pwd); 
+                await reauthenticateWithCredential(auth.currentUser, credential); 
+                btn.innerHTML = 'Reversing...'; 
+                await reverseTransaction(currentUid, currentTxnId, auth.currentUser.email); 
+                NotificationService.toast("Reversal Successful", "success"); 
+                closeAuthModal(); 
+                closeTxnModal(); 
+                loadTransactions(); 
+                loadMember(); 
+            } catch (error) { 
+                console.error(error); 
+                if(error.code === 'auth/wrong-password') { 
+                    NotificationService.toast("Incorrect Password", "error"); 
+                } else { 
+                    NotificationService.toast(error.message || "Failed", "error"); 
+                } 
+            } finally { 
+                btn.innerHTML = 'Verify & Reverse'; 
+                btn.disabled = false; 
+            } 
+        };
+
+        const mainContent = document.querySelector('main');
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        mainContent.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, {passive: true});
+
+        mainContent.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, {passive: true});
+
+        function handleSwipe() {
+            if (touchEndX < touchStartX - 50) {
+                switchTab('member');
+            }
+            if (touchEndX > touchStartX + 50) {
+                switchTab('financial');
+            }
+        }
     </script>
     <script>
   if ('serviceWorker' in navigator) {

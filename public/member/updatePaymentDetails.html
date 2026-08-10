@@ -2,11 +2,11 @@
 <html class="dark" lang="en">
 <head>
 <meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
 <title>Update Bank Payout Details - Cooperative Society</title>
 <link rel="icon" type="image/x-icon" href="/favicon.ico">
-<link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#0f172a">
+<link rel="manifest" href="/manifest.json?v=2">
+<meta id="theme-color-meta" name="theme-color" content="#0f172a">
 <link rel="apple-touch-icon" href="/assets/icon-192.png">
 <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
 <script type="module" src="../js/systemmaintenance.js"></script>
@@ -110,17 +110,20 @@
     font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
+/* Native App Scrollbar Hiding */
+@media (max-width: 1024px) {
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+}
+
 /* Isometric Background Pattern for Sidebar */
-/* Light Mode (New Smart Implementation) */
 .isometric-sidebar {
     background-color: #ffffff;
-    /* Fill color changed to %23f8fafc (Slate 50) for near-white pattern */
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg id='hexagons' fill='%23f8fafc' fill-opacity='1' fill-rule='nonzero'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
 }
 
-/* Dark Mode Override (Original Dark Pattern) */
 .dark .isometric-sidebar {
-    background-color: #1e293b; /* Matches card-dark */
+    background-color: #1e293b; 
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg id='hexagons' fill='%230f172a' fill-opacity='0.25' fill-rule='nonzero'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
 }
 </style>
@@ -142,8 +145,12 @@
                     "off-white-dark": "#F1F5F9",
                     "success": "#22c55e",
                     "danger": "#ef4444",
-                    "surface-light": "#ffffff",
-                    "surface-dark": "#1e293b",
+                    "card-light": "#ffffff",
+                    "card-dark": "#1e293b",
+                    "text-light": "#0f172a",
+                    "text-dark": "#e2e8f0",
+                    "subtext-light": "#64748b",
+                    "subtext-dark": "#94a3b8"
                 },
                 fontFamily: {
                     display: ["Poppins", "sans-serif"],
@@ -157,7 +164,18 @@
     };
 </script>
 </head>
-<body class="font-display bg-background-light dark:bg-background-dark text-gray-700 dark:text-gray-300">
+<body class="font-display bg-background-light dark:bg-background-dark text-gray-700 dark:text-gray-300 overflow-x-hidden no-scrollbar">
+
+    <script>
+        const themeMeta = document.getElementById('theme-color-meta');
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            if (themeMeta) themeMeta.setAttribute('content', '#0f172a');
+        } else {
+            document.documentElement.classList.remove('dark');
+            if (themeMeta) themeMeta.setAttribute('content', '#ffffff');
+        }
+    </script>
 
     <div id="preloader" class="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-50/80 dark:bg-gray-900/90 backdrop-blur-[5px] transition-colors">
         <div id="preloader-card" class="bg-white dark:bg-gray-800 p-12 rounded-2xl shadow-xl flex flex-col items-center justify-center aspect-square border border-gray-100 dark:border-gray-700">
@@ -173,10 +191,11 @@
     </div>
 
 <div class="flex h-screen">
-    <aside class="w-64 flex-shrink-0 bg-white isometric-sidebar p-6 flex-col justify-between hidden lg:flex">
+    <aside class="w-64 flex-shrink-0 bg-white isometric-sidebar p-6 flex-col justify-between hidden lg:flex border-r border-gray-200 dark:border-gray-800 z-20">
         <div>
             <div class="flex items-center gap-3 mb-10">
-                <img id="sidebar-logo" alt="Cooperative Logo" class="h-10 w-10 app-logo" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg"/>
+                <img alt="Cooperative Logo" class="h-10 w-10 dark:hidden" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20Logo%20-%20light%20mode.svg" />
+                <img alt="Cooperative Logo" class="h-10 w-10 hidden dark:block" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg" />
                 <span class="text-xl font-semibold text-gray-800 dark:text-white">Cooperative</span>
             </div>
             <nav class="flex flex-col gap-2">
@@ -200,38 +219,52 @@
                     <span class="material-symbols-outlined">payment</span>
                     <span class="font-medium">Update Payment details</span>
                 </a>
-                <a class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors" href="./changePassword">
-                    <span class="material-symbols-outlined">lock_reset</span>
-                    <span class="font-medium">Forgot/change password</span>
-                </a>
             </nav>
-        </div>
-        <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
-            <button id="logout-btn-desktop" class="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors text-left">
-                <span class="material-symbols-outlined">logout</span>
-                <span class="font-medium">Log Out</span>
-            </button>
         </div>
     </aside>
 
-    <main class="flex-1 flex flex-col overflow-y-auto content-area-transition" id="main-content">
-        <header class="flex-shrink-0 bg-white/80 dark:bg-background-dark/80 backdrop-blur-sm sticky top-0 z-20 flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
+    <main class="flex-1 flex flex-col overflow-y-auto content-area-transition pb-20 lg:pb-0 no-scrollbar" id="main-content">
+        <header class="flex-shrink-0 bg-gradient-to-b from-white to-white/80 dark:from-background-dark dark:to-background-dark/80 backdrop-blur-sm sticky top-0 z-20 flex items-center justify-between p-4 transition-all duration-300">
             <div class="flex items-center gap-4">
-                <button class="lg:hidden p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700" id="menu-btn">
-                    <span class="material-symbols-outlined text-gray-600 dark:text-gray-300">menu</span>
-                </button>
                 <div class="lg:hidden flex items-center gap-2">
-                    <img id="header-logo" alt="Cooperative Logo" class="h-10 w-10 app-logo" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg"/>
+                    <img alt="Cooperative Logo" class="h-10 w-10 dark:hidden" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20Logo%20-%20light%20mode.svg" />
+                    <img alt="Cooperative Logo" class="h-10 w-10 hidden dark:block" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg" />
                     <span class="font-semibold text-gray-800 dark:text-white">Cooperative Portal</span>
                 </div>
             </div>
-            <div class="flex items-center gap-4">
-                <button class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700" id="theme-toggle">
-                    <span class="material-symbols-outlined text-gray-600 dark:text-gray-300 dark:hidden">dark_mode</span>
-                    <span class="material-symbols-outlined text-gray-600 dark:text-gray-300 hidden dark:inline">light_mode</span>
-                </button>
-                <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden">
-                    <img id="header-profile-img" alt="User profile picture" src="https://ui-avatars.com/api/?name=User&background=random"/>
+            <div class="flex items-center gap-2 sm:gap-4">
+                <div class="relative ml-2">
+                    <button type="button" id="top-profile-trigger" class="flex items-center gap-3 pl-4 hover:opacity-80 focus:outline-none">
+                        <img id="header-profile-img" alt="User profile picture" src="https://ui-avatars.com/api/?name=User&background=random" class="size-9 sm:size-10 rounded-full ring-2 ring-gray-200 dark:ring-gray-700 object-cover" />
+                    </button>
+                    
+                    <div id="top-profile-dropdown" class="absolute right-0 z-50 mt-2 w-64 origin-top-right rounded-xl bg-white dark:bg-card-dark shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none hidden transform transition-all duration-200 opacity-0 scale-95">
+                        <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-slate-800/50 rounded-t-xl">
+                            <div class="flex items-center gap-3">
+                                <img id="dd-avatar" class="size-10 rounded-full ring-2 ring-white dark:ring-gray-600 object-cover" src="https://ui-avatars.com/api/?name=User&background=random" alt="">
+                                <div class="overflow-hidden">
+                                    <p id="dd-name" class="truncate text-sm font-bold text-gray-900 dark:text-white">Loading...</p>
+                                    <p id="dd-email" class="truncate text-xs text-gray-500 dark:text-gray-400">...</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-2 space-y-1">
+                            <button id="dd-theme-toggle" class="w-full text-left flex items-center justify-between gap-3 rounded-lg px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors" role="menuitem">
+                                <span class="flex items-center gap-3">
+                                    <span class="material-symbols-outlined text-[20px] text-gray-400 dark:text-gray-500" id="dd-theme-icon">dark_mode</span>
+                                    Switch Theme
+                                </span>
+                            </button>
+                            <a href="./changePassword" class="flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors" role="menuitem">
+                                <span class="material-symbols-outlined text-[20px] text-gray-400 dark:text-gray-500">lock_reset</span>
+                                Change Password
+                            </a>
+                            <button id="logout-btn-desktop" class="w-full text-left flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors" role="menuitem">
+                                <span class="material-symbols-outlined text-[20px]">logout</span>
+                                Log Out
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </header>
@@ -246,7 +279,7 @@
                     </p>
                 </div>
 
-                <div class="bg-white dark:bg-gray-900/40 rounded-xl shadow-lg border border-gray-100 dark:border-gray-800 p-6 sm:p-8">
+                <div class="bg-white dark:bg-gray-900/40 rounded-xl shadow-lg p-6 sm:p-8">
                     <div class="mb-8 p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30">
                         <div class="flex items-start gap-4">
                             <span class="material-symbols-outlined text-primary mt-0.5" data-icon="warning">warning</span>
@@ -360,52 +393,24 @@
         </footer>
     </main>
 
-    <div class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden" id="mobile-menu-overlay"></div>
-    <aside class="fixed top-0 left-0 h-full w-64 bg-white isometric-sidebar p-6 flex flex-col justify-between z-40 transform -translate-x-full transition-transform duration-300 ease-in-out lg:hidden" id="mobile-menu">
-        <div>
-            <div class="flex items-center justify-between mb-10">
-                <div class="flex items-center gap-3">
-                    <img id="mobile-logo" alt="Cooperative Logo" class="h-10 w-10 app-logo" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg"/>
-                    <span class="text-xl font-semibold text-gray-800 dark:text-white">Cooperative</span>
-                </div>
-                <button class="p-1" id="close-menu-btn">
-                    <span class="material-symbols-outlined">close</span>
-                </button>
-            </div>
-            <nav class="flex flex-col gap-2">
-                <a class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors" href="./memberDashboard">
-                    <span class="material-symbols-outlined">dashboard</span>
-                    <span class="font-medium">Dashboard</span>
-                </a>
-                <a class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors" href="./userProfile">
-                    <span class="material-symbols-outlined">person</span>
-                    <span class="font-medium">User Profile</span>
-                </a>
-                <a class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors" href="./withdrawalapplication">
-                    <span class="material-symbols-outlined">account_balance_wallet</span>
-                    <span class="font-medium">Withdraw Savings</span>
-                </a>
-                <a onclick="openMainModal('topup')" class="cursor-pointer flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                    <span class="material-symbols-outlined">upgrade</span>
-                    <span class="font-medium">Top-up/Upgrade Plan</span>
-                </a>
-                <a class="flex items-center gap-3 px-4 py-3 bg-primary text-white rounded-lg" href="#">
-                    <span class="material-symbols-outlined">payment</span>
-                    <span class="font-medium">Update Payment details</span>
-                </a>
-                <a class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors" href="./changePassword">
-                    <span class="material-symbols-outlined">lock_reset</span>
-                    <span class="font-medium">Forgot/change password</span>
-                </a>
-            </nav>
-        </div>
-        <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
-            <button id="logout-btn-mobile" class="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors text-left">
-                <span class="material-symbols-outlined">logout</span>
-                <span class="font-medium">Log Out</span>
-            </button>
-        </div>
-    </aside>
+    <nav class="fixed bottom-0 w-full z-40 lg:hidden border-t border-gray-200 dark:border-gray-800 isometric-sidebar flex justify-around items-center pb-safe pt-2 px-2 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+        <a href="./memberDashboard" class="flex flex-col items-center p-2 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors">
+            <span class="material-symbols-outlined text-2xl mb-1">dashboard</span>
+            <span class="text-[10px] font-bold">Dashboard</span>
+        </a>
+        <a href="./withdrawalapplication" class="flex flex-col items-center p-2 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors">
+            <span class="material-symbols-outlined text-2xl mb-1">account_balance_wallet</span>
+            <span class="text-[10px] font-bold">Withdraw</span>
+        </a>
+        <a href="./updatePaymentDetails" class="flex flex-col items-center p-2 text-primary">
+            <span class="material-symbols-outlined text-2xl mb-1">payment</span>
+            <span class="text-[10px] font-bold">Bank Info</span>
+        </a>
+        <a href="./userProfile" class="flex flex-col items-center p-2 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors">
+            <span class="material-symbols-outlined text-2xl mb-1">person</span>
+            <span class="text-[10px] font-bold">Profile</span>
+        </a>
+    </nav>
 
     <div id="main-modal-overlay" class="fixed inset-0 z-50 flex items-start justify-center bg-black/40 backdrop-blur-md transition-opacity duration-300 p-4 sm:p-6 overflow-y-auto py-8 hidden" style='font-family: Manrope, "Noto Sans", sans-serif;'>
         <div class="relative flex w-full max-w-lg flex-col overflow-hidden rounded-xl bg-pure-white shadow-2xl dark:bg-dark-gray-blue w-full max-w-lg">
@@ -416,7 +421,7 @@
             </div>
             <div class="flex flex-col items-center p-6 border-b border-white-off/10 dark:border-light-gray/20">
                 <div class="flex h-16 w-16 items-center justify-center rounded-full bg-slate-blue/5 dark:bg-white/5 mb-4">
-                    <div id="modal-logo-bg" class="w-10 h-10 bg-center bg-no-repeat bg-cover app-logo-bg" style='background-image: url("https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg'></div>
+                    <div id="modal-logo-bg" class="w-10 h-10 bg-center bg-no-repeat bg-cover app-logo-bg" style='background-image: url("https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg")'></div>
                 </div>
                 <h3 class="text-slate-blue dark:text-off-white-dark tracking-tight text-2xl font-bold leading-tight text-center">Fund Top-up / Upgrade</h3>
             </div>
@@ -431,28 +436,18 @@
         </div>
     </div>
 
-    <div id="concurrency-modal" class="fixed inset-0 z-[200] flex items-center justify-center hidden">
-    </div>
-    
 </div>
 
 <script>
     function hidePreloader() {
         const preloader = document.getElementById('preloader');
         const card = document.getElementById('preloader-card');
-        
         if (!preloader || !card) return;
-
-        // 1. Apply TV collapse animation to the card
         card.classList.add('tv-off-active');
-
-        // 2. Fade out the background overlay slightly later
         setTimeout(() => {
             preloader.style.opacity = '0';
             preloader.style.transition = 'opacity 0.3s ease';
         }, 400);
-
-        // 3. Remove from DOM completely after animations
         setTimeout(() => {
             preloader.classList.add('hidden-force');
         }, 800);
@@ -461,7 +456,7 @@
 
 <script type="module">
     import '../js/auth.js';
-    import { auth, db, onAuthStateChanged, signOut, doc, getDoc, setDoc, onSnapshot } from '../js/firebase-init.js';
+    import { auth, db, onAuthStateChanged, signOut, doc, getDoc, setDoc } from '../js/firebase-init.js';
 
     let currentUser = null;
     let userDocRef = null;
@@ -473,6 +468,58 @@
     const saveButton = document.getElementById('save-button');
     const saveBtnText = document.getElementById('save-btn-text');
     const messageBox = document.getElementById('form-message');
+
+    // --- DROPDOWN LOGIC ---
+    const profileTrigger = document.getElementById('top-profile-trigger');
+    const profileDropdown = document.getElementById('top-profile-dropdown');
+    
+    if (profileTrigger && profileDropdown) {
+        profileTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            profileDropdown.classList.toggle('hidden');
+            setTimeout(() => {
+                profileDropdown.classList.toggle('opacity-0');
+                profileDropdown.classList.toggle('scale-95');
+            }, 10);
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!profileDropdown.contains(e.target) && !profileTrigger.contains(e.target)) {
+                profileDropdown.classList.add('opacity-0', 'scale-95');
+                setTimeout(() => profileDropdown.classList.add('hidden'), 200);
+            }
+        });
+    }
+
+    // --- THEME SYNC LOGIC ---
+    const themeToggleBtn = document.getElementById('dd-theme-toggle');
+    const htmlEl = document.documentElement;
+
+    function applyTheme(isDark) {
+        if(isDark) {
+            htmlEl.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
+            const themeMeta = document.getElementById('theme-color-meta');
+            if(themeMeta) themeMeta.setAttribute('content', '#0f172a');
+            document.querySelectorAll('.app-logo').forEach(i => i.src = "https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg");
+            const icon = document.getElementById('dd-theme-icon');
+            if(icon) icon.textContent = 'light_mode';
+        } else {
+            htmlEl.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
+            const themeMeta = document.getElementById('theme-color-meta');
+            if(themeMeta) themeMeta.setAttribute('content', '#ffffff');
+            document.querySelectorAll('.app-logo').forEach(i => i.src = "https://mountainmovingministryintl.org/gallery/MMMi%20Header%20Logo%20-%20light%20mode.svg");
+            const icon = document.getElementById('dd-theme-icon');
+            if(icon) icon.textContent = 'dark_mode';
+        }
+    }
+    
+    if(themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', () => {
+            applyTheme(!htmlEl.classList.contains('dark'));
+        });
+    }
 
     // --- INJECTED TOAST UTILITY ---
     const Toast = {
@@ -513,9 +560,7 @@
         if (user) {
             currentUser = user;
             userDocRef = doc(db, "users", user.uid);
-            document.getElementById('header-profile-img').src = user.photoURL || `https://ui-avatars.com/api/?name=User&background=random`;
             
-            // --- WAIT FOR DATA TO LOAD BEFORE HIDING PRELOADER ---
             try {
                 await checkPaymentStatus();
             } catch(e) {
@@ -537,37 +582,34 @@
             if (docSnap.exists()) {
                 const data = docSnap.data();
                 
-                // 1. Update Header Image from DB if available
+                document.getElementById('dd-name').textContent = `${data.firstName || 'User'} ${data.surname || ''}`.trim();
+                document.getElementById('dd-email').textContent = data.email || '';
+
                 if (data.photoURL) {
                     document.getElementById('header-profile-img').src = data.photoURL;
+                    document.getElementById('dd-avatar').src = data.photoURL;
                 } else {
-                     // Generate Initials from First and Surname
                     const firstName = data.firstName || "User";
                     const surname = data.surname || "";
                     const fullName = `${firstName}+${surname}`;
-                    document.getElementById('header-profile-img').src = `https://ui-avatars.com/api/?name=${fullName}&background=random`;
+                    const fallbackImg = `https://ui-avatars.com/api/?name=${fullName}&background=random`;
+                    document.getElementById('header-profile-img').src = fallbackImg;
+                    document.getElementById('dd-avatar').src = fallbackImg;
                 }
 
-                // 2. Set Account Name (Always read-only and required for context)
                 const fullName = `${data.firstName || ''} ${data.surname || ''}`.trim() || "Valued Member";
                 accountNameInput.value = fullName;
 
-                // 3. Check if details are already locked (stored in DB)
                 if (data.bankName && data.accountNumber) {
-                    // Populate fields
                     bankNameSelect.value = data.bankName;
                     accountNumberInput.value = data.accountNumber;
-                    
-                    // Lock everything (Persistent State)
                     lockForm("Your bank details have been saved and cannot be changed.");
                 } else {
-                    // Enable form for editing
                     saveButton.disabled = true;
                     bankNameSelect.disabled = false;
                     accountNumberInput.disabled = false;
                 }
             } else {
-                console.error("User document does not exist");
                 Toast.show("User profile not found.", "error");
             }
         } catch (error) {
@@ -578,11 +620,8 @@
 
     // --- Validation Logic ---
     function validateForm() {
-        // If form is already locked (disabled), don't re-enable logic
         if (bankNameSelect.disabled || accountNumberInput.disabled) return;
-
         const bankNameFilled = bankNameSelect.value.trim() !== '';
-        // Strict 10 digit regex for Nigeria NUBAN
         const accountNumberFilledAndValid = /^\d{10}$/.test(accountNumberInput.value.trim());
 
         if (bankNameFilled && accountNumberFilledAndValid) {
@@ -598,14 +637,12 @@
         const accountNumber = accountNumberInput.value.trim();
         const accountName = accountNameInput.value;
 
-        // Visual Feedback immediately
         saveButton.disabled = true;
         saveBtnText.textContent = "Processing...";
         bankNameSelect.disabled = true;
         accountNumberInput.disabled = true;
 
         try {
-            // Save to Firestore
             await setDoc(userDocRef, {
                 bankName: bankName,
                 accountNumber: accountNumber,
@@ -613,22 +650,15 @@
                 paymentDetailsUpdatedAt: new Date()
             }, { merge: true });
 
-            // Toast Success
             Toast.show("Payment details saved successfully!", "success");
-            
-            // Persistent Lock Message
             lockForm("Payment details saved successfully.");
             
         } catch (error) {
             console.error("Save failed:", error);
-            
-            // Re-enable on failure
             saveBtnText.textContent = "Save and Confirm Details";
             saveButton.disabled = false;
             bankNameSelect.disabled = false;
             accountNumberInput.disabled = false;
-            
-            // Toast Error
             Toast.show("Error saving details. Please try again.", "error");
         }
     });
@@ -637,8 +667,7 @@
     function lockForm(msg) {
         bankNameSelect.disabled = true;
         accountNumberInput.disabled = true;
-        
-        saveButton.classList.add('hidden'); // Hide button completely
+        saveButton.classList.add('hidden'); 
         
         messageBox.textContent = msg;
         messageBox.classList.remove('hidden', 'bg-red-100', 'text-red-800');
@@ -646,102 +675,23 @@
         messageBox.classList.remove('hidden');
     }
 
-    // --- Event Listeners ---
     bankNameSelect.addEventListener('change', validateForm);
     accountNumberInput.addEventListener('input', validateForm);
 
-    // --- Logout ---
     const logoutDesktop = document.getElementById('logout-btn-desktop');
-    const logoutMobile = document.getElementById('logout-btn-mobile');
-    
-    async function handleLogout() {
+    const handleLogout = async () => {
         try {
             await signOut(auth);
             window.location.href = "/auth/index.html";
         } catch(e) { console.error(e); }
-    }
+    };
     
     if(logoutDesktop) logoutDesktop.addEventListener('click', handleLogout);
-    if(logoutMobile) logoutMobile.addEventListener('click', handleLogout);
-
-</script>
-
-<script>
-    const menuBtn = document.getElementById('menu-btn');
-    const closeMenuBtn = document.getElementById('close-menu-btn');
-    const mobileMenu = document.getElementById('mobile-menu');
-    const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
-    const mainContent = document.getElementById('main-content');
-
-    function openMenu() {
-        mobileMenu.classList.remove('-translate-x-full');
-        mobileMenuOverlay.classList.remove('hidden');
-        if (window.innerWidth < 1024) mainContent.classList.add('content-blurred');
-    }
-    function closeMenu() {
-        mobileMenu.classList.add('-translate-x-full');
-        mobileMenuOverlay.classList.add('hidden');
-        mainContent.classList.remove('content-blurred');
-    }
-    if(menuBtn) menuBtn.addEventListener('click', openMenu);
-    if(closeMenuBtn) closeMenuBtn.addEventListener('click', closeMenu);
-    if(mobileMenuOverlay) mobileMenuOverlay.addEventListener('click', closeMenu);
-    window.addEventListener('resize', () => { if (window.innerWidth >= 1024) closeMenu(); });
-
-    // --- THEME & LOGO SWITCHING LOGIC ---
-    const themeToggle = document.getElementById('theme-toggle');
-    const htmlEl = document.documentElement;
-
-    // Define Logos
-    const logoDark = "https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg";
-    const logoLight = "https://mountainmovingministryintl.org/gallery/MMMi%20Header%20Logo%20-%20light%20mode.svg";
-
-    function updateAppLogos(isDark) {
-        // Dark Mode = "Maintains icon" (White)
-        // Light Mode = "Changes to specific link" (Dark Text)
-        const targetSrc = isDark ? logoDark : logoLight;
-        
-        // 1. Update Standard Images (<img class="app-logo">)
-        const logos = document.querySelectorAll('.app-logo');
-        logos.forEach(img => {
-            img.src = targetSrc;
-        });
-
-        // 2. Update Background Images (div class="app-logo-bg") - Used in Modal
-        const bgLogos = document.querySelectorAll('.app-logo-bg');
-        bgLogos.forEach(div => {
-            div.style.backgroundImage = `url("${targetSrc}")`;
-        });
-    }
-
-    if(themeToggle) {
-        themeToggle.addEventListener('click', () => {
-            htmlEl.classList.toggle('dark');
-            const isDark = htmlEl.classList.contains('dark');
-            
-            if (isDark) localStorage.setItem('theme', 'dark');
-            else localStorage.setItem('theme', 'light');
-
-            updateAppLogos(isDark);
-        });
-    }
-
-    // Initial Check
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
-    if (savedTheme === 'dark' || (!('theme' in localStorage) && prefersDark)) {
-        htmlEl.classList.add('dark');
-        updateAppLogos(true);
-    } else {
-        htmlEl.classList.remove('dark');
-        updateAppLogos(false);
-    }
 
     const mainModalOverlay = document.getElementById('main-modal-overlay');
     const closeModalBtn = document.getElementById('close-main-modal-btn');
-    function openMainModal(tab) { mainModalOverlay.classList.remove('hidden'); }
-    function hideMainModal() { mainModalOverlay.classList.add('hidden'); }
+    window.openMainModal = function(tab) { mainModalOverlay.classList.remove('hidden'); }
+    window.hideMainModal = function() { mainModalOverlay.classList.add('hidden'); }
     if(closeModalBtn) closeModalBtn.addEventListener('click', hideMainModal);
 </script>
 <script>

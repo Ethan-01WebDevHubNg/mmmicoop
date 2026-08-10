@@ -1,12 +1,18 @@
 <!DOCTYPE html>
-
-<html class="dark" lang="en"><head>
+<html class="dark" lang="en">
+<head>
 <meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
 <title>Error - Cooperative Society Portal</title>
+
+<!-- Apple PWA Meta Tags -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MMMi App">
+
 <link rel="icon" type="image/x-icon" href="/favicon.ico">
-<link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#0f172a">
+<link rel="manifest" href="/manifest.json?v=2">
+<meta id="theme-color-meta" name="theme-color" content="#0f172a">
 <link rel="apple-touch-icon" href="/assets/icon-192.png">
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <script type="module" src="../js/systemmaintenance.js"></script>
@@ -30,21 +36,41 @@
         },
       }
     </script>
+<style>
+/* Native App Scrollbar Hiding */
+@media (max-width: 1024px) {
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+}
+</style>
 </head>
-<body class="font-display">
-<div class="relative flex h-auto min-h-screen w-full flex-col bg-background-light dark:bg-background-dark group/design-root overflow-x-hidden">
+<body class="font-display bg-background-light dark:bg-background-dark overflow-x-hidden no-scrollbar">
+
+<script>
+    const themeMeta = document.getElementById('theme-color-meta');
+    if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+        if (themeMeta) themeMeta.setAttribute('content', '#0f172a');
+    } else {
+        document.documentElement.classList.remove('dark');
+        if (themeMeta) themeMeta.setAttribute('content', '#f8f6f6');
+    }
+</script>
+
+<div class="relative flex h-auto min-h-screen w-full flex-col bg-background-light dark:bg-background-dark group/design-root overflow-x-hidden no-scrollbar">
 <div class="layout-container flex h-full grow flex-col">
 <div class="px-4 sm:px-10 md:px-20 lg:px-40 flex flex-1 justify-center py-5">
 <div class="layout-content-container flex flex-col w-full max-w-[960px] flex-1">
-<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-gray-200/20 dark:border-white/10 px-4 sm:px-10 py-3">
+<header class="flex items-center justify-between whitespace-nowrap px-4 sm:px-10 py-3 transition-all duration-300">
 <div class="flex items-center gap-4 text-slate-800 dark:text-white">
-<div class="flex flex-col items-center items-center justify-start py-4">
-<img alt="Mountain Moving Ministry Intl. Logo" class="h-12 w-auto " src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg"/>
+<div class="flex flex-col items-center justify-start py-4">
+<img alt="Mountain Moving Ministry Intl. Logo" class="h-12 w-auto dark:hidden" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20Logo%20-%20light%20mode.svg"/>
+<img alt="Mountain Moving Ministry Intl. Logo" class="h-12 w-auto hidden dark:block" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg"/>
 </div>
-<h2 class="text-lg font-bold font-weight:900 leading-tight tracking-[- 0.015em]">Coop</h2>
+<h2 class="text-lg font-bold font-weight:900 leading-tight tracking-[-0.015em]">Coop</h2>
 </div>
 </header>
-<main class="flex-grow flex items-center justify-center py-12 px-4">
+<main class="flex-grow flex items-center justify-center py-12 px-4 no-scrollbar">
 <div class="flex flex-col items-center gap-8 w-full max-w-lg bg-white dark:bg-slate-900/40 rounded-xl shadow-lg dark:shadow-black/20 p-8 sm:p-12">
 <div class="flex flex-col items-center gap-6 text-center">
 <div class="text-primary">
@@ -59,15 +85,14 @@
 <button id="try-again-button" class="flex w-full sm:w-auto min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-6 bg-transparent text-primary dark:text-primary border-2 border-primary hover:bg-primary/10 transition-colors">
 <span class="truncate text-sm font-bold">Try Again</span>
 </button>
-<button class="flex w-full sm:w-auto min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-6 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors">
+<button onclick="window.location.href='/auth/index.html'" class="flex w-full sm:w-auto min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-6 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors">
 <span class="truncate">Go to Dashboard</span>
 </button>
 
 </div>
 </div>
 </main>
-<footer class="flex flex-col gap-6 px-5 py-10 text-center">
-<!-- UNIFIED STYLE: Applied text-slate-500, dark:text-gray-400, text-base, and font-normal to unify with the developer link style. -->
+<footer class="flex flex-col gap-6 px-5 py-10 text-center border-t border-gray-200 dark:border-gray-800 mt-auto">
 <p class="text-slate-500 dark:text-gray-400 text-base font-normal leading-normal">
   © 2026 
   <a class="hover:text-primary hover:underline transition-colors text-slate-500 dark:text-gray-400" href="https://mountainmovingministryintl.org/Home/">Mountain Moving Ministry Intl.</a> 
@@ -83,12 +108,9 @@
 </div>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Configure the 'Try Again' button
     const tryAgainButton = document.getElementById('try-again-button');
 
     if (tryAgainButton) {
-        // Use history.back() to navigate to the previous page in the session history,
-        // which effectively "reloads" the page the user was trying to access.
         tryAgainButton.addEventListener('click', () => {
             window.history.back();
         });

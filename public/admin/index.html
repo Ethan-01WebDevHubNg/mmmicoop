@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html class="dark overflow-y-scroll overflow-x-hidden" lang="en">
+<html class="dark overflow-y-scroll overflow-x-hidden no-scrollbar" lang="en">
 <head>
     <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
     <title>Dashboard - MMMI Admin</title>
 
     <!-- Apple PWA Meta Tags -->
@@ -11,8 +11,8 @@
     <meta name="apple-mobile-web-app-title" content="MMMi Admin">
 
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#0f172a">
+    <link rel="manifest" href="/manifest.json?v=2">
+    <meta id="theme-color-meta" name="theme-color" content="#1e293b">
     <link rel="apple-touch-icon" href="/assets/icon-192.png">
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
@@ -45,18 +45,36 @@
         .dark .isometric-sidebar { background-color: #1e293b; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg id='hexagons' fill='%230f172a' fill-opacity='0.25' fill-rule='nonzero'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); }
         @keyframes fadeInSlideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in-slide-up { animation: fadeInSlideUp 0.5s ease-out forwards; }
+        
+        /* Native App Scrollbar Hiding */
+        @media (max-width: 1024px) {
+            .no-scrollbar::-webkit-scrollbar { display: none; }
+            .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        }
     </style>
 </head>
-<body class="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark transition-colors duration-300 flex flex-col min-h-screen">
+<body class="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark transition-colors duration-300 flex flex-col min-h-screen no-scrollbar">
+
+    <!-- AUTO THEME SYNC SCRIPT -->
+    <script>
+        const themeMeta = document.getElementById('theme-color-meta');
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            if (themeMeta) themeMeta.setAttribute('content', '#0f172a');
+        } else {
+            document.documentElement.classList.remove('dark');
+            if (themeMeta) themeMeta.setAttribute('content', '#f8fafc');
+        }
+    </script>
 
     <div class="flex flex-1">
-        <aside class="hidden lg:flex w-64 flex-col border-r border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 bg-white dark:bg-card-dark isometric-sidebar fixed h-full z-20">
-            <div class="flex h-16 items-center gap-3 px-6 border-b border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 bg-white/90 dark:bg-card-dark/90 backdrop-blur">
+        <aside class="hidden lg:flex w-64 flex-col bg-white dark:bg-card-dark isometric-sidebar fixed h-full z-20 shadow-[4px_0_24px_rgba(0,0,0,0.02)] dark:shadow-[4px_0_24px_rgba(0,0,0,0.2)]">
+            <div class="flex h-16 items-center gap-3 px-6 bg-white/90 dark:bg-card-dark/90 backdrop-blur">
                  <img class="size-8 dark:hidden" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20Logo%20-%20light%20mode.svg" alt="Logo">
                  <img class="size-8 hidden dark:block" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg" alt="Logo">
                  <h1 class="text-lg font-bold tracking-tight">MMMI Admin</h1>
             </div>
-            <nav class="flex-1 space-y-1 p-4 overflow-y-auto">
+            <nav class="flex-1 space-y-1 p-4 overflow-y-auto no-scrollbar">
                 <a href="/admin/index" class="flex items-center gap-3 rounded-lg bg-primary text-white px-4 py-3 text-sm font-bold shadow-md shadow-primary/20 transition-colors">
                     <span class="material-symbols-outlined text-white">dashboard</span><span>Dashboard</span>
                 </a>
@@ -77,7 +95,7 @@
                     <span>Broadcast</span>
                 </button>
             </nav>
-            <div class="p-4 border-t border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 bg-white/50 dark:bg-card-dark/50 mt-auto">
+            <div class="p-4 bg-white/50 dark:bg-card-dark/50 mt-auto">
                  <a class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10 mb-2" href="/admin/userManagement">
                     <span class="material-symbols-outlined">manage_accounts</span><span>Admin Users</span>
                 </a>
@@ -88,7 +106,8 @@
         </aside>
 
         <div class="flex flex-1 flex-col lg:ml-64 transition-all duration-300 min-w-0">
-            <header class="sticky top-0 z-30 w-full border-b border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 bg-white/80 dark:bg-card-dark/80 backdrop-blur-md">
+            <!-- Borderless gradient header -->
+            <header class="sticky top-0 z-30 w-full bg-gradient-to-b from-background-light to-background-light/80 dark:from-background-dark dark:to-background-dark/80 backdrop-blur-md transition-all duration-300">
                 <div class="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-3">
                     <div class="flex items-center gap-4">
                         <button id="menu-btn" class="lg:hidden p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 text-text-light dark:text-text-dark">
@@ -104,11 +123,11 @@
                         </button>
                         
                         <div class="relative ml-2">
-                            <button type="button" id="top-profile-trigger" class="flex items-center gap-3 pl-4 border-l border-gray-200 dark:border-l-0 dark:ring-l dark:ring-gray-700 hover:opacity-80 focus:outline-none">
-                                <img id="admin-avatar" src="https://ui-avatars.com/api/?name=Admin&background=random" class="size-8 sm:size-9 rounded-full ring-2 ring-white dark:ring-gray-700">
+                            <button type="button" id="top-profile-trigger" class="flex items-center gap-3 pl-4 focus:outline-none">
+                                <img id="admin-avatar" src="https://ui-avatars.com/api/?name=Admin&background=random" class="size-8 sm:size-9 rounded-full ring-2 ring-white dark:ring-gray-700 object-cover">
                             </button>
-                            <div id="top-profile-dropdown" class="absolute right-0 z-50 mt-2 w-72 origin-top-right rounded-xl bg-white dark:bg-card-dark shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none hidden transform transition-all duration-200 opacity-0 scale-95 origin-top-right">
-                                <div class="px-5 py-5 border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-slate-800/50 rounded-t-xl">
+                            <div id="top-profile-dropdown" class="absolute right-0 z-50 mt-2 w-72 origin-top-right rounded-xl bg-white dark:bg-card-dark shadow-2xl ring-1 ring-black/5 focus:outline-none hidden transform transition-all duration-200 opacity-0 scale-95 origin-top-right">
+                                <div class="px-5 py-5 bg-gray-50/50 dark:bg-slate-800/50 rounded-t-xl">
                                     <div class="flex items-center gap-3">
                                         <img id="dd-avatar" class="size-10 rounded-full ring-2 ring-white dark:ring-gray-600 object-cover" src="https://ui-avatars.com/api/?name=Admin&background=random" alt="">
                                         <div class="overflow-hidden">
@@ -137,7 +156,8 @@
             </header>
 
             <div id="mobile-menu-overlay" class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden backdrop-blur-sm"></div>
-            <aside id="mobile-menu" class="fixed top-0 left-0 h-full w-64 bg-white dark:bg-card-dark isometric-sidebar flex flex-col border-r border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 shadow-2xl z-50 transform -translate-x-full transition-transform duration-300 lg:hidden">
+            <!-- Maintained Sidebar for Mobile -->
+            <aside id="mobile-menu" class="fixed top-0 left-0 h-full w-64 bg-white dark:bg-card-dark isometric-sidebar flex flex-col shadow-2xl z-50 transform -translate-x-full transition-transform duration-300 lg:hidden">
                  <div class="flex items-center justify-between mb-8 px-6 pt-6">
                     <div class="flex items-center gap-2">
                          <img class="size-8 dark:hidden" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20Logo%20-%20light%20mode.svg" alt="Logo">
@@ -146,7 +166,7 @@
                     </div>
                     <button id="close-menu-btn" class="p-1 rounded hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">close</span></button>
                 </div>
-                <nav class="flex-1 space-y-2 overflow-y-auto px-4">
+                <nav class="flex-1 space-y-2 overflow-y-auto px-4 no-scrollbar">
                     <a href="/admin/index" class="flex items-center gap-3 rounded-lg bg-primary text-white px-4 py-3 text-sm font-bold shadow-md shadow-primary/20"><span class="material-symbols-outlined text-white">dashboard</span><span>Dashboard</span></a>
                     <a href="/admin/Memberlists" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10"><span class="material-symbols-outlined">groups</span><span>Members</span></a>
                     <a href="/admin/withdrwalRequests" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10"><span class="material-symbols-outlined">payments</span><span>Withdrawals</span></a>
@@ -157,7 +177,7 @@
                         <span>Broadcast</span>
                     </button>
                 </nav>
-                 <div class="p-4 border-t border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 mt-auto bg-gray-50/50 dark:bg-slate-800/30">
+                 <div class="p-4 mt-auto bg-gray-50/50 dark:bg-slate-800/30">
                     <a href="/admin/userManagement" class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-subtext-light dark:text-subtext-dark hover:bg-black/5 dark:hover:bg-white/10 mb-2">
                         <span class="material-symbols-outlined">manage_accounts</span><span>Admin Users</span>
                     </a>
@@ -167,9 +187,10 @@
                 </div>
             </aside>
 
-            <main class="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in-slide-up">
+            <main class="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in-slide-up no-scrollbar">
                 
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <!-- Removed border/ring from cards -->
                     <div class="bg-gradient-to-br from-primary to-red-700 rounded-2xl p-6 text-white shadow-xl shadow-primary/20 relative overflow-hidden group">
                         <div class="relative z-10">
                             <div class="flex items-center justify-between">
@@ -181,7 +202,7 @@
                         <span class="material-symbols-outlined absolute -bottom-4 -right-4 text-9xl text-white/10 group-hover:scale-110 transition-transform">groups</span>
                     </div>
 
-                    <div class="bg-card-light dark:bg-card-dark rounded-2xl p-6 ring-1 ring-gray-200 dark:ring-gray-700 shadow-sm relative overflow-hidden">
+                    <div class="bg-card-light dark:bg-card-dark rounded-2xl p-6 shadow-md relative overflow-hidden">
                         <div class="flex items-center justify-between">
                             <p class="text-subtext-light dark:text-subtext-dark text-xs font-bold uppercase tracking-wider">Active Savings</p>
                             <span class="material-symbols-outlined text-green-500 bg-green-100 dark:bg-green-900/20 p-1 rounded-lg">account_balance_wallet</span>
@@ -190,7 +211,7 @@
                         <p class="text-xs text-green-600 dark:text-green-400 mt-2 font-bold flex items-center gap-1"><span class="material-symbols-outlined text-sm">trending_up</span>Total Volume</p>
                     </div>
 
-                    <div class="bg-card-light dark:bg-card-dark rounded-2xl p-6 ring-1 ring-gray-200 dark:ring-gray-700 shadow-sm relative overflow-hidden">
+                    <div class="bg-card-light dark:bg-card-dark rounded-2xl p-6 shadow-md relative overflow-hidden">
                         <div class="flex items-center justify-between">
                             <p class="text-subtext-light dark:text-subtext-dark text-xs font-bold uppercase tracking-wider">Pending Withdrawals</p>
                             <span class="material-symbols-outlined text-yellow-500 bg-yellow-100 dark:bg-yellow-900/20 p-1 rounded-lg">pending_actions</span>
@@ -199,7 +220,7 @@
                         <a href="/admin/withdrwalRequests" class="text-xs text-primary hover:underline mt-2 inline-block font-bold">Review Requests &rarr;</a>
                     </div>
                     
-                    <div class="bg-card-light dark:bg-card-dark rounded-2xl p-6 ring-1 ring-gray-200 dark:ring-gray-700 shadow-sm relative overflow-hidden">
+                    <div class="bg-card-light dark:bg-card-dark rounded-2xl p-6 shadow-md relative overflow-hidden">
                         <div class="flex items-center justify-between">
                             <p class="text-subtext-light dark:text-subtext-dark text-xs font-bold uppercase tracking-wider">Today's Inflow</p>
                             <span class="material-symbols-outlined text-blue-500 bg-blue-100 dark:bg-blue-900/20 p-1 rounded-lg">payments</span>
@@ -208,17 +229,17 @@
                     </div>
                 </div>
 
-                <div class="bg-card-light dark:bg-card-dark rounded-2xl ring-1 ring-gray-200 dark:ring-gray-700 shadow-sm overflow-hidden">
-                    <div class="px-6 py-4 bg-gray-100 dark:bg-slate-900 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div class="bg-card-light dark:bg-card-dark rounded-2xl shadow-md overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50/80 dark:bg-slate-900/80 flex flex-col sm:flex-row justify-between items-center gap-4">
                         <h3 class="font-bold text-lg text-text-light dark:text-text-dark">Recent Transactions</h3>
                         <div class="relative w-full sm:w-64">
                             <input id="txn-search" type="text" placeholder="Search ID, Member..." class="w-full pl-9 pr-4 py-2 rounded-lg bg-white dark:bg-card-dark border-none ring-1 ring-gray-200 dark:ring-gray-700 text-sm focus:ring-primary shadow-sm dark:text-white">
                             <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm">search</span>
                         </div>
                     </div>
-                    <div class="overflow-x-auto">
+                    <div class="overflow-x-auto no-scrollbar">
                         <table class="w-full text-left text-sm whitespace-nowrap">
-                            <thead class="bg-gray-50 dark:bg-slate-800/50 text-subtext-light dark:text-subtext-dark">
+                            <thead class="bg-gray-50/50 dark:bg-slate-800/30 text-subtext-light dark:text-subtext-dark border-y border-gray-100 dark:border-gray-800/50">
                                 <tr>
                                     <th class="px-6 py-4 font-semibold">Date</th>
                                     <th class="px-6 py-4 font-semibold">Transaction ID</th>
@@ -228,19 +249,19 @@
                                     <th class="px-6 py-4 font-semibold">Status</th>
                                 </tr>
                             </thead>
-                            <tbody id="recent-txn-body" class="divide-y divide-gray-200 dark:divide-gray-800">
+                            <tbody id="recent-txn-body" class="divide-y divide-gray-100 dark:divide-gray-800/50">
                                 <tr><td colspan="6" class="px-6 py-8 text-center text-subtext-light animate-pulse">Loading live data...</td></tr>
                             </tbody>
                         </table>
                     </div>
-                    <div class="p-4 border-t border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 bg-gray-50/50 dark:bg-slate-800/30 text-center">
+                    <div class="p-4 bg-gray-50/50 dark:bg-slate-800/30 text-center border-t border-gray-100 dark:border-gray-800/50">
                         <a href="/admin/reports" class="text-sm font-bold text-primary hover:underline">View All Transactions</a>
                     </div>
                 </div>
 
             </main>
 
-            <footer class="flex-shrink-0 text-center p-4 text-sm text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-none dark:ring-1 dark:ring-gray-700 mt-auto">
+            <footer class="flex-shrink-0 text-center p-4 text-sm text-gray-500 dark:text-gray-400 mt-auto bg-white/50 dark:bg-card-dark/50 z-30">
               <div class="flex flex-col sm:flex-row justify-center items-center gap-2 sm:gap-6">
                 <p>&copy; 2026 <a class="hover:text-primary hover:underline" href="https://mountainmovingministryintl.org/" rel="noopener noreferrer" target="_blank">Mountain Moving Ministry Intl.</a> All rights reserved.</p>
                 <div class="flex gap-4 sm:gap-6">
@@ -253,7 +274,7 @@
 
     <!-- NEW MULTIPART UPLOAD BROADCAST MODAL -->
     <div id="broadcast-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
-        <div class="bg-white dark:bg-card-dark rounded-2xl shadow-2xl w-full max-w-md border border-gray-100 dark:border-gray-700 overflow-hidden transform transition-all scale-100 max-h-[90vh] flex flex-col">
+        <div class="bg-white dark:bg-card-dark rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-100 max-h-[90vh] flex flex-col">
             
             <div class="bg-emerald-600 p-4 flex justify-between items-center shrink-0">
                 <h3 class="text-white font-bold text-lg flex items-center gap-2">
@@ -264,7 +285,7 @@
                 </button>
             </div>
 
-            <div class="p-6 space-y-4 overflow-y-auto custom-scroll">
+            <div class="p-6 space-y-4 overflow-y-auto no-scrollbar">
                 
                 <div>
                     <label class="block text-xs font-bold text-subtext-light dark:text-subtext-dark uppercase mb-1">Target Audience</label>
@@ -487,82 +508,82 @@
 </script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const promptEl = document.getElementById('pwa-install-prompt');
-        const closeBtn = document.getElementById('pwa-close-btn');
-        const installBtn = document.getElementById('pwa-install-btn');
-        const nativeActions = document.getElementById('pwa-native-actions');
-        const iosInstructions = document.getElementById('pwa-ios-instructions');
-        
-        let deferredPrompt = null;
-        const COOLDOWN_DAYS = 7;
-        const DISMISSAL_KEY = 'pwa_prompt_dismissed';
+document.addEventListener('DOMContentLoaded', () => {
+    const promptEl = document.getElementById('pwa-install-prompt');
+    const closeBtn = document.getElementById('pwa-close-btn');
+    const installBtn = document.getElementById('pwa-install-btn');
+    const nativeActions = document.getElementById('pwa-native-actions');
+    const iosInstructions = document.getElementById('pwa-ios-instructions');
+    
+    let deferredPrompt = null;
+    const COOLDOWN_DAYS = 7;
+    const DISMISSAL_KEY = 'pwa_prompt_dismissed';
 
-        const isInstalled = navigator.standalone || window.matchMedia('(display-mode: standalone)').matches || window.matchMedia('(display-mode: window-controls-overlay)').matches;
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-        const isMobile = window.innerWidth <= 768 || /Mobi|Android/i.test(navigator.userAgent);
-        
-        function hasCooldown() {
-            const dismissed = localStorage.getItem(DISMISSAL_KEY);
-            if (!dismissed) return false;
-            const daysPassed = (Date.now() - parseInt(dismissed, 10)) / (1000 * 60 * 60 * 24);
-            return daysPassed < COOLDOWN_DAYS;
-        }
+    const isInstalled = navigator.standalone || window.matchMedia('(display-mode: standalone)').matches || window.matchMedia('(display-mode: window-controls-overlay)').matches;
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const isMobile = window.innerWidth <= 768 || /Mobi|Android/i.test(navigator.userAgent);
+    
+    function hasCooldown() {
+        const dismissed = localStorage.getItem(DISMISSAL_KEY);
+        if (!dismissed) return false;
+        const daysPassed = (Date.now() - parseInt(dismissed, 10)) / (1000 * 60 * 60 * 24);
+        return daysPassed < COOLDOWN_DAYS;
+    }
 
-        function setCooldown() {
-            localStorage.setItem(DISMISSAL_KEY, Date.now().toString());
-        }
+    function setCooldown() {
+        localStorage.setItem(DISMISSAL_KEY, Date.now().toString());
+    }
 
-        function showPrompt() {
-            promptEl.classList.remove('hidden');
-            setTimeout(() => promptEl.classList.remove('translate-y-full'), 50);
-        }
+    function showPrompt() {
+        promptEl.classList.remove('hidden');
+        setTimeout(() => promptEl.classList.remove('translate-y-full'), 50);
+    }
 
-        function hidePrompt() {
-            promptEl.classList.add('translate-y-full');
-            setTimeout(() => promptEl.classList.add('hidden'), 500);
-        }
+    function hidePrompt() {
+        promptEl.classList.add('translate-y-full');
+        setTimeout(() => promptEl.classList.add('hidden'), 500);
+    }
 
-        closeBtn.addEventListener('click', () => {
-            setCooldown();
-            hidePrompt();
+    closeBtn.addEventListener('click', () => {
+        setCooldown();
+        hidePrompt();
+    });
+
+    if (isInstalled || !isMobile || hasCooldown()) return;
+
+    if (isIOS) {
+        iosInstructions.classList.remove('hidden');
+        setTimeout(showPrompt, 2500);
+    } 
+    else {
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            nativeActions.classList.remove('hidden');
+            setTimeout(showPrompt, 2500);
         });
 
-        if (isInstalled || !isMobile || hasCooldown()) return;
-
-        if (isIOS) {
-            iosInstructions.classList.remove('hidden');
-            setTimeout(showPrompt, 2500);
-        } 
-        else {
-            window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                deferredPrompt = e;
-                nativeActions.classList.remove('hidden');
-                setTimeout(showPrompt, 2500);
-            });
-
-            installBtn.addEventListener('click', async () => {
-                hidePrompt();
-                if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    const { outcome } = await deferredPrompt.userChoice;
-                    if (outcome === 'accepted') {
-                        console.log('User accepted the install prompt');
-                    } else {
-                        setCooldown();
-                    }
-                    deferredPrompt = null;
+        installBtn.addEventListener('click', async () => {
+            hidePrompt();
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    console.log('User accepted the install prompt');
+                } else {
+                    setCooldown();
                 }
-            });
-
-            window.addEventListener('appinstalled', () => {
-                hidePrompt();
                 deferredPrompt = null;
-                console.log('PWA was installed natively');
-            });
-        }
-    });
+            }
+        });
+
+        window.addEventListener('appinstalled', () => {
+            hidePrompt();
+            deferredPrompt = null;
+            console.log('PWA was installed natively');
+        });
+    }
+});
 </script>
 
     <script type="module" src="../js/admin-core.js"></script>
@@ -581,7 +602,23 @@
             const { adminData } = e.detail;
             setupProfileDropdown(adminData);
             loadDashboardData();
+            setupMobileMenu();
         });
+
+        // Ensure Theme toggle works perfectly
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        if(themeToggleBtn) {
+            themeToggleBtn.addEventListener('click', () => {
+                setTimeout(() => {
+                    const isDark = document.documentElement.classList.contains('dark');
+                    const themeMeta = document.getElementById('theme-color-meta');
+                    if(themeMeta) themeMeta.setAttribute('content', isDark ? '#0f172a' : '#f8fafc');
+                    document.querySelectorAll('.app-logo').forEach(i => {
+                        i.src = isDark ? "https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg" : "https://mountainmovingministryintl.org/gallery/MMMi%20Header%20Logo%20-%20light%20mode.svg";
+                    });
+                }, 50);
+            });
+        }
 
         function setupProfileDropdown(data) {
             const trigger = document.getElementById('top-profile-trigger');
@@ -605,6 +642,27 @@
                     dropdown.classList.add('hidden', 'opacity-0', 'scale-95');
                 }
             });
+        }
+
+        function setupMobileMenu() {
+            const menuBtn = document.getElementById('menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const overlay = document.getElementById('mobile-menu-overlay');
+            const closeBtn = document.getElementById('close-menu-btn');
+
+            const openMenu = () => {
+                mobileMenu.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            };
+
+            const closeMenu = () => {
+                mobileMenu.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            };
+
+            menuBtn.addEventListener('click', openMenu);
+            closeBtn.addEventListener('click', closeMenu);
+            overlay.addEventListener('click', closeMenu);
         }
 
         async function loadDashboardData() {
@@ -681,14 +739,14 @@
                     : `<span class="font-mono font-bold text-text-light dark:text-text-dark">${t.displayMemberId}</span>`;
 
                 return `
-                    <tr class="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors">
+                    <tr class="hover:bg-gray-50/80 dark:hover:bg-slate-800/50 transition-colors">
                         <td class="px-6 py-4 text-subtext-light dark:text-subtext-dark">${formatDate(t.date)}</td>
                         <td class="px-6 py-4 font-mono text-xs text-subtext-light">${t.transactionId || t.id}</td>
                         <td class="px-6 py-4 text-xs">${memberHtml}</td>
                         <td class="px-6 py-4 text-text-light dark:text-text-dark capitalize">${t.category || 'General'}</td>
                         <td class="px-6 py-4 font-bold ${amountClass}">${formatCurrency(t.amount)}</td>
                         <td class="px-6 py-4">
-                            <span class="px-2 py-1 rounded-full text-xs font-bold border ${getStatusColor(t.status)}">
+                            <span class="px-2 py-1 rounded-full text-xs font-bold ${getStatusColor(t.status)}">
                                 ${t.status}
                             </span>
                         </td>
@@ -709,10 +767,10 @@
 
         function getStatusColor(status) {
             switch(status?.toLowerCase()) {
-                case 'success': return 'bg-green-50 border-green-200 text-green-700 dark:bg-green-900/20 dark:border-green-800 dark:text-green-300';
-                case 'pending': return 'bg-yellow-50 border-yellow-200 text-yellow-700 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-300';
-                case 'rejected': return 'bg-red-50 border-red-200 text-red-700 dark:bg-red-900/20 dark:border-red-800 dark:text-red-300';
-                default: return 'bg-gray-50 border-gray-200 text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300';
+                case 'success': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300';
+                case 'pending': return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300';
+                case 'rejected': return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300';
+                default: return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300';
             }
         }
     </script>

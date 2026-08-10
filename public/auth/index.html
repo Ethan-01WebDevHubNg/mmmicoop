@@ -2,11 +2,17 @@
 <html class="dark" lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
   <title>Member Login - Cooperative Society Financial Management Portal</title>
+
+  <!-- Apple PWA Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="MMMi App">
+
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
-  <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#0f172a">
+  <link rel="manifest" href="/manifest.json?v=2">
+  <meta id="theme-color-meta" name="theme-color" content="#0f172a">
   <link rel="apple-touch-icon" href="/assets/icon-192.png">
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <script type="module" src="../js/systemmaintenance.js"></script>
@@ -48,8 +54,8 @@
     }
 
     .grecaptcha-badge {
-    visibility: hidden;
-}
+      visibility: hidden;
+    }
   </style>
   <script id="tailwind-config">
     tailwind.config = {
@@ -84,11 +90,25 @@
   </script>
 </head>
 <body class="font-display bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary h-screen w-screen overflow-hidden overflow-y-auto m-0 p-0">
+
+  <script>
+    const themeMeta = document.getElementById('theme-color-meta');
+    if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+        if (themeMeta) themeMeta.setAttribute('content', '#0f172a');
+        document.querySelectorAll('.app-logo').forEach(i => i.src = "https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg");
+    } else {
+        document.documentElement.classList.remove('dark');
+        if (themeMeta) themeMeta.setAttribute('content', '#f8f6f6');
+        document.querySelectorAll('.app-logo').forEach(i => i.src = "https://mountainmovingministryintl.org/gallery/MMMi%20Header%20Logo%20-%20light%20mode.svg");
+    }
+  </script>
+
   <div class="relative flex h-full w-full flex-col items-center justify-center p-4 group/design-root overflow-hidden overflow-y-auto">
     <div class="layout-container flex h-full w-full max-w-md flex-col justify-center items-center">
       
       <div class="mb-6 w-full flex flex-col items-center shrink-0">
-        <img alt="Mountain Moving Ministry International Logo" class="h-14 w-auto" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg" />
+        <img alt="Mountain Moving Ministry International Logo" class="h-14 w-auto app-logo" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg" />
         <div class="text-xl font-extrabold tracking-tight text-center text-text-light dark:text-text-dark mt-2">
           COOPERATIVE SOCIETY
         </div>
@@ -147,14 +167,14 @@
         </div>
       </div>
     </div>
-             <footer class="flex-shrink-0 text-center p-4 text-sm text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-800 mt-auto">
-                <p>&copy; 2026 <a class="hover:text-primary hover:underline" href="https://mountainmovingministryintl.org/" target="_blank">Mountain Moving Ministry Intl.</a> All rights reserved.</p>
-                <p class="text-sm text-text-light-secondary dark:text-text-dark-secondary">
-                    Protected by reCAPTCHA and Google's
-                    <a class="text-sm text-primary hover:underline inline-block" href="https://policies.google.com/privacy">Privacy Policy</a> and
-                    <a class="text-sm text-primary hover:underline inline-block" href="https://policies.google.com/terms">Terms of Service</a> apply.</p>
-                    <a class="hover:text-primary" href="https://ethan01.com" rel="noopener noreferrer" target="_blank">Contact Developer</a>
-            </footer>
+    <footer class="flex-shrink-0 text-center p-4 text-sm text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-800 mt-auto">
+        <p>&copy; 2026 <a class="hover:text-primary hover:underline" href="https://mountainmovingministryintl.org/" target="_blank">Mountain Moving Ministry Intl.</a> All rights reserved.</p>
+        <p class="text-sm text-text-light-secondary dark:text-text-dark-secondary">
+            Protected by reCAPTCHA and Google's
+            <a class="text-sm text-primary hover:underline inline-block" href="https://policies.google.com/privacy">Privacy Policy</a> and
+            <a class="text-sm text-primary hover:underline inline-block" href="https://policies.google.com/terms">Terms of Service</a> apply.</p>
+            <a class="hover:text-primary" href="https://ethan01.com" rel="noopener noreferrer" target="_blank">Contact Developer</a>
+    </footer>
   </div>
 
   <script>

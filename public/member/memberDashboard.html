@@ -2,7 +2,7 @@
 <html class="dark" lang="en">
 <head>
 <meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
 <title>Member Dashboard - Cooperative Society</title>
 
 <!-- Apple PWA Meta Tags -->
@@ -11,8 +11,8 @@
 <meta name="apple-mobile-web-app-title" content="MMMi App">
 
 <link rel="icon" type="image/x-icon" href="/favicon.ico">
-<link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#0f172a">
+<link rel="manifest" href="/manifest.json?v=2">
+<meta id="theme-color-meta" name="theme-color" content="#0f172a">
 <link rel="apple-touch-icon" href="/assets/icon-192.png">
 <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
 <script type="module" src="../js/systemmaintenance.js"></script>
@@ -59,22 +59,63 @@
 
 .grecaptcha-badge { visibility: hidden; }
 input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-.custom-scroll::-webkit-scrollbar { width: 4px; }
-.custom-scroll::-webkit-scrollbar-track { background: transparent; }
-.custom-scroll::-webkit-scrollbar-thumb { background-color: #e2e8f0; border-radius: 20px; }
-.dark .custom-scroll::-webkit-scrollbar-thumb { background-color: #334155; }
+
+/* Brutal Native App Scrollbar Hiding for Mobile */
+@media (max-width: 1024px) {
+    ::-webkit-scrollbar { display: none !important; }
+    * { -ms-overflow-style: none !important; scrollbar-width: none !important; }
+}
 
 .content-area-transition { transition: filter 0.3s ease-in-out; }
 .content-blurred { filter: blur(10px); pointer-events: none; }
 </style>
 <script>
-    tailwind.config = { darkMode: "class", theme: { extend: { colors: { primary: "#e31919", "background-light": "#f1f5f9", "background-dark": "#0f172a", "slate-blue": "#0f172a", "white-off": "#F8FAFC", "pure-white": "#FFFFFF", "muted-gray": "#64748B", "dark-gray-blue": "#1E293B", "light-gray": "#94A3B8" }, fontFamily: { display: ["Poppins", "sans-serif"], manrope: ["Manrope", "sans-serif"] } } } };
+    tailwind.config = { 
+        darkMode: "class", 
+        theme: { 
+            extend: { 
+                colors: { 
+                    "primary": "#e31919", 
+                    "background-light": "#f1f5f9", 
+                    "background-dark": "#0f172a", 
+                    "card-light": "#ffffff",
+                    "card-dark": "#1e293b",
+                    "text-light": "#0f172a",
+                    "text-dark": "#e2e8f0",
+                    "subtext-light": "#64748b",
+                    "subtext-dark": "#94a3b8",
+                    "slate-blue": "#0f172a", 
+                    "white-off": "#F8FAFC", 
+                    "pure-white": "#FFFFFF", 
+                    "muted-gray": "#64748B", 
+                    "dark-gray-blue": "#1E293B", 
+                    "light-gray": "#94A3B8" 
+                }, 
+                fontFamily: { 
+                    display: ["Poppins", "sans-serif"], 
+                    manrope: ["Manrope", "sans-serif"] 
+                } 
+            } 
+        } 
+    };
 </script>
 </head>
-<body class="font-display bg-background-light dark:bg-background-dark text-gray-700 dark:text-gray-300">
+<body class="font-display bg-background-light dark:bg-background-dark text-gray-700 dark:text-gray-300 overflow-x-hidden overflow-y-auto">
+
+    <!-- AUTO THEME SYNC SCRIPT -->
+    <script>
+        const themeMeta = document.getElementById('theme-color-meta');
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            if (themeMeta) themeMeta.setAttribute('content', '#0f172a');
+        } else {
+            document.documentElement.classList.remove('dark');
+            if (themeMeta) themeMeta.setAttribute('content', '#ffffff');
+        }
+    </script>
 
     <div id="preloader" class="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-50/80 dark:bg-gray-900/90 backdrop-blur-[5px]">
-        <div id="preloader-card" class="bg-white dark:bg-gray-800 p-12 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 flex flex-col items-center">
+        <div id="preloader-card" class="bg-white dark:bg-card-dark p-12 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 flex flex-col items-center">
             <div class="gravity-container"><div class="gravity-dot"></div><div class="gravity-dot"></div><div class="gravity-dot"></div><div class="gravity-dot"></div><div class="gravity-center"></div></div>
             <span class="mt-8 text-sm text-gray-400 dark:text-gray-500 tracking-[0.2em] font-medium animate-pulse">Loading User Data</span>
         </div>
@@ -93,10 +134,11 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
     </div>
 
     <div class="flex h-screen">
-        <aside class="w-64 flex-shrink-0 bg-white isometric-sidebar p-6 flex-col justify-between hidden lg:flex">
+        <aside class="w-64 flex-shrink-0 bg-white isometric-sidebar p-6 flex-col justify-between hidden lg:flex border-r border-gray-200 dark:border-gray-800 z-20">
             <div>
                 <div class="flex items-center gap-3 mb-10">
-                    <img id="sidebar-logo" alt="Logo" class="h-10 w-10 app-logo" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg"/>
+                    <img alt="Logo" class="h-10 w-10 dark:hidden" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20Logo%20-%20light%20mode.svg" />
+                    <img alt="Logo" class="h-10 w-10 hidden dark:block" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg" />
                     <span class="text-xl font-semibold text-gray-800 dark:text-white">Cooperative</span>
                 </div>
                 <nav class="flex flex-col gap-2">
@@ -105,27 +147,55 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
                     <a class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" href="./withdrawalapplication"><span class="material-symbols-outlined">account_balance_wallet</span><span class="font-medium">Withdraw Savings</span></a>
                     <a onclick="openMainModal('topup')" class="cursor-pointer flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><span class="material-symbols-outlined">upgrade</span><span class="font-medium">Top-up/Upgrade</span></a>
                     <a class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" href="./updatePaymentDetails"><span class="material-symbols-outlined">payment</span><span class="font-medium">Payment Details</span></a>
-                    <a class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" href="./changePassword"><span class="material-symbols-outlined">lock_reset</span><span class="font-medium">Forgot/Change Password</span></a>
                 </nav>
-            </div>
-            <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
-                <button id="logout-btn-desktop" class="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-left"><span class="material-symbols-outlined">logout</span><span class="font-medium">Log Out</span></button>
             </div>
         </aside>
 
-        <main class="flex-1 flex flex-col overflow-y-auto content-area-transition" id="main-content">
-            <header class="flex-shrink-0 bg-white/80 dark:bg-background-dark/80 backdrop-blur-sm sticky top-0 z-20 flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
+        <main class="flex-1 flex flex-col overflow-y-auto content-area-transition pb-20 lg:pb-0 no-scrollbar" id="main-content">
+            
+            <header class="flex-shrink-0 bg-gradient-to-b from-white to-white/80 dark:from-background-dark dark:to-background-dark/80 backdrop-blur-sm sticky top-0 z-20 flex items-center justify-between p-4 transition-all duration-300">
                 <div class="flex items-center gap-4">
-                    <button class="lg:hidden p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700" id="menu-btn"><span class="material-symbols-outlined text-gray-600 dark:text-gray-300">menu</span></button>
-                    <div class="lg:hidden flex items-center gap-2"><img id="header-logo" alt="Logo" class="h-10 w-10 app-logo" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg"/></div>
+                    <div class="lg:hidden flex items-center gap-2">
+                        <img alt="Logo" class="h-10 w-10 dark:hidden" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20Logo%20-%20light%20mode.svg" />
+                        <img alt="Logo" class="h-10 w-10 hidden dark:block" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg" />
+                        <span class="font-semibold text-gray-800 dark:text-white">Cooperative</span>
+                    </div>
                 </div>
-                <div class="flex items-center gap-4">
-                    <button class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700" id="theme-toggle">
-                        <span class="material-symbols-outlined text-gray-600 dark:text-gray-300 dark:hidden">dark_mode</span>
-                        <span class="material-symbols-outlined text-gray-600 dark:text-gray-300 hidden dark:inline">light_mode</span>
-                    </button>
-                    <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden border border-gray-300 dark:border-gray-600">
-                        <img id="header-profile-img" alt="Profile" class="w-full h-full object-cover" src="https://ui-avatars.com/api/?name=Member&background=random"/>
+                
+                <div class="flex items-center gap-2 sm:gap-4">
+                    <div class="relative ml-2">
+                        <button type="button" id="top-profile-trigger" class="flex items-center gap-3 pl-4 border-l border-gray-200 dark:border-l-0 dark:ring-l dark:ring-gray-700 hover:opacity-80 focus:outline-none">
+                            <img id="header-profile-img" src="https://ui-avatars.com/api/?name=Member&background=random" class="size-9 sm:size-10 rounded-full ring-2 ring-gray-200 dark:ring-gray-700 object-cover">
+                        </button>
+                        
+                        <!-- Restored card-dark class to prevent white background in dark mode -->
+                        <div id="top-profile-dropdown" class="absolute right-0 z-50 mt-2 w-64 origin-top-right rounded-xl bg-white dark:bg-card-dark shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none hidden transform transition-all duration-200 opacity-0 scale-95">
+                            <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-slate-800/50 rounded-t-xl">
+                                <div class="flex items-center gap-3">
+                                    <img id="dd-avatar" class="size-10 rounded-full ring-2 ring-white dark:ring-gray-600 object-cover" src="https://ui-avatars.com/api/?name=Member&background=random" alt="">
+                                    <div class="overflow-hidden">
+                                        <p id="dd-name" class="truncate text-sm font-bold text-gray-900 dark:text-white">Loading...</p>
+                                        <p id="dd-email" class="truncate text-xs text-gray-500 dark:text-gray-400">...</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-2 space-y-1">
+                                <button id="dd-theme-toggle" class="w-full text-left flex items-center justify-between gap-3 rounded-lg px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors" role="menuitem">
+                                    <span class="flex items-center gap-3">
+                                        <span class="material-symbols-outlined text-[20px] text-gray-400 dark:text-gray-500" id="dd-theme-icon">dark_mode</span>
+                                        Switch Theme
+                                    </span>
+                                </button>
+                                <a href="./changePassword" class="flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors" role="menuitem">
+                                    <span class="material-symbols-outlined text-[20px] text-gray-400 dark:text-gray-500">lock_reset</span>
+                                    Change Password
+                                </a>
+                                <button id="logout-btn-desktop" class="w-full text-left flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors" role="menuitem">
+                                    <span class="material-symbols-outlined text-[20px]">logout</span>
+                                    Log Out
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </header>
@@ -153,7 +223,7 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 
                     <div id="dashboard-savings" class="dashboard-view">
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                            <div class="bg-white dark:bg-gray-900/40 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 animate-fade-in-slide" style="animation-delay: 0.1s;">
+                            <div class="bg-white dark:bg-card-dark p-6 rounded-lg shadow-sm animate-fade-in-slide" style="animation-delay: 0.1s;">
                                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Savings</p>
                                 <div class="flex items-center gap-3 my-3">
                                     <p id="wallet-balance-display" class="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white" data-value="0">&#8358;0.00</p>
@@ -176,7 +246,7 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
                                 </div>
                             </div>
 
-                            <div id="plan-details-container" class="bg-gray-800 dark:bg-gray-900 p-6 rounded-lg shadow-sm border border-gray-700 dark:border-gray-800 animate-fade-in-slide" style="animation-delay: 0.2s;">
+                            <div id="plan-details-container" class="bg-gray-800 dark:bg-gray-900 p-6 rounded-lg shadow-sm animate-fade-in-slide" style="animation-delay: 0.2s;">
                                 <p class="text-gray-400">Loading plan details...</p>
                             </div>
                         </div>
@@ -184,7 +254,7 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 
                     <div id="dashboard-daily" class="dashboard-view hidden">
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                            <div class="bg-white dark:bg-gray-900/40 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 animate-fade-in-slide" style="animation-delay: 0.1s;">
+                            <div class="bg-white dark:bg-card-dark p-6 rounded-lg shadow-sm animate-fade-in-slide" style="animation-delay: 0.1s;">
                                 <div class="flex justify-between items-start mb-2">
                                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Monthly Contribution</p>
                                     <span id="daily-status-badge" class="px-2 py-0.5 rounded text-[10px] font-bold bg-gray-100 text-gray-500">INACTIVE</span>
@@ -217,7 +287,7 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
                                 </div>
                             </div>
 
-                            <div class="bg-indigo-900 dark:bg-gray-900 p-6 rounded-lg shadow-sm border border-indigo-800 dark:border-gray-800 animate-fade-in-slide flex flex-col justify-between" style="animation-delay: 0.2s;">
+                            <div class="bg-indigo-900 dark:bg-gray-900 p-6 rounded-lg shadow-sm animate-fade-in-slide flex flex-col justify-between" style="animation-delay: 0.2s;">
                                 <div>
                                     <div class="flex items-center gap-2 mb-4"><span class="material-symbols-outlined text-yellow-400">lightbulb</span><h2 class="text-lg font-semibold text-white">Daily Wisdom</h2></div>
                                     <p id="daily-quote" class="text-indigo-100 text-sm italic mb-6 leading-relaxed">"Loading motivation..."</p>
@@ -231,7 +301,7 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
                         </div>
                     </div>
 
-                    <div class="bg-white dark:bg-gray-900/40 p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 animate-fade-in-slide" style="animation-delay: 0.3s;">
+                    <div class="bg-white dark:bg-card-dark p-4 sm:p-6 rounded-lg shadow-sm animate-fade-in-slide" style="animation-delay: 0.3s;">
                         <div class="flex justify-between items-center mb-4">
                             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Recent Transactions</h2>
                             <button id="view-all-tx-btn" onclick="toggleTransactions()" class="hidden text-sm font-medium text-primary hover:underline bg-transparent border-none cursor-pointer focus:outline-none">View All</button>
@@ -261,46 +331,39 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
                 </div>
             </div>
             
-            <footer class="flex-shrink-0 text-center p-4 text-sm text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-800 mt-auto">
+            <footer class="flex-shrink-0 text-center p-4 text-sm text-gray-500 dark:text-gray-400 mt-auto">
                 <p>&copy; 2026 <a class="hover:text-primary hover:underline" href="https://mountainmovingministryintl.org/" target="_blank">Mountain Moving Ministry Intl.</a> All rights reserved.</p>
-                <p class="text-sm text-text-light-secondary dark:text-text-dark-secondary">
-                    Protected by reCAPTCHA and Google's
-                    <a class="text-sm text-primary hover:underline inline-block" href="https://policies.google.com/privacy">Privacy Policy</a> and
-                    <a class="text-sm text-primary hover:underline inline-block" href="https://policies.google.com/terms">Terms of Service</a> apply.</p>
-                    <a class="hover:text-primary" href="https://ethan01.com" rel="noopener noreferrer" target="_blank">Contact Developer</a>
             </footer>
         </main>
         
-        <div class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden" id="mobile-menu-overlay"></div>
-        <aside class="fixed top-0 left-0 h-full w-64 bg-white isometric-sidebar p-6 flex flex-col justify-between z-40 transform -translate-x-full transition-transform duration-300 ease-in-out lg:hidden" id="mobile-menu">
-            <div>
-                <div class="flex items-center justify-between mb-10">
-                    <div class="flex items-center gap-3"><img id="mobile-logo" alt="Logo" class="h-10 w-10 app-logo" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg"/><span class="text-xl font-semibold text-gray-800 dark:text-white">Cooperative</span></div>
-                    <button class="p-1" id="close-menu-btn"><span class="material-symbols-outlined">close</span></button>
-                </div>
-                <nav class="flex flex-col gap-2">
-                    <a class="flex items-center gap-3 px-4 py-3 bg-primary text-white rounded-lg" href="#"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
-                    <a class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" href="./userProfile"><span class="material-symbols-outlined">person</span>Profile</a>
-                    <a class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" href="./withdrawalapplication"><span class="material-symbols-outlined">account_balance_wallet</span>Withdraw</a>
-                    <a onclick="openMainModal('topup')" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><span class="material-symbols-outlined">upgrade</span>Top-up/Upgrade</a>
-                    <a class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" href="./updatePaymentDetails"><span class="material-symbols-outlined">payment</span>Payment Details</a>
-                    <a class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" href="./changePassword"><span class="material-symbols-outlined">lock_reset</span>Forgot/Change Password</a>
-                </nav>
-            </div>
-            <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
-                <button id="logout-btn-mobile" class="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-left"><span class="material-symbols-outlined">logout</span>Log Out</button>
-            </div>
-        </aside>
+        <nav class="fixed bottom-0 w-full z-40 lg:hidden border-t border-gray-200 dark:border-gray-800 isometric-sidebar flex justify-around items-center pb-safe pt-2 px-2 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+            <a href="./memberDashboard" class="flex flex-col items-center p-2 text-primary">
+                <span class="material-symbols-outlined text-2xl mb-1">dashboard</span>
+                <span class="text-[10px] font-bold">Dashboard</span>
+            </a>
+            <a href="./withdrawalapplication" class="flex flex-col items-center p-2 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors">
+                <span class="material-symbols-outlined text-2xl mb-1">account_balance_wallet</span>
+                <span class="text-[10px] font-bold">Withdraw</span>
+            </a>
+            <a href="./updatePaymentDetails" class="flex flex-col items-center p-2 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors">
+                <span class="material-symbols-outlined text-2xl mb-1">payment</span>
+                <span class="text-[10px] font-bold">Bank Info</span>
+            </a>
+            <a href="./userProfile" class="flex flex-col items-center p-2 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors">
+                <span class="material-symbols-outlined text-2xl mb-1">person</span>
+                <span class="text-[10px] font-bold">Profile</span>
+            </a>
+        </nav>
     </div>
 
     <div id="main-modal-overlay" class="fixed inset-0 z-50 flex items-start justify-center bg-black/40 backdrop-blur-md transition-opacity duration-300 p-4 sm:p-6 overflow-y-auto py-8 hidden" style='font-family: Manrope, "Noto Sans", sans-serif;'>
-        <div class="relative flex w-full max-w-lg flex-col overflow-hidden rounded-xl bg-pure-white shadow-2xl dark:bg-dark-gray-blue w-full max-w-lg">
+        <div class="relative flex w-full max-w-lg flex-col overflow-hidden rounded-xl bg-pure-white shadow-2xl dark:bg-card-dark w-full max-w-lg">
             <div class="absolute top-4 right-4 z-10">
                 <button id="close-main-modal-btn" class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-blue/10 hover:bg-slate-blue/20 dark:bg-white/10 dark:hover:bg-white/20 text-slate-blue dark:text-white transition-colors">
                     <span class="material-symbols-outlined text-xl">close</span>
                 </button>
             </div>
-            <div class="flex flex-col items-center p-6 border-b border-white-off/10 dark:border-light-gray/20">
+            <div class="flex flex-col items-center p-6 border-b border-white-off/10 dark:border-gray-700">
                 <h3 class="text-slate-blue dark:text-white tracking-tight text-2xl font-bold leading-tight text-center">Fund Top-up / Upgrade</h3>
             </div>
 
@@ -309,7 +372,7 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
                     <div class="relative flex h-12 w-full bg-slate-200 dark:bg-slate-900 rounded-xl p-1 select-none items-center shadow-inner">
                         <input type="radio" name="view_toggle" id="radio-topup" class="switch-input hidden" onchange="toggleView('topup')" checked>
                         <input type="radio" name="view_toggle" id="radio-upgrade" class="switch-input hidden" onchange="toggleView('upgrade')">
-                        <label for="radio-topup" class="flex-1 flex items-center justify-center font-bold text-sm bg-white dark:bg-dark-gray-blue rounded-lg shadow-sm text-slate-900 dark:text-white transition-all cursor-pointer" id="lbl-topup">Top-Up Wallet</label>
+                        <label for="radio-topup" class="flex-1 flex items-center justify-center font-bold text-sm bg-white dark:bg-card-dark rounded-lg shadow-sm text-slate-900 dark:text-white transition-all cursor-pointer" id="lbl-topup">Top-Up Wallet</label>
                         <label for="radio-upgrade" class="flex-1 flex items-center justify-center font-bold text-sm text-slate-500 dark:text-slate-400 transition-all cursor-pointer" id="lbl-upgrade">Upgrade Plan</label>
                     </div>
                 </div>
@@ -318,7 +381,7 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
                     <div class="flex flex-col items-center p-4 border rounded-xl border-primary bg-primary/5 dark:bg-primary/10 mb-4">
                         <span class="material-symbols-outlined text-primary text-3xl mb-2">account_balance_wallet</span>
                         <h4 class="font-bold text-slate-blue dark:text-white">Top-Up Wallet</h4>
-                        <p class="text-xs text-center text-muted-gray dark:text-light-gray">Add funds directly to your cooperative account.</p>
+                        <p class="text-xs text-center text-muted-gray dark:text-gray-400">Add funds directly to your cooperative account.</p>
                     </div>
                     <label class="flex flex-col min-w-40 flex-1">
                         <p class="text-slate-blue dark:text-white text-base font-medium pb-2">Amount</p>
@@ -335,7 +398,7 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
                     <div class="flex flex-col items-center p-4 border rounded-xl border-primary bg-primary/5 dark:bg-primary/10 mb-4">
                         <span class="material-symbols-outlined text-primary text-3xl mb-2">star</span>
                         <h4 class="font-bold text-slate-blue dark:text-white">Upgrade Plan</h4>
-                        <p class="text-xs text-center text-muted-gray dark:text-light-gray">Select a higher plan. <span class="text-red-500 font-bold">Resets 3-Month Cycle.</span></p>
+                        <p class="text-xs text-center text-muted-gray dark:text-gray-400">Select a higher plan. <span class="text-red-500 font-bold">Resets 3-Month Cycle.</span></p>
                     </div>
                     
                     <div id="upgrade-plans-list" class="grid grid-cols-1 gap-4 sm:grid-cols-2 max-h-80 overflow-y-auto custom-scroll pr-2">
@@ -349,24 +412,24 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
     </div>
 
     <div id="daily-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm hidden p-4">
-        <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-6 animate-fade-in-slide">
+        <div class="relative bg-white dark:bg-card-dark rounded-2xl shadow-xl max-w-md w-full p-6 animate-fade-in-slide">
             <button onclick="closeDailyModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><span class="material-symbols-outlined">close</span></button>
             <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Daily Contribution</h3>
             <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Amount (Min &#8358;500)</label>
             <div class="relative mb-2">
                 <span class="absolute left-3 top-3 text-gray-500">&#8358;</span>
-                <input id="daily-input" type="number" min="500" class="w-full pl-8 p-3 rounded-lg border border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-primary focus:border-primary" placeholder="500">
+                <input id="daily-input" type="number" min="500" class="w-full pl-8 p-3 rounded-lg border border-gray-300 dark:bg-slate-900 dark:border-gray-700 dark:text-white focus:ring-primary focus:border-primary" placeholder="500">
             </div>
             <p id="daily-lock-msg" class="hidden text-xs text-orange-500 mb-4 font-semibold"><span class="material-symbols-outlined text-xs align-bottom">lock</span> Amount is locked for the current active cycle.</p>
             
-            <div id="pay-ahead-section" class="mb-6 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg hidden">
+            <div id="pay-ahead-section" class="mb-6 p-3 bg-gray-50 dark:bg-slate-900/50 rounded-lg hidden">
                 <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2">Pay Days Ahead</label>
                 <div class="flex items-center justify-between">
                     <span class="text-sm text-gray-600 dark:text-gray-300">Pay <span id="ahead-count-text" class="font-bold">0</span> days ahead</span>
                     <div class="flex items-center gap-3">
-                        <button onclick="updateAhead(-1)" class="w-8 h-8 rounded-full bg-white dark:bg-gray-600 shadow flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-500 text-gray-600 dark:text-white transition-colors font-bold text-lg leading-none pb-1">-</button>
+                        <button onclick="updateAhead(-1)" class="w-8 h-8 rounded-full bg-white dark:bg-gray-800 shadow flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-white transition-colors font-bold text-lg leading-none pb-1">-</button>
                         <span class="font-mono font-bold text-xl text-primary" id="ahead-counter-display">0</span>
-                        <button onclick="updateAhead(1)" class="w-8 h-8 rounded-full bg-white dark:bg-gray-600 shadow flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-500 text-gray-600 dark:text-white transition-colors font-bold text-lg leading-none pb-1">+</button>
+                        <button onclick="updateAhead(1)" class="w-8 h-8 rounded-full bg-white dark:bg-gray-800 shadow flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-white transition-colors font-bold text-lg leading-none pb-1">+</button>
                     </div>
                 </div>
             </div>
@@ -379,7 +442,7 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
     </div>
 
     <div id="daily-destination-modal" class="fixed inset-0 z-[55] flex items-center justify-center bg-black/60 backdrop-blur-sm hidden p-4">
-        <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-sm w-full p-6 animate-fade-in-slide">
+        <div class="relative bg-white dark:bg-card-dark rounded-2xl shadow-xl max-w-sm w-full p-6 animate-fade-in-slide">
              <button onclick="closeDestinationModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><span class="material-symbols-outlined">close</span></button>
             <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 text-center">Choose Destination</h3>
             <p class="text-sm text-gray-500 dark:text-gray-400 mb-6 text-center">Where would you like to move your funds?</p>
@@ -409,26 +472,26 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
     </div>
 
     <div id="auth-modal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm hidden p-4">
-        <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-sm w-full p-6 animate-fade-in-slide">
+        <div class="relative bg-white dark:bg-card-dark rounded-2xl shadow-xl max-w-sm w-full p-6 animate-fade-in-slide">
             <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Security Check</h3>
             <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Please enter your password to confirm withdrawal.</p>
             
             <form id="auth-form" onsubmit="event.preventDefault(); handleAuthSubmit();">
                 <div class="relative mb-4">
-                    <input id="auth-password-input" type="password" class="w-full p-3 pr-10 rounded-lg border border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-primary focus:border-primary" placeholder="Password" required>
+                    <input id="auth-password-input" type="password" class="w-full p-3 pr-10 rounded-lg border border-gray-300 dark:bg-slate-900 dark:border-gray-700 dark:text-white focus:ring-primary focus:border-primary" placeholder="Password" required>
                     <button type="button" onclick="toggleAuthPassword()" class="absolute right-3 top-3 text-gray-400 hover:text-gray-600">
                         <span id="auth-eye-icon" class="material-symbols-outlined text-xl">visibility</span>
                     </button>
                 </div>
                 <div class="flex gap-3">
-                    <button type="button" onclick="closeAuthModal()" class="flex-1 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
+                    <button type="button" onclick="closeAuthModal()" class="flex-1 py-2 rounded-lg border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-800">Cancel</button>
                     <button type="submit" id="auth-submit-btn" class="flex-1 py-2 rounded-lg bg-primary text-white font-bold hover:bg-red-700">Confirm</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <div id="debt-popup" class="fixed top-24 right-6 z-40 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-2xl border-l-4 border-red-500 flex items-center gap-4 hidden max-w-xs">
+    <div id="debt-popup" class="fixed top-24 right-6 z-40 bg-white dark:bg-card-dark p-4 rounded-xl shadow-2xl border-l-4 border-red-500 flex items-center gap-4 hidden max-w-xs">
         <div>
             <p class="text-xs font-bold text-red-500 uppercase">Reminder</p>
             <p class="text-sm text-gray-700 dark:text-gray-300 font-medium mt-1">You owe contribution for <span id="debt-days-count">0</span> days.</p>
@@ -439,36 +502,37 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 
     <div id="custom-modal" class="fixed inset-0 z-[100] flex items-center justify-center hidden">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
-        <div class="relative bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-2xl max-w-sm w-full mx-4 z-10 animate-fade-in-slide">
+        <div class="relative bg-white dark:bg-card-dark p-6 rounded-2xl shadow-2xl max-w-sm w-full mx-4 z-10 animate-fade-in-slide">
             <h4 id="modal-title" class="text-lg font-bold text-slate-blue dark:text-white mb-3"></h4>
-            <p id="modal-message" class="text-muted-gray dark:text-light-gray mb-6 text-sm leading-relaxed"></p>
+            <p id="modal-message" class="text-muted-gray dark:text-gray-400 mb-6 text-sm leading-relaxed"></p>
             <div class="flex justify-end space-x-3 mt-auto">
-                <button id="modal-close" class="px-4 py-2 text-sm font-semibold rounded-lg bg-white-off dark:bg-slate-blue text-muted-gray dark:text-light-gray">Close</button>
+                <button id="modal-close" class="px-4 py-2 text-sm font-semibold rounded-lg bg-white-off dark:bg-slate-800 text-muted-gray dark:text-gray-300">Close</button>
                 <button id="modal-confirm" class="px-4 py-2 text-sm font-semibold rounded-lg bg-primary text-white hidden shadow-lg shadow-primary/20">Confirm</button>
             </div>
         </div>
     </div>
 
-    <div id="concurrency-modal" class="fixed inset-0 z-[200] flex items-center justify-center hidden">
-    </div>
+    <!-- INJECTED SCRIPT: hidePreloader function -->
+    <script>
+        function hidePreloader() {
+            const preloader = document.getElementById('preloader');
+            const card = document.getElementById('preloader-card');
+            if (!preloader || !card) return;
+            
+            card.classList.add('tv-off-active');
+            
+            setTimeout(() => {
+                preloader.style.opacity = '0';
+                preloader.style.transition = 'opacity 0.3s ease';
+            }, 400);
+            
+            setTimeout(() => {
+                preloader.classList.add('hidden-force');
+            }, 800);
+        }
+    </script>
 
 <script src="../js/interest-engine.js"></script>
-<script>
-    function hidePreloader() {
-        const p = document.getElementById('preloader');
-        const c = document.getElementById('preloader-card');
-        if(c) c.classList.add('tv-off-active');
-        setTimeout(() => { if(p) p.style.opacity = '0'; p.style.transition = 'opacity 0.3s ease'; }, 400);
-        setTimeout(() => { if(p) p.classList.add('hidden-force'); }, 800);
-    }
-    if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        document.documentElement.classList.add('dark');
-        document.querySelectorAll('.app-logo').forEach(i => i.src = "https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg");
-    } else {
-        document.documentElement.classList.remove('dark');
-        document.querySelectorAll('.app-logo').forEach(i => i.src = "https://mountainmovingministryintl.org/gallery/MMMi%20Header%20Logo%20-%20light%20mode.svg");
-    }
-</script>
 
 <script type="module">
     import '../js/auth.js';
@@ -480,13 +544,59 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
     let activeDashboard = 'savings';
     let isBalanceVisible = true;
     
-    // Pagination & Transaction State
     let rawTransactions = []; 
     let currentFilteredTx = []; 
     let currentPage = 0; 
     const itemsPerPage = 20; 
 
-    // --- INIT ---
+    const profileTrigger = document.getElementById('top-profile-trigger');
+    const profileDropdown = document.getElementById('top-profile-dropdown');
+    
+    if (profileTrigger && profileDropdown) {
+        profileTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            profileDropdown.classList.toggle('hidden');
+            setTimeout(() => {
+                profileDropdown.classList.toggle('opacity-0');
+                profileDropdown.classList.toggle('scale-95');
+            }, 10);
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!profileDropdown.contains(e.target) && !profileTrigger.contains(e.target)) {
+                profileDropdown.classList.add('opacity-0', 'scale-95');
+                setTimeout(() => profileDropdown.classList.add('hidden'), 200);
+            }
+        });
+    }
+
+    const themeToggleBtn = document.getElementById('dd-theme-toggle');
+    const htmlEl = document.documentElement;
+
+    function applyTheme(isDark) {
+        if(isDark) {
+            htmlEl.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
+            const themeMeta = document.getElementById('theme-color-meta');
+            if(themeMeta) themeMeta.setAttribute('content', '#0f172a');
+            const icon = document.getElementById('dd-theme-icon');
+            if(icon) icon.textContent = 'light_mode';
+        } else {
+            htmlEl.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
+            const themeMeta = document.getElementById('theme-color-meta');
+            if(themeMeta) themeMeta.setAttribute('content', '#ffffff');
+            const icon = document.getElementById('dd-theme-icon');
+            if(icon) icon.textContent = 'dark_mode';
+        }
+    }
+    
+    if(themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', () => {
+            applyTheme(!htmlEl.classList.contains('dark'));
+        });
+    }
+
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             currentUser = user;
@@ -509,65 +619,18 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
                 });
 
                 await loadData();
-                initSwipeListener(); // Initialize the Swipe Listener
             } catch (e) {
                 console.error("Dashboard Init Error:", e);
             } finally {
-                hidePreloader();
+                hidePreloader(); 
                 if (window.InterestEngine && window.InterestEngine.showNotification) {
                     window.InterestEngine.showNotification();
                 }
             }
-            
-            bindMobileMenu();
             bindPagination();
-
         } else { window.location.href = "/auth/index.html"; }
     });
 
-    // --- SWIPE GESTURE LISTENER ---
-    function initSwipeListener() {
-        const swipeArea = document.getElementById('main-content');
-        if (!swipeArea) return;
-
-        let touchStartX = 0;
-        let touchStartY = 0;
-        let touchEndX = 0;
-        let touchEndY = 0;
-
-        swipeArea.addEventListener('touchstart', (e) => {
-            touchStartX = e.changedTouches[0].screenX;
-            touchStartY = e.changedTouches[0].screenY;
-        }, {passive: true});
-
-        swipeArea.addEventListener('touchend', (e) => {
-            touchEndX = e.changedTouches[0].screenX;
-            touchEndY = e.changedTouches[0].screenY;
-            handleSwipeGesture();
-        }, {passive: true});
-
-        function handleSwipeGesture() {
-            const xDiff = touchEndX - touchStartX;
-            const yDiff = touchEndY - touchStartY;
-            const threshold = 50; // Minimum distance to be considered a swipe
-
-            if (Math.abs(xDiff) > Math.abs(yDiff) && Math.abs(xDiff) > threshold) {
-                if (xDiff < 0) {
-                    if (activeDashboard === 'savings') {
-                        document.getElementById('dash-toggle-daily').checked = true;
-                        switchDashboard('daily');
-                    }
-                } else {
-                    if (activeDashboard === 'daily') {
-                        document.getElementById('dash-toggle-savings').checked = true;
-                        switchDashboard('savings');
-                    }
-                }
-            }
-        }
-    }
-
-    // --- DATA LOADING ---
     async function loadData() {
         if (!currentUser) return;
         const uid = currentUser.uid;
@@ -579,8 +642,17 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
             document.getElementById('member-id-display').textContent = `ID: ${data.memberId || 'N/A'}`;
             updateGreeting(data.firstName || "Member");
             
-            if (data.photoURL) document.getElementById('header-profile-img').src = data.photoURL;
-            else document.getElementById('header-profile-img').src = `https://ui-avatars.com/api/?name=${data.firstName}+${data.surname}&background=random`;
+            document.getElementById('dd-name').textContent = `${data.firstName || 'User'} ${data.surname || ''}`.trim();
+            document.getElementById('dd-email').textContent = data.email || '';
+
+            if (data.photoURL) {
+                document.getElementById('header-profile-img').src = data.photoURL;
+                document.getElementById('dd-avatar').src = data.photoURL;
+            } else { 
+                const fallbackImg = `https://ui-avatars.com/api/?name=${data.firstName}+${data.surname}&background=random`;
+                document.getElementById('header-profile-img').src = fallbackImg;
+                document.getElementById('dd-avatar').src = fallbackImg;
+            }
 
             Daily.processDailyData(data);
 
@@ -654,7 +726,6 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
         }
     }
 
-    // --- PLANS UI ---
     function renderPlansUI() {
         const allPlans = InterestEngine.getPlans() || [];
         const activePlans = allPlans.filter(p => p.isActive !== false);
@@ -666,13 +737,13 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
         }
 
         container.innerHTML = activePlans.map(p => `
-            <div data-plan="${p.name}" onclick="selectPlan(this)" class="plan-card flex flex-col p-4 border rounded-xl cursor-pointer border-white-off/10 dark:border-light-gray/20 hover:border-primary/50 transition-all">
+            <div data-plan="${p.name}" onclick="selectPlan(this)" class="plan-card flex flex-col p-4 border rounded-xl cursor-pointer border-white-off/10 dark:border-gray-700 hover:border-primary/50 transition-all">
                 <div class="flex justify-between items-center mb-2">
                     <h5 class="font-bold text-slate-blue dark:text-white">${p.name}</h5>
                     <span class="text-xs text-primary font-semibold">${p.rate}% /90d cycle</span>
                 </div>
-                <p class="text-xs text-muted-gray dark:text-light-gray mb-2">Range: &#8358;${p.minAmount.toLocaleString()} - ${p.maxAmount ? '&#8358;'+p.maxAmount.toLocaleString() : 'Unlimited'}</p>
-                <ul class="text-xs text-muted-gray dark:text-light-gray list-disc pl-4 space-y-1">
+                <p class="text-xs text-muted-gray dark:text-gray-400 mb-2">Range: &#8358;${p.minAmount.toLocaleString()} - ${p.maxAmount ? '&#8358;'+p.maxAmount.toLocaleString() : 'Unlimited'}</p>
+                <ul class="text-xs text-muted-gray dark:text-gray-400 list-disc pl-4 space-y-1">
                     <li>Rate applies to 3-month cycle</li>
                     <li>Withdrawable after maturity</li>
                 </ul>
@@ -680,7 +751,6 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
         `).join('');
     }
 
-    // --- DASHBOARD UI LOGIC ---
     window.switchDashboard = function(type) {
         activeDashboard = type;
         document.getElementById('dashboard-savings').classList.toggle('hidden', type !== 'savings');
@@ -693,7 +763,6 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
         document.getElementById('greeting-text').textContent = `${h<12?"Good morning":h<18?"Good afternoon":"Good evening"}, ${name}!`;
     }
 
-    // --- MODAL & PLAN SELECTION ---
     window.openMainModal = function(tab) {
         document.getElementById('main-modal-overlay').classList.remove('hidden');
         toggleView(tab);
@@ -709,12 +778,12 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
         
         if(view === 'topup'){
             document.getElementById('radio-topup').checked = true;
-            topBtn.className = "flex-1 flex items-center justify-center font-bold text-sm bg-white dark:bg-dark-gray-blue rounded-lg shadow-sm text-slate-900 dark:text-white transition-all cursor-pointer py-2";
+            topBtn.className = "flex-1 flex items-center justify-center font-bold text-sm bg-white dark:bg-gray-800 rounded-lg shadow-sm text-slate-900 dark:text-white transition-all cursor-pointer py-2";
             upBtn.className = "flex-1 flex items-center justify-center font-bold text-sm text-slate-500 dark:text-slate-400 transition-all cursor-pointer py-2";
         } else {
             document.getElementById('radio-upgrade').checked = true;
             topBtn.className = "flex-1 flex items-center justify-center font-bold text-sm text-slate-500 dark:text-slate-400 transition-all cursor-pointer py-2";
-            upBtn.className = "flex-1 flex items-center justify-center font-bold text-sm bg-white dark:bg-dark-gray-blue rounded-lg shadow-sm text-slate-900 dark:text-white transition-all cursor-pointer py-2";
+            upBtn.className = "flex-1 flex items-center justify-center font-bold text-sm bg-white dark:bg-gray-800 rounded-lg shadow-sm text-slate-900 dark:text-white transition-all cursor-pointer py-2";
         }
     }
 
@@ -773,7 +842,6 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
         squadInstance.setup(); squadInstance.open();
     }
 
-    // --- TRANSACTION LOGIC WITH PAGINATION ---
     async function fetchTransactions(uid) {
         const q = query(collection(db, "users", uid, "transactions"), orderBy("date", "desc"), limit(100));
         const snap = await getDocs(q);
@@ -900,29 +968,6 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
         });
     }
 
-    function bindMobileMenu() {
-        const mm = document.getElementById('mobile-menu'); 
-        const mo = document.getElementById('mobile-menu-overlay');
-        const mb = document.getElementById('menu-btn');
-        const cmb = document.getElementById('close-menu-btn');
-        const mainContent = document.getElementById('main-content');
-        
-        const openMenu = () => { 
-            mm.classList.remove('-translate-x-full'); 
-            mo.classList.remove('hidden'); 
-            if(mainContent) mainContent.classList.add('content-blurred');
-        };
-        const closeMenu = () => { 
-            mm.classList.add('-translate-x-full'); 
-            mo.classList.add('hidden'); 
-            if(mainContent) mainContent.classList.remove('content-blurred');
-        };
-
-        if(mb) mb.onclick = openMenu;
-        if(cmb) cmb.onclick = closeMenu; 
-        if(mo) mo.onclick = closeMenu;
-    }
-
     // SHARED UTILS
     window.toggleBalanceVisibility = () => { isBalanceVisible=!isBalanceVisible; loadData(); };
     
@@ -953,16 +998,38 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
     };
     window.formatCurrency = function(v) { return new Intl.NumberFormat('en-NG', {style:'currency', currency:'NGN'}).format(v); }
 
-    document.getElementById('logout-btn-desktop').addEventListener('click', () => signOut(auth));
-    document.getElementById('logout-btn-mobile').addEventListener('click', () => signOut(auth));
-    document.getElementById('close-main-modal-btn').addEventListener('click', hideMainModal);
+    const logoutDesktop = document.getElementById('logout-btn-desktop');
+    const handleLogout = () => signOut(auth);
+    if (logoutDesktop) logoutDesktop.addEventListener('click', handleLogout);
     
-    document.getElementById('theme-toggle').addEventListener('click', () => {
-        document.documentElement.classList.toggle('dark');
-        const d = document.documentElement.classList.contains('dark');
-        localStorage.setItem('theme', d?'dark':'light');
-        document.querySelectorAll('.app-logo').forEach(i => i.src = d ? "https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg" : "https://mountainmovingministryintl.org/gallery/MMMi%20Header%20Logo%20-%20light%20mode.svg");
-    });
+    document.getElementById('close-main-modal-btn').addEventListener('click', hideMainModal);
+
+    // --- RE-INJECTED SWIPE LOGIC ---
+    const mainContentArea = document.getElementById('main-content');
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    if (mainContentArea) {
+        mainContentArea.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, {passive: true});
+
+        mainContentArea.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, {passive: true});
+    }
+
+    function handleSwipe() {
+        if (touchStartX - touchEndX > 50) {
+            switchDashboard('daily');
+            document.getElementById('dash-toggle-daily').checked = true;
+        }
+        if (touchEndX - touchStartX > 50) {
+            switchDashboard('savings');
+            document.getElementById('dash-toggle-savings').checked = true;
+        }
+    }
 </script>
 <script>
   if ('serviceWorker' in navigator) {
@@ -1072,12 +1139,10 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
             </button>
         </div>
         
-        <!-- Android / Native Actions -->
         <div id="pwa-native-actions" class="hidden flex gap-3">
             <button id="pwa-install-btn" class="flex-1 bg-primary text-white font-bold py-2.5 rounded-xl text-sm shadow-md shadow-primary/20 hover:bg-red-700 transition-colors">Install Now</button>
         </div>
 
-        <!-- iOS Instructions -->
         <div id="pwa-ios-instructions" class="hidden bg-blue-50 dark:bg-blue-900/20 rounded-xl p-3 border border-blue-100 dark:border-blue-800">
             <p class="text-xs text-blue-800 dark:text-blue-200 font-medium flex items-center gap-2 mb-2">
                 <span class="material-symbols-outlined text-base">ios_share</span> 1. Tap the Share button below

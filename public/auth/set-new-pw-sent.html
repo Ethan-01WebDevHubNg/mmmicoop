@@ -2,11 +2,17 @@
 <html class="dark" lang="en">
 <head>
     <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
     <title>Email Sent - Cooperative Society</title>
+    
+    <!-- Apple PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MMMi App">
+
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#0f172a">
+    <link rel="manifest" href="/manifest.json?v=2">
+    <meta id="theme-color-meta" name="theme-color" content="#211111">
     <link rel="apple-touch-icon" href="/assets/icon-192.png">
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script type="module" src="../js/systemmaintenance.js"></script>
@@ -33,16 +39,34 @@
     </script>
     <style>
         .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 48; }
+        
+        /* Native App Scrollbar Hiding */
+        @media (max-width: 1024px) {
+            .no-scrollbar::-webkit-scrollbar { display: none; }
+            .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        }
     </style>
 </head>
-<body class="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark h-screen w-screen overflow-hidden flex flex-col">
+<body class="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark h-screen w-screen overflow-hidden flex flex-col no-scrollbar">
+
+    <script>
+        const themeMeta = document.getElementById('theme-color-meta');
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            if (themeMeta) themeMeta.setAttribute('content', '#211111');
+        } else {
+            document.documentElement.classList.remove('dark');
+            if (themeMeta) themeMeta.setAttribute('content', '#f8f6f6');
+        }
+    </script>
 
     <header class="w-full flex justify-center py-4 shrink-0">
-        <img alt="Mountain Moving Ministry Intl. Logo" class="h-10 sm:h-12 w-auto" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg"/>
+        <img alt="Mountain Moving Ministry Intl. Logo" class="h-10 sm:h-12 w-auto dark:hidden" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20Logo%20-%20light%20mode.svg"/>
+        <img alt="Mountain Moving Ministry Intl. Logo" class="h-10 sm:h-12 w-auto hidden dark:block" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg"/>
     </header>
 
-    <main class="flex-1 flex items-center justify-center px-4 w-full">
-        <div class="w-full max-w-md rounded-xl bg-white dark:bg-[#2a1a1a] p-8 shadow-lg border border-black/5 dark:border-white/5">
+    <main class="flex-1 flex items-center justify-center px-4 w-full no-scrollbar">
+        <div class="w-full max-w-md rounded-xl bg-white dark:bg-[#2a1a1a] p-8 shadow-lg">
             <div class="flex flex-col items-center text-center">
                 <div class="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
                     <span class="material-symbols-outlined text-3xl text-primary">mark_email_read</span>
@@ -67,7 +91,6 @@
     </footer>
 
 <script type="module" src="password-reset.js"></script>
-</body>
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
@@ -77,4 +100,5 @@
     });
   }
 </script>
+</body>
 </html>

@@ -2,11 +2,17 @@
 <html class="dark" lang="en">
 <head>
     <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
     <title>Set New Password</title>
+    
+    <!-- Apple PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MMMi App">
+
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#0f172a">
+    <link rel="manifest" href="/manifest.json?v=2">
+    <meta id="theme-color-meta" name="theme-color" content="#f8f6f6">
     <link rel="apple-touch-icon" href="/assets/icon-192.png">
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
@@ -49,10 +55,27 @@
       .rule-icon { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24 }
       .rule-success { color: var(--tw-color-success); }
       .rule-fail { color: var(--tw-color-danger); }
+      
+      /* Native App Scrollbar Hiding */
+      @media (max-width: 1024px) {
+          .no-scrollbar::-webkit-scrollbar { display: none; }
+          .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      }
     </style>
 </head>
-<body class="bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark h-screen w-screen overflow-hidden flex flex-col">
+<body class="bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark h-screen w-screen overflow-hidden flex flex-col no-scrollbar">
     
+    <script>
+        const themeMeta = document.getElementById('theme-color-meta');
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            if (themeMeta) themeMeta.setAttribute('content', '#0f172a');
+        } else {
+            document.documentElement.classList.remove('dark');
+            if (themeMeta) themeMeta.setAttribute('content', '#f8f6f6');
+        }
+    </script>
+
     <div id="notification-banner" class="fixed top-6 left-1/2 transform -translate-x-1/2 -translate-y-[150%] transition-all duration-500 ease-in-out z-50 w-auto max-w-[90vw] sm:max-w-md">
         <div id="notification-content" class="flex items-center p-4 rounded-xl shadow-2xl backdrop-blur-md border border-white/10">
             </div>
@@ -60,10 +83,11 @@
 
     <main class="flex-1 flex flex-col items-center justify-center p-4 w-full">
         <div class="mb-4 flex justify-center">
-            <img alt="Logo" class="h-14 w-14" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg"/>
+            <img alt="Logo" class="h-14 w-14 dark:hidden" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20Logo%20-%20light%20mode.svg"/>
+            <img alt="Logo" class="h-14 w-14 hidden dark:block" src="https://mountainmovingministryintl.org/gallery/MMMi%20Header%20logo.svg"/>
         </div>
         
-        <div class="w-full max-w-md rounded-xl border border-border-light bg-card-light dark:border-border-dark dark:bg-card-dark shadow-lg flex flex-col max-h-[85vh]">
+        <div class="w-full max-w-md rounded-xl bg-card-light dark:bg-card-dark shadow-lg flex flex-col max-h-[85vh]">
             <div class="p-6 sm:p-8 space-y-4 overflow-y-auto custom-scrollbar">
                 <div class="space-y-1 text-center">
                     <h1 class="text-2xl font-black text-text-light dark:text-white">Set New Password</h1>
@@ -127,7 +151,6 @@
         import { auth } from "../js/firebase-init.js";
         import { confirmPasswordReset, verifyPasswordResetCode } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        // UPDATED NOTIFICATION HELPER
         function showNotification(message, type) {
             const banner = document.getElementById('notification-banner');
             const content = document.getElementById('notification-content');
@@ -135,22 +158,20 @@
 
             let iconName, title, bgClass, textClass, iconClass;
 
-            // COLOR LOGIC: Deep Green for Success, Dark Red for Error
             if (type === 'success') {
                 iconName = 'check_circle';
                 title = 'Success';
-                bgClass = 'bg-green-900/95';  // Deep Green Background
+                bgClass = 'bg-green-900/95'; 
                 textClass = 'text-green-50';
                 iconClass = 'text-green-400';
             } else {
                 iconName = 'error';
                 title = 'Error';
-                bgClass = 'bg-[#7f1d1d]/95'; // Dark Red Background (Tailwind red-900 approx)
+                bgClass = 'bg-[#7f1d1d]/95';
                 textClass = 'text-red-50';
                 iconClass = 'text-red-400';
             }
 
-            // Inject inner HTML 
             content.innerHTML = `
                 <span class="material-symbols-outlined text-3xl mr-4 ${iconClass}">${iconName}</span>
                 <div class="flex-1">
@@ -159,21 +180,17 @@
                 </div>
             `;
 
-            // Apply classes
             content.className = `flex items-center p-4 rounded-xl shadow-2xl backdrop-blur-md border border-white/10 ${bgClass}`;
 
-            // Show Banner
             banner.classList.remove('-translate-y-[150%]');
             banner.classList.add('translate-y-0');
 
-            // Hide after 5 seconds
             setTimeout(() => {
                 banner.classList.remove('translate-y-0');
                 banner.classList.add('-translate-y-[150%]');
             }, 5000);
         }
 
-        // INITIALIZATION
         const urlParams = new URLSearchParams(window.location.search);
         const oobCode = urlParams.get('oobCode');
 
@@ -187,7 +204,6 @@
             });
         }
 
-        // VALIDATION & SUBMISSION LOGIC
         const newPasswordInput = document.getElementById('new-password');
         const confirmPasswordInput = document.getElementById('confirm-password');
         const passwordRules = document.querySelectorAll('#password-rules > div');

@@ -3,9 +3,13 @@
   "short_name": "MMMi Portal",
   "start_url": "/auth/index",
   "scope": "/",
-  "display": "fullscreen",
-  "display_override": ["fullscreen", "window-controls-overlay", "standalone"],
-  "background_color": "#ffffff",
+  "display": "standalone",
+  "display_override": [
+    "standalone", 
+    "window-controls-overlay", 
+    "minimal-ui"
+  ],
+  "background_color": "#0f172a",
   "theme_color": "#0f172a",
   "orientation": "portrait",
   "icons": [
